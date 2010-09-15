@@ -1,7 +1,7 @@
-= Jasmine Reporters
+# Jasmine Reporters
 
 Jasmine Reporters is a collection of javascript jasmine.Reporter classes that can be used with
-the <a href="http://pivotal.github.com/jasmine/">jasmine testing framework</a>.
+the [jasmine testing framework](http://pivotal.github.com/jasmine/).
 
 Right now the project is focused on two new reporters:</p>
 
