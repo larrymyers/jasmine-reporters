@@ -1,7 +1,7 @@
 (function() {
     
     if (! jasmine) {
-        return;
+        throw new Exception("jasmine library does not exist in global namespace!");
     }
     
     var ConsoleReporter = function() {
@@ -39,8 +39,6 @@
             }
         }
     };
-    
-    
     
     // export public
     jasmine.ConsoleReporter = ConsoleReporter;
