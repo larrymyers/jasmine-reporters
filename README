@@ -1,11 +1,9 @@
-<h1>Jasmine Reporters</h1>
+= Jasmine Reporters
 
-<p>Jasmine Reporters is a collection of javascript jasmine.Reporter classes that can be used with
-the <a href="http://pivotal.github.com/jasmine/">jasmine testing framework</a>.</p>
+Jasmine Reporters is a collection of javascript jasmine.Reporter classes that can be used with
+the <a href="http://pivotal.github.com/jasmine/">jasmine testing framework</a>.
 
-<p>Right now the project is focused on two new reporters:</p>
+Right now the project is focused on two new reporters:</p>
 
-<ol>
-    <li>ConsoleReporter - Report test results to the browser console.</li>
-    <li>JUnitXmlReporter - Report test results to a file (using Rhino) in JUnit XML Report format.</li>
-</ol>
+* ConsoleReporter - Report test results to the browser console.
+* JUnitXmlReporter - Report test results to a file (using Rhino) in JUnit XML Report format.
