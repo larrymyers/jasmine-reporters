@@ -5,11 +5,7 @@
     }
     
     function writeFile(filename, text) {
-        if (! java) {
-            return;
-        }
-        
-        try {
+       try {
             var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
             out.write(text);
             out.close();
@@ -17,8 +13,11 @@
         }
     }
     
-    var JUnitXmlReporter = function() {
-        this.output = [];
+    /**
+     * 
+     */
+    var JUnitXmlReporter = function(savePath) {
+        this.savePath = savePath || '';
     };
     
     JUnitXmlReporter.prototype = {
@@ -82,7 +81,7 @@
             
             output.push('</testsuite>');
             
-            writeFile(fileName, output.join(''));
+            writeFile(this.savePath + fileName, output.join(''));
             
             this.log(suite.description + ": " + results.passedCount + " of " + results.totalCount + " passed.");
         },

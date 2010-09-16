@@ -4,6 +4,9 @@
         throw new Exception("jasmine library does not exist in global namespace!");
     }
     
+    /**
+     *
+     */
     var ConsoleReporter = function() {
         this.started = false;
         this.finished = false;
