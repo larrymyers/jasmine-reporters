@@ -13,6 +13,21 @@
         }
     }
     
+    function elapsed(startTime, endTime) {
+        return (endTime - startTime)/1000;
+    }
+    
+    function ISODateString(d) {
+        function pad(n) { return n < 10 ? '0'+n : n; }
+        
+        return d.getFullYear() + '-'
+            + pad(d.getMonth()+1) +'-'
+            + pad(d.getDate()) + 'T'
+            + pad(d.getHours()) + ':'
+            + pad(d.getMinutes()) + ':'
+            + pad(d.getSeconds());
+    }
+    
     /**
      * 
      */
@@ -36,10 +51,18 @@
                 resultText = "Passed.";
             }
             
+            spec.endTime = new Date();
+            
             this.log(resultText);
         },
         
         reportSpecStarting: function(spec) {
+            spec.startTime = new Date();
+            
+            if (! spec.suite.startTime) {
+                spec.suite.startTime = new Date();
+            }
+            
             this.log(spec.suite.description + ' : ' + spec.description + ' ... ');
         },
         
@@ -49,19 +72,25 @@
                 results = suite.results(),
                 items = results.getItems(),
                 item,
+                spec,
                 expectedResults,
                 trace,
                 i,
                 j;
+                
+            suite.endTime = new Date();
             
             output.push('<?xml version="1.0" encoding="UTF-8" ?>');
             output.push('<testsuite name="' + suite.description + '" errors="0" failures="' 
-                + results.failedCount + '" tests="' + results.totalCount + '" time="0.064" timestamp="2010-09-15T20:41:40">');
+                + results.failedCount + '" tests="' + results.totalCount + '" time="' 
+                + elapsed(suite.startTime, suite.endTime) + '" timestamp="' + ISODateString(suite.startTime) + '">');
             
             for (i = 0; i < items.length; i++) {
                 item = items[i];
+                spec = suite.specs()[i];
                 
-                output.push(' <testcase classname="' + suite.description + '" name="' + item.description + '" time="0.0080">');
+                output.push(' <testcase classname="' + suite.description + '" name="' 
+                    + item.description + '" time="' + elapsed(spec.startTime, spec.endTime) + '">');
                 
                 if (!item.passed()) {
                     expectedResults = item.getItems();
