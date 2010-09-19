@@ -5,7 +5,14 @@
     }
     
     /**
+     * Basic reporter that outputs spec results to the browser console.
+     * Useful if you need to test an html page and don't want the TrivialReporter
+     * markup mucking things up.
      *
+     * Usage:
+     *
+     * jasmine.getEnv().addReporter(new jasmine.ConsoleReporter());
+     * jasmine.getEnv().execute();
      */
     var ConsoleReporter = function() {
         this.started = false;

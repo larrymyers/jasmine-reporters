@@ -29,7 +29,9 @@
     }
     
     /**
-     * 
+     * Generates JUnit XML for the given spec run.
+     * Allows the test results to be used in java based CI
+     * systems like CruiseControl and Hudson.
      */
     var JUnitXmlReporter = function(savePath) {
         this.savePath = savePath || '';
