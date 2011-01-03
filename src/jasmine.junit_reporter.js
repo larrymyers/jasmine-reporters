@@ -4,7 +4,6 @@
         throw new Exception("jasmine library does not exist in global namespace!");
     }
 
-
     function elapsed(startTime, endTime) {
         return (endTime - startTime)/1000;
     }
@@ -28,10 +27,14 @@
      * @param {string} savePath where to save the files
      * @param {boolean} consolidate whether to save nested describes within the
      *                  same file as their parent; default: true
+     * @param {boolean} useDotNotation whether to separate suite names with
+     *                  dots rather than spaces (ie "Class.init" not
+     *                  "Class init"); default: true
      */
-    var JUnitXmlReporter = function(savePath, consolidate) {
+    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation) {
         this.savePath = savePath || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
+        this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
     };
 
     JUnitXmlReporter.prototype = {
@@ -59,7 +62,7 @@
             this.log(spec.status);
 
             spec.duration = elapsed(spec.startTime, new Date());
-            spec.output = '<testcase classname="' + spec.suite.getFullName() +
+            spec.output = '<testcase classname="' + this.getFullName(spec.suite) +
                 '" name="' + spec.description + '" time="' + spec.duration + '">';
 
             var failure = "";
@@ -100,7 +103,7 @@
                 failedCount += specs[i].didFail ? 1 : 0;
                 specOutput += "\n  " + specs[i].output;
             }
-            suite.output = '\n<testsuite name="' + suite.getFullName() +
+            suite.output = '\n<testsuite name="' + this.getFullName(suite) +
                 '" errors="0" tests="' + specs.length + '" failures="' + failedCount +
                 '" time="' + suite.duration + '" timestamp="' + ISODateString(suite.startTime) + '">';
             suite.output += specOutput;
@@ -113,7 +116,7 @@
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
-                var fileName = 'TEST-' + suite.getFullName().replace(/\s/g, '') + '.xml';
+                var fileName = 'TEST-' + this.getFullName(suite).replace(/\s/g, '') + '.xml';
                 var output = '<?xml version="1.0" encoding="UTF-8" ?>';
                 // if we are consolidating, only write out top-level suites
                 if (this.consolidate && suite.parentSuite) {
@@ -146,6 +149,19 @@
                 out.write(text);
                 out.close();
             } catch (e) {
+            }
+        },
+
+        getFullName: function(suite) {
+            if (this.useDotNotation) {
+                var fullName = suite.description;
+                for (var parentSuite = suite.parentSuite; parentSuite; parentSuite = parentSuite.parentSuite) {
+                    fullName = parentSuite.description + '.' + fullName;
+                }
+                return fullName;
+            }
+            else {
+                return suite.getFullName();
             }
         },
 

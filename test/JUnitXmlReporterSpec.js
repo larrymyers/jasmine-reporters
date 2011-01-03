@@ -45,6 +45,9 @@
             it("should default consolidate to true", function(){
                 expect(reporter.consolidate).toBe(true);
             });
+            it("should default useDotNotation to true", function(){
+                expect(reporter.useDotNotation).toBe(true);
+            });
         });
 
         describe("reportSpecStarting", function(){
@@ -166,6 +169,26 @@
                     for (var i = 0; i < reporter.writeFile.callCount; i++) {
                         expect(reporter.writeFile.argsForCall[i][1]).toContain("<?xml");
                     }
+                });
+            });
+
+            describe("dot notation is true", function(){
+                beforeEach(function(){
+                    reporter.reportRunnerResults(runner);
+                });
+                it("should separate descriptions with dot notation", function(){
+                    expect(subSubSuite.output).toContain('classname="ParentSuite.SubSuite.SubSubSuite"');
+                });
+            });
+
+            describe("dot notation is false", function(){
+                beforeEach(function(){
+                    reporter.useDotNotation = false;
+                    triggerSuiteEvents([suite, subSuite, subSubSuite, siblingSuite]);
+                    reporter.reportRunnerResults(runner);
+                });
+                it("should separate descriptions with dot notation", function(){
+                    expect(subSubSuite.output).toContain('classname="ParentSuite SubSuite SubSubSuite"');
                 });
             });
         });
