@@ -18,6 +18,10 @@
             + pad(d.getMinutes()) + ':'
             + pad(d.getSeconds());
     }
+    
+    function trim(str) {
+        return str.replace(/^\s+/, "" ).replace(/\s+$/, "" )
+    }
 
     /**
      * Generates JUnit XML for the given spec run.
@@ -77,7 +81,7 @@
                 }
             }
             if (failure) {
-                spec.output += "<failure>" + failure.trim() + "</failure>";
+                spec.output += "<failure>" + trim(failure) + "</failure>";
             }
             spec.output += "</testcase>";
         },
