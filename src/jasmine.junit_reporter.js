@@ -58,7 +58,7 @@
             }
             this.log(spec.status);
 
-            spec.duration = elapsed(new Date(), spec.startTime);
+            spec.duration = elapsed(spec.startTime, new Date());
             spec.output = '<testcase classname="' + spec.suite.getFullName() +
                 '" name="' + spec.description + '" time="' + spec.duration + '">';
 
@@ -94,7 +94,7 @@
             // if a suite has no (active?) specs, reportSpecStarting is never called
             // and thus the suite has no startTime -- account for that here
             suite.startTime = suite.startTime || new Date();
-            suite.duration = elapsed(new Date(), suite.startTime);
+            suite.duration = elapsed(suite.startTime, new Date());
 
             for (var i = 0; i < specs.length; i++) {
                 failedCount += specs[i].didFail ? 1 : 0;
