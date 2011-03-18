@@ -10869,7 +10869,7 @@ var __toDashed__ = function(camelCaseName) {
 
 CSS2Properties = function(element){
     //console.log('css2properties %s', __cssproperties__++);
-    this.styleIndex = __supportedStyles__;//non-standard
+    this.styleIndex = __extend__({}, __supportedStyles__);//non-standard
     this.type = element.tagName;//non-standard
     __setArray__(this, []);
     __cssTextToStyles__(this, element.cssText || '');
