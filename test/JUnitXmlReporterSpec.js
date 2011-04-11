@@ -34,7 +34,7 @@
             runner = new jasmine.Runner(env);
 
             suite = fakeSuite("ParentSuite");
-            spec = fakeSpec(suite, "should be a dummy");
+            spec = fakeSpec(suite, "should be a dummy with invalid characters: & < > \" '");
             reporter = new jasmine.JUnitXmlReporter();
         });
 
@@ -81,6 +81,9 @@
                 expect(spec.output).not.toBeUndefined();
                 expect(spec.output).toContain("<testcase");
             });
+            it("should escape bad xml characters in spec description", function() {
+                expect(spec.output).toContain("&amp; &lt; &gt; &quot; &apos;");
+            });
             it("should generate <failure> output if test failed", function(){
                 // this one takes a bit of setup to pretend a failure
                 spec = fakeSpec(suite, "should be a dummy");
@@ -125,7 +128,7 @@
             beforeEach(function(){
                 subSuite = fakeSuite("SubSuite", suite);
                 subSubSuite = fakeSuite("SubSubSuite", subSuite);
-                siblingSuite = fakeSuite("SiblingSuite");
+                siblingSuite = fakeSuite("SiblingSuite With Invalid Chars & < > \" ' | : \\ /");
                 var subSpec = fakeSpec(subSuite, "should be one level down");
                 var subSubSpec = fakeSpec(subSubSuite, "should be two levels down");
                 var siblingSpec = fakeSpec(siblingSuite, "should be a sibling of Parent");
@@ -134,6 +137,19 @@
                 spyOn(reporter, "getNestedOutput").andCallThrough();
                 triggerSuiteEvents([suite, subSuite, subSubSuite, siblingSuite]);
             });
+
+            describe("general functionality", function() {
+                beforeEach(function() {
+                    reporter.reportRunnerResults(runner);
+                });
+                it("should remove invalid filename chars from the filename", function() {
+                    expect(reporter.writeFile).toHaveBeenCalledWith("TEST-SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
+                });
+                it("should remove invalid xml chars from the classname", function() {
+                    expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /");
+                });
+            });
+
             describe("consolidated is true", function(){
                 beforeEach(function(){
                     reporter.reportRunnerResults(runner);
@@ -187,7 +203,7 @@
                     triggerSuiteEvents([suite, subSuite, subSubSuite, siblingSuite]);
                     reporter.reportRunnerResults(runner);
                 });
-                it("should separate descriptions with dot notation", function(){
+                it("should separate descriptions with whitespace", function(){
                     expect(subSubSuite.output).toContain('classname="ParentSuite SubSuite SubSubSuite"');
                 });
             });
