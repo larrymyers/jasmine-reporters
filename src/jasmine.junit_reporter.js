@@ -23,21 +23,6 @@
         return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
     }
 
-    function removeInvalidFilenameChars(str) {
-        return str.replace(/\&/g, "")
-            .replace(/</g, "")
-            .replace(/\>/g, "")
-            .replace(/\"/g, "")
-            .replace(/\'/g, "")
-            .replace(/\:/g, "")
-            .replace(/\*/g, "")
-            .replace(/\?/g, "")
-            .replace(/\\/g, "")
-            .replace(/\//g, "")
-            .replace(/\|/g, "")
-            .replace(/\s/g, '');
-    }
-
     function escapeInvalidXmlChars(str) {
         return str.replace(/\&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -193,7 +178,7 @@
 
             // Either remove or escape invalid XML characters
             if (isFilename) {
-                return removeInvalidFilenameChars(fullName);
+                return fullName.replace(/[^\w]/g, "");
             }
             return escapeInvalidXmlChars(fullName);
         },
