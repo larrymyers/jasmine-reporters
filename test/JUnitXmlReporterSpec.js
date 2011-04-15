@@ -84,12 +84,12 @@
             it("should escape bad xml characters in spec description", function() {
                 expect(spec.output).toContain("&amp; &lt; &gt; &quot; &apos;");
             });
-            it("should generate <failure> output if test failed", function(){
+            it("should generate valid xml <failure> output if test failed", function(){
                 // this one takes a bit of setup to pretend a failure
                 spec = fakeSpec(suite, "should be a dummy");
                 reporter.reportSpecStarting(spec);
                 var expectationResult = new jasmine.ExpectationResult({
-                    matcherName: "toBeNull", passed: false, message: "Expected 'a' to be null, but it was not"
+                    matcherName: "toEqual", passed: false, message: "Expected 'a' to equal '&'."
                 });
                 var results = {
                     passed: function() { return false; },
@@ -98,6 +98,7 @@
                 spyOn(spec, "results").andReturn(results);
                 reporter.reportSpecResults(spec);
                 expect(spec.output).toContain("<failure>");
+                expect(spec.output).toContain("to equal &apos;&amp;");
             });
         });
 

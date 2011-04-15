@@ -85,7 +85,7 @@
 
                 if (result.type == 'expect' && result.passed && !result.passed()) {
                     failures += 1;
-                    failure += (failures + ": " + result.message + " ");
+                    failure += (failures + ": " + escapeInvalidXmlChars(result.message) + " ");
                 }
             }
             if (failure) {
