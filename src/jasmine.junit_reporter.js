@@ -156,12 +156,20 @@
         },
 
         writeFile: function(filename, text) {
-           try {
+            // Rhino
+            try {
                 var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
                 out.write(text);
                 out.close();
-            } catch (e) {
+            } catch (e) {}
+            // PhantomJS, via pyphantomjs and the saveToFile plugin
+            // http://dev.umaclan.com/projects/pyphantomjs/wiki/Plugins#Save-to-File
+            try {
+                phantom.saveToFile(text, filename);
+            } catch (f) {
+                console.warn(f);
             }
+
         },
 
         getFullName: function(suite, isFilename) {
