@@ -18,7 +18,7 @@
             + pad(d.getMinutes()) + ':'
             + pad(d.getSeconds());
     }
-    
+
     function trim(str) {
         return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
     }
@@ -167,7 +167,6 @@
             try {
                 phantom.saveToFile(text, filename);
             } catch (f) {
-                console.warn(f);
             }
 
         },
