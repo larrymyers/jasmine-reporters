@@ -15,12 +15,13 @@ if (phantom.state.length === 0) {
 } else {
     if (phantom.loadStatus === 'success') {
         var finishedDiv = document.getElementsByClassName("finished-at")[0];
-        setInterval(function(){
+        var _setInterval = jasmine.Clock.real.setInterval;
+        _setInterval(function(){
             if (finishedDiv.innerHTML.length) {
                 var results = document.getElementsByClassName("description")[0].innerHTML.match(/(\d+) spec.* (\d+) failure.*/);
                 var specs = Number(results[1]);
                 var failures = Number(results[2]);
-                console.log("");
+                console.log(""); // insert blank line
                 if (failures > 0) {
                     console.error("FAILURE: " + results[0]);
                     phantom.exit(1);
