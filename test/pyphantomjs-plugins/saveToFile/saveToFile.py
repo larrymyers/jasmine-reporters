@@ -15,8 +15,9 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-''' 
+'''
 
+import os
 import codecs
 
 from plugincontroller import add_action
@@ -24,19 +25,22 @@ from plugincontroller import add_action
 from PyQt4.QtCore import qWarning, pyqtSlot
 
 @pyqtSlot(str, str, result=bool)
-def saveToFile(self, text, fileName):
-    fileName = self.m_scriptDir + fileName
-    try:
-        f = codecs.open(fileName, 'w+', 'utf-8')
-    except IOError:
-        qWarning('phantom.saveToFile - Could not open file: \'%s\'' % fileName)
-        return False
+@pyqtSlot(str, str, str, result=bool)
+def saveToFile(self, text, fileName, mode='a'):
+    if not os.path.isabs(fileName):
+        scriptDir = os.path.dirname(os.path.abspath(self.m_scriptFile))
+        fileName = os.path.join(scriptDir, fileName)
 
-    f.write(text)
-    f.close()
+    try:
+        with codecs.open(fileName, mode, 'utf-8') as f:
+            f.write(text)
+    except IOError:
+        qWarning('phantom.saveToFile - Could not open file \'%s\' for writing' % fileName)
+        return False
 
     return True
 
+
 @add_action('Phantom')
-def run(_locals):
+def run_saveToFile(_locals):
     _locals.saveToFile = saveToFile
