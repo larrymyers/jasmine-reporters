@@ -21,7 +21,12 @@
     ConsoleReporter.prototype = {
         reportRunnerResults: function(runner) {
             if (this.hasGroupedConsole()) {
-                this.reportToConsole(runner.suites());
+                var suites = runner.suites();
+                for (var i in suites) {
+                    if (!suites[i].parentSuite) {
+                        suiteResults(suites[i]);
+                    }
+                }
             }
             else {
                 var dur = (new Date()).getTime() - this.start_time;
@@ -38,12 +43,6 @@
         hasGroupedConsole: function() {
             var console = jasmine.getGlobal().console;
             return console && console.info && console.warn && console.group && console.groupEnd && console.groupCollapsed;
-        },
-
-        reportToConsole: function (suites) {
-            for (var i in suites) {
-                suiteResults(suites[i]);
-            }
         },
 
         reportRunnerStarting: function(runner) {
@@ -94,8 +93,12 @@
     function suiteResults(suite) {
         console.group(suite.description);
         var specs = suite.specs();
-        for (var j in specs) {
-            specResults(specs[j]);
+        for (var i in specs) {
+            specResults(specs[i]);
+        }
+        var suites = suite.suites();
+        for (var j in suites) {
+            suiteResults(suites[j]);
         }
         console.groupEnd();
     }
