@@ -50,28 +50,16 @@
     };
 
     JUnitXmlReporter.prototype = {
-        reportRunnerStarting: function(runner) {
-            this.log("Runner Started.");
-        },
-
         reportSpecStarting: function(spec) {
             spec.startTime = new Date();
 
-            if (! spec.suite.startTime) {
+            if (!spec.suite.startTime) {
                 spec.suite.startTime = spec.startTime;
             }
-
-            this.log(spec.suite.description + ' : ' + spec.description + ' ... ');
         },
 
         reportSpecResults: function(spec) {
             var results = spec.results();
-            spec.didFail = !results.passed();
-            spec.status = spec.didFail ? 'Failed.' : 'Passed.';
-            if (results.skipped) {
-                spec.status = 'Skipped.';
-            }
-            this.log(spec.status);
 
             spec.duration = elapsed(spec.startTime, new Date());
             spec.output = '<testcase classname="' + this.getFullName(spec.suite) +
@@ -120,11 +108,9 @@
                 '" time="' + suite.duration + '" timestamp="' + ISODateString(suite.startTime) + '">';
             suite.output += specOutput;
             suite.output += "\n</testsuite>";
-            this.log(suite.description + ": " + results.passedCount + " of " + results.totalCount + " expectations passed.");
         },
 
         reportRunnerResults: function(runner) {
-            this.log("Runner Finished.");
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
