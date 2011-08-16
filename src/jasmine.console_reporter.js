@@ -20,19 +20,73 @@
 
     ConsoleReporter.prototype = {
         reportRunnerResults: function(runner) {
-            if (this.hasConsole()) {
+            if (this.hasGroupedConsole()) {
                 this.reportToConsole(runner.suites());
+            }
+            else {
+                var dur = (new Date()).getTime() - this.start_time;
+                var failed = this.executed_specs - this.passed_specs;
+                var spec_str = this.executed_specs + (this.executed_specs === 1 ? " spec, " : " specs, ");
+                var fail_str = failed + (failed === 1 ? " failure in " : " failures in ");
+
+                this.log("Runner Finished.");
+                this.log(spec_str + fail_str + (dur/1000) + "s.");
             }
             this.finished = true;
         },
 
-        hasConsole: function() {
-            return window['console'] && console['info'] && console['warn'] && console['group'] && console['groupEnd'] && console['groupCollapsed'];
+        hasGroupedConsole: function() {
+            var console = jasmine.getGlobal().console;
+            return console && console.info && console.warn && console.group && console.groupEnd && console.groupCollapsed;
         },
 
         reportToConsole: function (suites) {
             for (var i in suites) {
                 suiteResults(suites[i]);
+            }
+        },
+
+        reportRunnerStarting: function(runner) {
+            this.started = true;
+            if (!this.hasGroupedConsole()) {
+                this.start_time = (new Date()).getTime();
+                this.executed_specs = 0;
+                this.passed_specs = 0;
+                this.log("Runner Started.");
+            }
+        },
+
+        reportSpecResults: function(spec) {
+            if (!this.hasGroupedConsole()) {
+                var resultText = "Failed.";
+
+                if (spec.results().passed()) {
+                    this.passed_specs++;
+                    resultText = "Passed.";
+                }
+
+                this.log(resultText);
+            }
+        },
+
+        reportSpecStarting: function(spec) {
+            if (!this.hasGroupedConsole()) {
+                this.executed_specs++;
+                this.log(spec.suite.description + ' : ' + spec.description + ' ... ');
+            }
+        },
+
+        reportSuiteResults: function(suite) {
+            if (!this.hasGroupedConsole()) {
+                var results = suite.results();
+                this.log(suite.description + ": " + results.passedCount + " of " + results.totalCount + " passed.");
+            }
+        },
+
+        log: function(str) {
+            var console = jasmine.getGlobal().console;
+            if (console && console.log) {
+                console.log(str);
             }
         }
     };
