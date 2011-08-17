@@ -6,7 +6,7 @@ the [JasmineBDD testing framework](http://pivotal.github.com/jasmine/).
 Right now the project is focused on two new reporters:
 
 * ConsoleReporter - Report test results to the browser console.
-* JUnitXmlReporter - Report test results to a file (using Rhino) in JUnit XML Report format.
+* JUnitXmlReporter - Report test results to a file (using Rhino or PyPhantomJS) in JUnit XML Report format.
 
 ## Usage
 
