@@ -60,7 +60,7 @@
 
         reportSpecResults: function(spec) {
             var results = spec.results();
-
+            spec.didFail = !results.passed();
             spec.duration = elapsed(spec.startTime, new Date());
             spec.output = '<testcase classname="' + this.getFullName(spec.suite) +
                 '" name="' + escapeInvalidXmlChars(spec.description) + '" time="' + spec.duration + '">';
