@@ -147,14 +147,23 @@
                 var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
                 out.write(text);
                 out.close();
+                return;
             } catch (e) {}
             // PhantomJS, via pyphantomjs and the saveToFile plugin
             // http://dev.umaclan.com/projects/pyphantomjs/wiki/Plugins#Save-to-File
             try {
                 phantom.saveToFile(text, filename);
+                return;
             } catch (f) {
             }
-
+            try {
+                var fs = require("fs");
+                var fd = fs.openSync(filename, "w");
+                fs.writeSync(fd, text, 0);
+                fs.closeSync(fd);
+                return;
+            } catch (g) {
+            }
         },
 
         getFullName: function(suite, isFilename) {
