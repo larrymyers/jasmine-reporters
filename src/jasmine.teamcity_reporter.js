@@ -43,7 +43,7 @@
 
               spec.items_.forEach(function(result){
                 if (!result.passed_) {
-                    outerThis.log("##teamcity[testFailed name='" + outerThis.escapeTeamcityString(spec.description) + "' message='[FAILED]' details='" + outerThis.escapeTeamcityString(result.trace.stack) + "']");
+                    outerThis.log("##teamcity[testFailed name='" + outerThis.escapeTeamcityString(spec.description) + "' message='|[FAILED|]' details='" + outerThis.escapeTeamcityString(result.trace.stack) + "']");
                 }
               });
 
