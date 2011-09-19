@@ -34,24 +34,24 @@
           }
           var description = path.join(' ');
 
-          this.log("##teamcity[testSuiteStarted name='" + escapeTeamcityString(description) + "']");
+          this.log("##teamcity[testSuiteStarted name='" + this.escapeTeamcityString(description) + "']");
 
           outerThis = this;
           results.items_.forEach(function(spec){
             if (spec.description) {
-              outerThis.log("##teamcity[testStarted name='" +  escapeTeamcityString(spec.description) + "' captureStandardOutput='true']");
+              outerThis.log("##teamcity[testStarted name='" +  this.escapeTeamcityString(spec.description) + "' captureStandardOutput='true']");
 
               spec.items_.forEach(function(result){
                 if (!result.passed_) {
-                    outerThis.log("##teamcity[testFailed name='" +  escapeTeamcityString(spec.description) + "' message='[FAILED]' details='" + escapeTeamcityString(result.trace.stack) + "']");
+                    outerThis.log("##teamcity[testFailed name='" +  this.escapeTeamcityString(spec.description) + "' message='[FAILED]' details='" + this.escapeTeamcityString(result.trace.stack) + "']");
                 }
               });
 
-              outerThis.log("##teamcity[testFinished name='" +  escapeTeamcityString(spec.description) + "']");
+              outerThis.log("##teamcity[testFinished name='" +  this.escapeTeamcityString(spec.description) + "']");
             }
           });
 
-          this.log("##teamcity[testSuiteFinished name='" +  escapeTeamcityString(description) + "]");
+          this.log("##teamcity[testSuiteFinished name='" +  this.escapeTeamcityString(description) + "]");
         },
 
         log: function(str) {
