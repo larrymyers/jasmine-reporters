@@ -51,7 +51,7 @@
             }
           });
 
-          this.log("##teamcity[testSuiteFinished name='" +  this.escapeTeamcityString(description) + "]");
+          this.log("##teamcity[testSuiteFinished name='" +  this.escapeTeamcityString(description) + "']");
         },
 
         log: function(str) {
