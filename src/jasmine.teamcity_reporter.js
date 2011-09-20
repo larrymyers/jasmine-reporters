@@ -26,32 +26,32 @@
         reportSpecStarting: function(spec) { },
 
         reportSuiteResults: function(suite) {
-          var results = suite.results();
-          var path = [];
-          while(suite) {
-            path.unshift(suite.description);
-            suite = suite.parentSuite;
-          }
-          var description = path.join(' ');
-
-          this.log("##teamcity[testSuiteStarted name='" + this.escapeTeamcityString(description) + "']");
-
-          outerThis = this;
-          results.items_.forEach(function(spec){
-            if (spec.description) {
-              outerThis.log("##teamcity[testStarted name='" + outerThis.escapeTeamcityString(spec.description) + "' captureStandardOutput='true']");
-
-              spec.items_.forEach(function(result){
-                if (!result.passed_) {
-                    outerThis.log("##teamcity[testFailed name='" + outerThis.escapeTeamcityString(spec.description) + "' message='|[FAILED|]' details='" + outerThis.escapeTeamcityString(result.trace.stack) + "']");
-                }
-              });
-
-              outerThis.log("##teamcity[testFinished name='" + outerThis.escapeTeamcityString(spec.description) + "']");
+            var results = suite.results();
+            var path = [];
+            while(suite) {
+                path.unshift(suite.description);
+                suite = suite.parentSuite;
             }
-          });
+            var description = path.join(' ');
 
-          this.log("##teamcity[testSuiteFinished name='" + outerThis.escapeTeamcityString(description) + "']");
+            this.log("##teamcity[testSuiteStarted name='" + this.escapeTeamcityString(description) + "']");
+
+            outerThis = this;
+            results.items_.forEach(function(spec){
+                if (spec.description) {
+                    outerThis.log("##teamcity[testStarted name='" + outerThis.escapeTeamcityString(spec.description) + "' captureStandardOutput='true']");
+
+                    spec.items_.forEach(function(result){
+                        if (!result.passed_) {
+                            outerThis.log("##teamcity[testFailed name='" + outerThis.escapeTeamcityString(spec.description) + "' message='|[FAILED|]' details='" + outerThis.escapeTeamcityString(result.trace.stack) + "']");
+                        }
+                    });
+
+                    outerThis.log("##teamcity[testFinished name='" + outerThis.escapeTeamcityString(spec.description) + "']");
+                }
+            });
+
+            this.log("##teamcity[testSuiteFinished name='" + outerThis.escapeTeamcityString(description) + "']");
         },
 
         log: function(str) {
