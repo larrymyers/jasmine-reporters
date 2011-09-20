@@ -36,7 +36,7 @@
 
             this.log("##teamcity[testSuiteStarted name='" + this.escapeTeamcityString(description) + "']");
 
-            outerThis = this;
+            var outerThis = this;
             results.items_.forEach(function(spec){
                 if (spec.description) {
                     outerThis.log("##teamcity[testStarted name='" + outerThis.escapeTeamcityString(spec.description) + "' captureStandardOutput='true']");
