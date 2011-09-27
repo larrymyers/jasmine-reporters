@@ -942,6 +942,10 @@ jasmine.Reporter.prototype.reportSpecStarting = function(spec) {
 };
 
 //noinspection JSUnusedLocalSymbols
+jasmine.Reporter.prototype.reportSuiteStarting = function(suite) {
+};
+
+//noinspection JSUnusedLocalSymbols
 jasmine.Reporter.prototype.reportSpecResults = function(spec) {
 };
 
@@ -1445,6 +1449,7 @@ jasmine.MultiReporter.prototype.addReporter = function(reporter) {
     "reportRunnerResults",
     "reportSuiteResults",
     "reportSpecStarting",
+    "reportSuiteStarting",
     "reportSpecResults",
     "log"
   ];
@@ -2160,6 +2165,7 @@ jasmine.Suite.prototype.children = function() {
 
 jasmine.Suite.prototype.execute = function(onComplete) {
   var self = this;
+  this.env.reporter.reportSuiteStarting(this);
   this.queue.start(function () {
     self.finish(onComplete);
   });
