@@ -19,12 +19,6 @@ rm -f *.xml
 cd ..
 git submodule update --init
 
-# copy the plugin into the appropriate directory
-cp -R $SCRIPTDIR/pyphantomjs-plugins/saveToFile ext/phantomjs/python/plugins/
-
 # fire up the phantomjs environment and run the test
-cd ext/phantomjs/python
-/usr/bin/env python pyphantomjs.py $SCRIPTDIR/phantomjs-testrunner.js $TESTFILE
-
-# clean up the submodule directory
-rm -rf plugins/saveToFile
+cd $SCRIPTDIR
+/usr/bin/env python ../ext/phantomjs/python/pyphantomjs/pyphantomjs.py $SCRIPTDIR/phantomjs-testrunner.js $TESTFILE
