@@ -22,13 +22,13 @@
         reportRunnerResults: function(runner) {
             if (this.hasGroupedConsole()) {
                 var suites = runner.suites();
-                startGroup(runner.results(), 'tests')
+                startGroup(runner.results(), 'tests');
                 for (var i in suites) {
                     if (!suites[i].parentSuite) {
                         suiteResults(suites[i]);
                     }
                 }
-                console.groupEnd()
+                console.groupEnd();
             }
             else {
                 var dur = (new Date()).getTime() - this.start_time;
@@ -97,21 +97,27 @@
         startGroup(results, suite.description);
         var specs = suite.specs();
         for (var i in specs) {
-            specResults(specs[i]);
+            if (specs.hasOwnProperty(i)) {
+                specResults(specs[i]);
+            }
         }
         var suites = suite.suites();
         for (var j in suites) {
-            suiteResults(suites[j]);
+            if (suites.hasOwnProperty(j)) {
+                suiteResults(suites[j]);
+            }
         }
         console.groupEnd();
     }
 
     function specResults(spec) {
         var results = spec.results();
-        startGroup(results, spec.description)
+        startGroup(results, spec.description);
         var items = results.getItems();
         for (var k in items) {
-            itemResults(items[k]);
+            if (items.hasOwnProperty(k)) {
+                itemResults(items[k]);
+            }
         }
         console.groupEnd();
     }
