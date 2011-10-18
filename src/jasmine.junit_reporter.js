@@ -48,6 +48,7 @@
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
     };
+    JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
 
     JUnitXmlReporter.prototype = {
         reportSpecStarting: function(spec) {
@@ -131,6 +132,8 @@
                     this.writeFile(this.savePath + fileName, output);
                 }
             }
+            // When all done, make it known on JUnitXmlReporter
+            JUnitXmlReporter.finished_at = (new Date()).getTime();
         },
 
         getNestedOutput: function(suite) {
@@ -149,10 +152,9 @@
                 out.close();
                 return;
             } catch (e) {}
-            // PhantomJS, via pyphantomjs and the saveToFile plugin
-            // http://dev.umaclan.com/projects/pyphantomjs/wiki/Plugins#Save-to-File
+            // PhantomJS, via a method injected by phantomjs-testrunner.js
             try {
-                phantom.saveToFile(text, filename);
+                __phantom_writeFile(filename, text);
                 return;
             } catch (f) {
             }
