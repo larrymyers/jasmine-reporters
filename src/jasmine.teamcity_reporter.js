@@ -74,8 +74,9 @@
         },
 
         escapeTeamcityString: function(message) {
-            if(!message)
+            if(!message) {
                 return "";
+            }
 
             return message.replace(/\|/g, "||")
                           .replace(/\'/g, "|'")
@@ -93,11 +94,15 @@
         console.group(suite.description);
         var specs = suite.specs();
         for (var i in specs) {
-            specResults(specs[i]);
+            if (specs.hasOwnProperty(i)) {
+                specResults(specs[i]);
+            }
         }
         var suites = suite.suites();
         for (var j in suites) {
-            suiteResults(suites[j]);
+            if (suites.hasOwnProperty(j)) {
+                suiteResults(suites[j]);
+            }
         }
         console.groupEnd();
     }
@@ -111,7 +116,9 @@
         }
         var items = results.getItems();
         for (var k in items) {
-            itemResults(items[k]);
+            if (items.hasOwnProperty(k)) {
+                itemResults(items[k]);
+            }
         }
         console.groupEnd();
     }
