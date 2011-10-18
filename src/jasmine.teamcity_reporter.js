@@ -74,6 +74,9 @@
         },
 
         escapeTeamcityString: function(message) {
+          if(!message)
+            return "";
+
           return message.replace(/\|/g, "||")
                         .replace(/\'/g, "|'")
                         .replace(/\n/g, "|n")
