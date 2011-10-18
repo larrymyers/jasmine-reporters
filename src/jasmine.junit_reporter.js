@@ -156,16 +156,15 @@
             try {
                 __phantom_writeFile(filename, text);
                 return;
-            } catch (f) {
-            }
+            } catch (f) {}
+            // Node.js
             try {
                 var fs = require("fs");
                 var fd = fs.openSync(filename, "w");
                 fs.writeSync(fd, text, 0);
                 fs.closeSync(fd);
                 return;
-            } catch (g) {
-            }
+            } catch (g) {}
         },
 
         getFullName: function(suite, isFilename) {
