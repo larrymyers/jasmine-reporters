@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # sanity check number of args
-if [ $# -ne 1 ]
+if [ $# -lt 1 ]
 then
     echo "Usage: `basename $0` path_to_runner.html"
     echo
@@ -9,7 +9,11 @@ then
 fi
 
 SCRIPTDIR=$(dirname `perl -e 'use Cwd "abs_path";print abs_path(shift)' $0`)
-TESTFILE=`perl -e 'use Cwd "abs_path";print abs_path(shift)' $1`
+TESTFILE=""
+while (( "$#" )); do
+    TESTFILE="$TESTFILE `perl -e 'use Cwd "abs_path";print abs_path(shift)' $1`"
+    shift
+done
 
 # cleanup previous test runs
 cd $SCRIPTDIR
