@@ -22,6 +22,9 @@ else {
         address = args[i];
         console.log("Loading " + address);
 
+        // if provided a url without a protocol, try to use file://
+        address = address.indexOf("://") === -1 ? "file://" + address : address;
+
         // create a WebPage object to work with
         page = require("webpage").create();
         page.url = address;
