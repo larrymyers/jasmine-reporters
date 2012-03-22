@@ -74,11 +74,13 @@
 
                 if (result.type == 'expect' && result.passed && !result.passed()) {
                     failures += 1;
-                    failure += (failures + ": " + escapeInvalidXmlChars(result.message) + " ");
+                    failure += '<failure type="' + result.type + '" message="' + trim(escapeInvalidXmlChars(result.message)) + '">';
+                    failure += escapeInvalidXmlChars(result.trace.stack || result.message);
+                    failure += "</failure>";
                 }
             }
             if (failure) {
-                spec.output += "<failure>" + trim(failure) + "</failure>";
+                spec.output += failure;
             }
             spec.output += "</testcase>";
         },
