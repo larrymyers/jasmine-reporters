@@ -35,6 +35,10 @@ else {
         page.onInitialized = setupPageFn(page, resultsKey);
         page.open(address, processPage(null, page, resultsKey));
         pages.push(page);
+
+        page.onConsoleMessage = function(msg) {
+            console.log(msg);
+        };
     }
 
     // bail when all pages have been processed
