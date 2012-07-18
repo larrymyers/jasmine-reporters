@@ -36,9 +36,7 @@ else {
         page.open(address, processPage(null, page, resultsKey));
         pages.push(page);
 
-        page.onConsoleMessage = function(msg) {
-            console.log(msg);
-        };
+        page.onConsoleMessage = logAndWorkAroundDefaultLineBreaking;
     }
 
     // bail when all pages have been processed
@@ -57,6 +55,22 @@ else {
 }
 
 // Thanks to hoisting, these helpers are still available when needed above
+/**
+ * Logs a message. Does not add a line-break for single characters '.' and 'F' or lines ending in ' ...'
+ *
+ * @param msg
+ */
+function logAndWorkAroundDefaultLineBreaking(msg) {
+    var interpretAsWithoutNewline = /(^(\033\[\d+m)*[\.F](\033\[\d+m)*$)|( \.\.\.$)/;
+    if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
+        var fs = require('fs');
+        // system.stdout.write(msg) ? wait for http://code.google.com/p/phantomjs/issues/detail?id=243 to be implemented
+        fs.write('/dev/stdout', msg, 'w');
+    } else {
+        console.log(msg);
+    }
+}
+
 /**
  * Stringifies the function, replacing any %placeholders% with mapped values.
  *
@@ -168,16 +182,12 @@ function processPage(status, page, resultsKey) {
 
                 // print out a success / failure message of the results
                 var results = getResults();
-                var specs = Number(results[1]);
                 var failures = Number(results[2]);
-                console.log("Results for url " + page.url + ":");
                 if (failures > 0) {
-                    console.error("  FAILURE: " + results[0]);
                     page.__exit_code = 1;
                     clearInterval(ival);
                 }
                 else {
-                    console.log("  SUCCESS: " + results[0]);
                     page.__exit_code = 0;
                     clearInterval(ival);
                 }
