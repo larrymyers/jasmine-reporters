@@ -23,7 +23,7 @@
             if (this.hasGroupedConsole()) {
                 var suites = runner.suites();
                 startGroup(runner.results(), 'tests');
-                for (var i in suites) {
+                for (var i=0; i<suites.length; i++) {
                     if (!suites[i].parentSuite) {
                         suiteResults(suites[i]);
                     }
