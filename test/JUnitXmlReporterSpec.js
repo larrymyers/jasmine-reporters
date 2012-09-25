@@ -74,31 +74,43 @@
                 //spec.results_ = fakeResults();
                 reporter.reportSpecResults(spec);
             });
+
             it("should compute duration", function(){
                 expect(spec.duration).not.toBeUndefined();
             });
+
             it("should generate <testcase> output", function(){
                 expect(spec.output).not.toBeUndefined();
                 expect(spec.output).toContain("<testcase");
             });
+
             it("should escape bad xml characters in spec description", function() {
                 expect(spec.output).toContain("&amp; &lt; &gt; &quot; &apos;");
             });
+
             it("should generate valid xml <failure> output if test failed", function(){
-                // this one takes a bit of setup to pretend a failure
                 spec = fakeSpec(suite, "should be a dummy");
                 reporter.reportSpecStarting(spec);
+
                 var expectationResult = new jasmine.ExpectationResult({
-                    matcherName: "toEqual", passed: false, message: "Expected 'a' to equal '&'."
+                    matcherName: "toEqual", passed: false,
+                    message: "Expected 'a' to equal '&'.",
+                    trace: { stack: "in test1.js:12\nin test2.js:123" }
                 });
+
                 var results = {
                     passed: function() { return false; },
                     getItems: function() { return [expectationResult]; }
                 };
+
                 spyOn(spec, "results").andReturn(results);
+
                 reporter.reportSpecResults(spec);
-                expect(spec.output).toContain("<failure>");
-                expect(spec.output).toContain("to equal &apos;&amp;");
+
+                expect(spec.output).toContain("<failure");
+                expect(spec.output).toContain("type=\"" + expectationResult.type + "\"");
+                expect(spec.output).toContain("message=\"Expected &apos;a&apos; to equal &apos;&amp;&apos;.\"");
+                expect(spec.output).toContain(">in test1.js:12\nin test2.js:123</failure>");
             });
         });
 
