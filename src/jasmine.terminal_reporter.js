@@ -60,7 +60,6 @@
 
         reportRunnerStarting: function(runner) {
             this.started = true;
-
             this.start_time = (new Date()).getTime();
             this.executed_specs = 0;
             this.passed_specs = 0;
@@ -75,14 +74,14 @@
             }
 
             if (this.verbosity === 2) {
-                resultText = 'F';
+                var resultText = 'F';
 
                 if (spec.results().passed()) {
                     resultText = '.';
                 }
                 this.log(this.inColor(resultText, color));
             } else if (this.verbosity > 2) {
-                resultText = "Failed"
+                resultText = "Failed";
 
                 if (spec.results().passed()) {
                     resultText = 'Passed';
