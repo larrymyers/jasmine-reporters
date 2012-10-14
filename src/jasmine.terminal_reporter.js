@@ -56,6 +56,8 @@
             if (this.verbosity > 0) {
                 this.log(this.inColor(result_str, result_color));
             }
+
+            this.finished = true;
         },
 
         reportRunnerStarting: function(runner) {
