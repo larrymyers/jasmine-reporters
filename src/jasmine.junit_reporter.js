@@ -42,11 +42,13 @@
      * @param {boolean} useDotNotation whether to separate suite names with
      *                  dots rather than spaces (ie "Class.init" not
      *                  "Class init"); default: true
+     * @param {string}  remoteUrl where to send test results to a remote url
      */
-    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation) {
+    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, remoteUrl) {
         this.savePath = savePath || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
+        this.remoteUrl = remoteUrl || '';
     };
     JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
 
@@ -167,6 +169,14 @@
                 fs.closeSync(fd);
                 return;
             } catch (g) {}
+            // remote server
+            try {
+                var scriptTag = document.createElement('script');
+                var url = this.remoteUrl + "?callback=JSONP&text=" + encodeURIComponent(text) +
+                    "&filename=" + encodeURIComponent(filename) + "";
+                scriptTag.setAttribute("src", url);
+                document.getElementsByTagName("head")[0].appendChild(scriptTag);
+            }  catch (h) {}
         },
 
         getFullName: function(suite, isFilename) {
