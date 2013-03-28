@@ -1,7 +1,7 @@
 (function() {
 
-    if (! jasmine) {
-        throw new Exception("jasmine library does not exist in global namespace!");
+    if (typeof jasmine == 'undefined') {
+        throw new Error("jasmine library does not exist in global namespace!");
     }
 
     function elapsed(startTime, endTime) {
