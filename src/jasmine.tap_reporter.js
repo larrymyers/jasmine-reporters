@@ -42,6 +42,9 @@
             var errorMessage = '';
 
             var results = spec.results();
+            if (results.skipped) {
+                return;
+            }
             var passed = results.passed();
 
             this.passed_asserts += results.passedCount;
