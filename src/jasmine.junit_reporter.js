@@ -127,11 +127,11 @@
                     output += "\n<testsuites>";
                     output += this.getNestedOutput(suite);
                     output += "\n</testsuites>";
-                    this.writeFile(this.savePath + fileName, output);
+                    this.writeFile(this.savePath, fileName, output);
                 }
                 else {
                     output += suite.output;
-                    this.writeFile(this.savePath + fileName, output);
+                    this.writeFile(this.savePath, fileName, output);
                 }
             }
             // When all done, make it known on JUnitXmlReporter
@@ -146,9 +146,27 @@
             return output;
         },
 
-        writeFile: function(filename, text) {
+        writeFile: function(path, filename, text) {
+            function getQualifiedFilename(separator) {
+                if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
+                    path += separator;
+                }
+                return path + filename;
+            }
+
             // Rhino
             try {
+                // turn filename into a qualified path
+                if (path) {
+                    filename = getQualifiedFilename(java.lang.System.getProperty("file.separator"));
+                    // create parent dir and ancestors if necessary
+                    var file = java.io.File(filename);
+                    var parentDir = file.getParentFile();
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+                }
+                // finally write the file
                 var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
                 out.write(text);
                 out.close();
@@ -156,13 +174,16 @@
             } catch (e) {}
             // PhantomJS, via a method injected by phantomjs-testrunner.js
             try {
+                // turn filename into a qualified path
+                filename = getQualifiedFilename(window.fs_path_separator);
                 __phantom_writeFile(filename, text);
                 return;
             } catch (f) {}
             // Node.js
             try {
                 var fs = require("fs");
-                var fd = fs.openSync(filename, "w");
+                var nodejs_path = require("path");
+                var fd = fs.openSync(nodejs_path.join(path, filename), "w");
                 fs.writeSync(fd, text, 0);
                 fs.closeSync(fd);
                 return;

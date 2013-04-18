@@ -156,7 +156,7 @@
                     reporter.reportRunnerResults(runner);
                 });
                 it("should remove invalid filename chars from the filename", function() {
-                    expect(reporter.writeFile).toHaveBeenCalledWith("TEST-SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
+                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "TEST-SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
                 });
                 it("should remove invalid xml chars from the classname", function() {
                     expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /");
@@ -174,11 +174,11 @@
                     expect(reporter.getNestedOutput.callCount).toEqual(4);
                 });
                 it("should wrap output in <testsuites>", function(){
-                    expect(reporter.writeFile.mostRecentCall.args[1]).toContain("<testsuites>");
+                    expect(reporter.writeFile.mostRecentCall.args[2]).toContain("<testsuites>");
                 });
                 it("should include xml header in every file", function(){
                     for (var i = 0; i < reporter.writeFile.callCount; i++) {
-                        expect(reporter.writeFile.argsForCall[i][1]).toContain("<?xml");
+                        expect(reporter.writeFile.argsForCall[i][2]).toContain("<?xml");
                     }
                 });
             });
@@ -192,11 +192,11 @@
                     expect(reporter.writeFile.callCount).toEqual(4);
                 });
                 it("should not wrap results in <testsuites>", function(){
-                    expect(reporter.writeFile.mostRecentCall.args[1]).not.toContain("<testsuites>");
+                    expect(reporter.writeFile.mostRecentCall.args[2]).not.toContain("<testsuites>");
                 });
                 it("should include xml header in every file", function(){
                     for (var i = 0; i < reporter.writeFile.callCount; i++) {
-                        expect(reporter.writeFile.argsForCall[i][1]).toContain("<?xml");
+                        expect(reporter.writeFile.argsForCall[i][2]).toContain("<?xml");
                     }
                 });
             });

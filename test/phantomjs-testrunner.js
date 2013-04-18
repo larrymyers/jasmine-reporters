@@ -9,12 +9,15 @@ if (phantom.args.length === 0) {
 }
 else {
     var args = phantom.args;
-    var pages = [], page, address, resultsKey, i, l;
+    var fs = require("fs"),
+        pages = [],
+        page, address, resultsKey, i, l;
+
 
     var setupPageFn = function(p, k) {
         return function() {
             overloadPageEvaluate(p);
-            setupWriteFileFunction(p, k);
+            setupWriteFileFunction(p, k, fs.separator);
         };
     };
 
@@ -110,13 +113,14 @@ function overloadPageEvaluate(page) {
  *                     be stored for later retrieval.
  */
 // TODO: not bothering with error checking for now (closed environment)
-function setupWriteFileFunction(page, key) {
+function setupWriteFileFunction(page, key, path_separator) {
     page.evaluate(function(){
         window["%resultsObj%"] = {};
+        window.fs_path_separator = "%fs_path_separator%";
         window.__phantom_writeFile = function(filename, text) {
             window["%resultsObj%"][filename] = text;
         };
-    }, {resultsObj: key});
+    }, {resultsObj: key, fs_path_separator: path_separator});
 }
 
 /**
