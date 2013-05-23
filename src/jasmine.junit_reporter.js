@@ -65,6 +65,9 @@
             spec.duration = elapsed(spec.startTime, new Date());
             spec.output = '<testcase classname="' + this.getFullName(spec.suite) +
                 '" name="' + escapeInvalidXmlChars(spec.description) + '" time="' + spec.duration + '">';
+            if(results.skipped) {
+              spec.output = spec.output + "<skipped />";
+            }
 
             var failure = "";
             var failures = 0;
