@@ -48,9 +48,15 @@
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
     };
+    JUnitXmlReporter.started_at = null; // will be updated when test runner start
     JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
 
     JUnitXmlReporter.prototype = {
+        reportRunnerStarting: function() {
+            // When run test, make it known on JUnitXmlReporter
+            JUnitXmlReporter.started_at = (new Date()).getTime();
+        },
+
         reportSpecStarting: function(spec) {
             spec.startTime = new Date();
 
