@@ -70,6 +70,10 @@
         reportSpecResults: function(spec) {
             var color = "red";
 
+            if (spec.results().skipped) {
+                return;
+            }
+
             if (spec.results().passed()) {
                 this.passed_specs++;
                 color = "green";
