@@ -19,7 +19,11 @@ fi
 SCRIPTDIR=$(dirname `perl -e 'use Cwd "abs_path";print abs_path(shift)' $0`)
 TESTFILE=""
 while (( "$#" )); do
-    TESTFILE="$TESTFILE `perl -e 'use Cwd "abs_path";print abs_path(shift)' $1`"
+    if [ ${1:0:7} == "http://" -o ${1:0:8} == "https://" ]; then
+        TESTFILE="$TESTFILE $1"
+    else
+        TESTFILE="$TESTFILE `perl -e 'use Cwd "abs_path";print abs_path(shift)' $1`"
+    fi
     shift
 done
 
