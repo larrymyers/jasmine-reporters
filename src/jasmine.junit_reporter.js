@@ -36,7 +36,8 @@
      * Allows the test results to be used in java based CI
      * systems like CruiseControl and Hudson.
      *
-     * @param {string} savePath where to save the files
+     * @param {string, Function} output path to save the files in or callback
+	 *					function to pass the results to when test has finished
      * @param {boolean} consolidate whether to save nested describes within the
      *                  same file as their parent; default: true
      * @param {boolean} useDotNotation whether to separate suite names with
@@ -44,7 +45,7 @@
      *                  "Class init"); default: true
      */
     var JUnitXmlReporter = function(savePath, consolidate, useDotNotation) {
-        this.savePath = savePath || '';
+        this.output = output || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
     };
@@ -130,11 +131,11 @@
                     output += "\n<testsuites>";
                     output += this.getNestedOutput(suite);
                     output += "\n</testsuites>";
-                    this.writeFile(this.savePath, fileName, output);
+					this.outputString(output, fileName);
                 }
                 else {
                     output += suite.output;
-                    this.writeFile(this.savePath, fileName, output);
+					this.outputString(output, fileName);
                 }
             }
             // When all done, make it known on JUnitXmlReporter
@@ -148,6 +149,17 @@
             }
             return output;
         },
+		
+		outputString: function(text, fileName) {
+			switch(typeof this.output) {
+			case 'function':
+				this.output(text);
+				break;
+			case 'string':
+				this.writeFile(this.output, fileName, text);
+				break;
+			}
+		},
 
         writeFile: function(path, filename, text) {
             function getQualifiedFilename(separator) {
