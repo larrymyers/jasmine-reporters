@@ -66,9 +66,8 @@ else {
 function logAndWorkAroundDefaultLineBreaking(msg) {
     var interpretAsWithoutNewline = /(^(\033\[\d+m)*[\.F](\033\[\d+m)*$)|( \.\.\.$)/;
     if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
-        var fs = require('fs');
-        // system.stdout.write(msg) ? wait for http://code.google.com/p/phantomjs/issues/detail?id=243 to be implemented
-        fs.write('/dev/stdout', msg, 'w');
+        var system = require('system');
+        system.stdout.write(msg);
     } else {
         console.log(msg);
     }
