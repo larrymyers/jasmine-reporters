@@ -17,9 +17,13 @@
     };
 
     TeamcityReporter.prototype = {
-        reportRunnerResults: function(runner) { },
+        reportRunnerResults: function(runner) {
+            this.log("##teamcity[progressFinish 'Running Jasmine Tests']");
+        },
 
-        reportRunnerStarting: function(runner) { },
+        reportRunnerStarting: function(runner) {
+            this.log("##teamcity[progressStart 'Running Jasmine Tests']");
+        },
 
         reportSpecResults: function(spec) { },
 
