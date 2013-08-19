@@ -11,5 +11,11 @@
   },
   "main" : "./src/load_reporters.js",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/larrymyers/jasmine-reporters/master/LICENSE"
+    }
+  ]  
 }
