@@ -66,8 +66,13 @@ else {
 function logAndWorkAroundDefaultLineBreaking(msg) {
     var interpretAsWithoutNewline = /(^(\033\[\d+m)*[\.F](\033\[\d+m)*$)|( \.\.\.$)/;
     if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
-        var system = require('system');
-        system.stdout.write(msg);
+        try {
+            var system = require('system');
+            system.stdout.write(msg);
+        } catch (e) {
+            var fs = require('fs');
+            fs.write('/dev/stdout', msg, 'w');
+        }
     } else {
         console.log(msg);
     }
