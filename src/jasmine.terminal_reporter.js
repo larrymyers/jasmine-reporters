@@ -94,6 +94,20 @@
                 }
                 this.log(' ' + this.inColor(resultText, color));
             }
+            if (!spec.results().passed()) {
+                if (this.verbosity === 2) {
+                  this.log(" ");
+                  this.log(this.indentWithCurrentLevel(this.indent_string + spec.getFullName()));
+                }
+                var items = spec.results().getItems()
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    if (item instanceof jasmine.ExpectationResult && !item.passed()) {
+                        this.log(this.inColor(this.indentWithCurrentLevel(this.indent_string + this.indent_string + item.toString()), color));
+                    }
+                }
+            }
+
         },
 
         reportSpecStarting: function(spec) {
