@@ -161,7 +161,7 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (jasmine.JUnitXmlReporter) {
+                if (jasmine && jasmine.JUnitXmlReporter) {
                     return jasmine.JUnitXmlReporter.finished_at !== null;
                 }
                 // otherwise, see if there is anything in a "finished-at" element
@@ -176,7 +176,9 @@ function processPage(status, page, resultsKey) {
                        ["Unable to determine success or failure."];
             });
         };
-        var ival = setInterval(function(){
+        var timeOut = 60000,
+            loopInterval = 100,
+            ival = setInterval(function(){
             if (isFinished()) {
                 // get the results that need to be written to disk
                 var fs = require("fs"),
@@ -200,6 +202,14 @@ function processPage(status, page, resultsKey) {
                     clearInterval(ival);
                 }
             }
-        }, 100);
+            else {
+                if (timeOut <= 0) {
+                    console.log('Page has timed out');
+                    page.__exit_code = 0;
+                    clearInterval(ival);
+                }
+                timeOut = timeOut - loopInterval;
+            }
+        }, loopInterval);
     }
 }
