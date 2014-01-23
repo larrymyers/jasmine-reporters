@@ -55,7 +55,7 @@
                 reporter.reportSpecStarting(spec);
                 expect(spec.startTime).not.toBeUndefined();
             });
-            it("shound add start time to the suite", function(){
+            it("should add start time to the suite", function(){
                 expect(suite.startTime).toBeUndefined();
                 reporter.reportSpecStarting(spec);
                 expect(suite.startTime).not.toBeUndefined();
@@ -156,7 +156,7 @@
                     reporter.reportRunnerResults(runner);
                 });
                 it("should remove invalid filename chars from the filename", function() {
-                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "TEST-SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
+                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
                 });
                 it("should remove invalid xml chars from the classname", function() {
                     expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /");

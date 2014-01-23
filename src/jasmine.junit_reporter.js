@@ -24,11 +24,11 @@
     }
 
     function escapeInvalidXmlChars(str) {
-        return str.replace(/</g, "&lt;")
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/\&/g, "&amp;");
+            .replace(/\'/g, "&apos;");
     }
 
     /**
@@ -120,7 +120,7 @@
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
-                var fileName = 'TEST-' + this.getFullName(suite, true) + '.xml';
+                var fileName = this.getFullName(suite, true) + '.xml';
                 var output = '<?xml version="1.0" encoding="UTF-8" ?>';
                 // if we are consolidating, only write out top-level suites
                 if (this.consolidate && suite.parentSuite) {
