@@ -205,6 +205,9 @@
                 fullName = suite.getFullName();
             }
 
+            // replace empty name with 'test'
+            fullName = fullName.replace(/^$/, "test");
+
             // Either remove or escape invalid XML characters
             if (isFilename) {
                 return fullName.replace(/[^\w]/g, "");

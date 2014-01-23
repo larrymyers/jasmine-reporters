@@ -161,6 +161,11 @@
                 it("should remove invalid xml chars from the classname", function() {
                     expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /");
                 });
+                it("should return a name of 'test' for empty files", function () {
+                  suite.description = '';
+                  expect(reporter.getFullName(suite)).toContain('test');
+                  expect(reporter.getFullName(suite, true)).toContain('test');
+                });
             });
 
             describe("consolidated is true", function(){
