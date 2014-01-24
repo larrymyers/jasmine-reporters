@@ -48,6 +48,28 @@
             it("should default useDotNotation to true", function(){
                 expect(reporter.useDotNotation).toBe(true);
             });
+
+            describe("file prepend", function(){
+                it("should default output file prepend to \'TEST-\'", function () {
+                    expect(reporter.filePrefix).toBe("TEST-");
+                });
+                it("should allow the user to override the default xml output file prepend", function () {
+                    reporter = new jasmine.JUnitXmlReporter("", true, true, "alt-prepend-");
+                    expect(reporter.filePrefix).toBe("alt-prepend-");
+                });
+                it("should output the file with the modified prepend", function () {
+
+                    reporter = new jasmine.JUnitXmlReporter("", true, true, "alt-prepend-");
+
+                    spyOn(reporter, "writeFile");
+
+                    triggerSuiteEvents([suite]);
+
+                    reporter.reportRunnerResults(runner);
+
+                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "alt-prepend-ParentSuite.xml", jasmine.any(String));
+                });
+            });
         });
 
         describe("reportSpecStarting", function(){
@@ -85,7 +107,7 @@
             });
 
             it("should escape bad xml characters in spec description", function() {
-                expect(spec.output).toContain("&amp; &lt; &gt; &quot; &apos;");
+                expect(spec.output).toContain("&amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos;");
             });
 
             it("should generate valid xml <failure> output if test failed", function(){
@@ -109,7 +131,7 @@
 
                 expect(spec.output).toContain("<failure");
                 expect(spec.output).toContain("type=\"" + expectationResult.type + "\"");
-                expect(spec.output).toContain("message=\"Expected &apos;a&apos; to equal &apos;&amp;&apos;.\"");
+                expect(spec.output).toContain("message=\"Expected &amp;apos;a&amp;apos; to equal &amp;apos;&amp;&amp;apos;.\"");
                 expect(spec.output).toContain(">in test1.js:12\nin test2.js:123</failure>");
             });
         });
@@ -156,15 +178,10 @@
                     reporter.reportRunnerResults(runner);
                 });
                 it("should remove invalid filename chars from the filename", function() {
-                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
+                    expect(reporter.writeFile).toHaveBeenCalledWith(reporter.savePath, "TEST-SiblingSuiteWithInvalidChars.xml", jasmine.any(String));
                 });
                 it("should remove invalid xml chars from the classname", function() {
-                    expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /");
-                });
-                it("should return a name of 'test' for empty files", function () {
-                  suite.description = '';
-                  expect(reporter.getFullName(suite)).toContain('test');
-                  expect(reporter.getFullName(suite, true)).toContain('test');
+                    expect(siblingSuite.output).toContain("SiblingSuite With Invalid Chars &amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos; | : \\ /");
                 });
             });
 
