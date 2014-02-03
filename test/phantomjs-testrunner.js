@@ -161,7 +161,7 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (jasmine.JUnitXmlReporter) {
+                if (jasmine.JUnitXmlReporter && jasmine.JUnitXmlReporter.started_at !== null) {
                     return jasmine.JUnitXmlReporter.finished_at !== null;
                 }
                 // otherwise, see if there is anything in a "finished-at" element
