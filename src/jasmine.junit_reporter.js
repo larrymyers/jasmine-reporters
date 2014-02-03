@@ -42,11 +42,14 @@
      * @param {boolean} useDotNotation whether to separate suite names with
      *                  dots rather than spaces (ie "Class.init" not
      *                  "Class init"); default: true
+     * @param {string} filePrefix is the string value that is prepended to the
+     *                  xml output file; default: 'TEST-'
      */
-    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation) {
+    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix) {
         this.savePath = savePath || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
+        this.filePrefix = filePrefix || 'TEST-';
     };
     JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
 
@@ -120,7 +123,7 @@
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
-                var fileName = 'TEST-' + this.getFullName(suite, true) + '.xml';
+                var fileName = this.filePrefix + this.getFullName(suite, true) + '.xml';
                 var output = '<?xml version="1.0" encoding="UTF-8" ?>';
                 // if we are consolidating, only write out top-level suites
                 if (this.consolidate && suite.parentSuite) {
