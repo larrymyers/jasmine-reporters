@@ -1,3 +1,4 @@
+/* globals jasmine, phantom */
 // Verify arguments
 if (phantom.args.length === 0) {
     console.log("Simple JasmineBDD test runner for phantom.js");
@@ -161,7 +162,7 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (jasmine.JUnitXmlReporter && jasmine.JUnitXmlReporter.started_at !== null) {
+                if (jasmine && jasmine.JUnitXmlReporter && jasmine.JUnitXmlReporter.started_at !== null) {
                     return jasmine.JUnitXmlReporter.finished_at !== null;
                 }
                 // otherwise, see if there is anything in a "finished-at" element
@@ -176,6 +177,8 @@ function processPage(status, page, resultsKey) {
                        ["Unable to determine success or failure."];
             });
         };
+        var timeout = 60000;
+        var loopInterval = 100;
         var ival = setInterval(function(){
             if (isFinished()) {
                 // get the results that need to be written to disk
@@ -200,6 +203,14 @@ function processPage(status, page, resultsKey) {
                     clearInterval(ival);
                 }
             }
-        }, 100);
+            else {
+                timeout -= loopInterval;
+                if (timeout <= 0) {
+                    console.log('Page has timed out; aborting.');
+                    page.__exit_code = 2;
+                    clearInterval(ival);
+                }
+            }
+        }, loopInterval);
     }
 }
