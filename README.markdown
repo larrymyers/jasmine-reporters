@@ -9,7 +9,7 @@ Included reporters:
 * JUnitXmlReporter - Report test results to a file (using Rhino or PyPhantomJS) in JUnit XML Report format.
 * TapReporter - Test Anything Protocol, report tests results to console.
 * TeamcityReporter - Basic reporter that outputs spec results to for the Teamcity build system.
-
+* TerminalReporter - Logs to a terminal (including colors) with variable verbosity.
 
 ## Usage
 
