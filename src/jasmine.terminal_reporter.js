@@ -98,6 +98,8 @@
                 if (this.verbosity === 2) {
                   this.log(" ");
                   this.log(this.indentWithCurrentLevel(this.indent_string + spec.getFullName()));
+                } else if (this.verbosity === 1) {
+                  this.log(spec.getFullName());
                 }
                 var items = spec.results().getItems()
                 for (var i = 0; i < items.length; i++) {
