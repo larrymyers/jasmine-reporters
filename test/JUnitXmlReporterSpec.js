@@ -54,12 +54,12 @@
                     expect(reporter.filePrefix).toBe("TEST-");
                 });
                 it("should allow the user to override the default xml output file prepend", function () {
-                    reporter = new jasmine.JUnitXmlReporter("", true, true, "alt-prepend-");
+                    reporter = new jasmine.JUnitXmlReporter("", "alt-prepend-");
                     expect(reporter.filePrefix).toBe("alt-prepend-");
                 });
                 it("should output the file with the modified prepend", function () {
 
-                    reporter = new jasmine.JUnitXmlReporter("", true, true, "alt-prepend-");
+                    reporter = new jasmine.JUnitXmlReporter("", "alt-prepend-");
 
                     spyOn(reporter, "writeFile");
 
@@ -185,7 +185,7 @@
                 });
             });
 
-            describe("consolidated is true", function(){
+            describe("consolidated is true and consolidatedAll is false", function(){
                 beforeEach(function(){
                     reporter.reportRunnerResults(runner);
                 });
@@ -205,7 +205,7 @@
                 });
             });
 
-            describe("consolidated is false", function(){
+            describe("consolidated is false and consolidatedAll is false", function(){
                 beforeEach(function(){
                     reporter.consolidate = false;
                     reporter.reportRunnerResults(runner);
@@ -223,6 +223,24 @@
                 });
             });
 
+            describe("consolidatedAll is true", function(){
+                beforeEach(function(){
+                    reporter.consolidateAll = true;
+                    reporter.reportRunnerResults(runner);
+                });
+                it("should write one file for all test suites", function(){
+                    expect(reporter.writeFile.callCount).toEqual(1);
+                });
+                it("should consolidate suites output", function(){
+                    expect(reporter.getNestedOutput.callCount).toEqual(4);
+                });
+                it("should wrap output in <testsuites>", function(){
+                    expect(reporter.writeFile.mostRecentCall.args[2]).toContain("<testsuites>");
+                });
+                it("should include xml header in the file", function(){
+                    expect(reporter.writeFile.argsForCall[0][2]).toContain("<?xml");
+                });
+            });
             describe("dot notation is true", function(){
                 beforeEach(function(){
                     reporter.reportRunnerResults(runner);

@@ -37,18 +37,24 @@
      * systems like CruiseControl and Hudson.
      *
      * @param {string} savePath where to save the files
-     * @param {boolean} consolidate whether to save nested describes within the
-     *                  same file as their parent; default: true
-     * @param {boolean} useDotNotation whether to separate suite names with
-     *                  dots rather than spaces (ie "Class.init" not
-     *                  "Class init"); default: true
      * @param {string} filePrefix is the string value that is prepended to the
      *                  xml output file; default: 'TEST-'
+     * @param {Object} options Other options
+     * @param {boolean} options.consolidate whether to save nested describes within the
+     *                                      same file as their parent; default: true
+     * @param {boolean} options.consolidateAll whether to save test results from different specs
+     *                                         all in a single file; filePrefix is then the
+     *                                         whole file name without extension; default: false
+     * @param {boolean} options.useDotNotation whether to separate suite names with
+     *                                         dots rather than spaces (ie "Class.init" not
+     *                                         "Class init"); default: true
      */
-    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix) {
+    var JUnitXmlReporter = function(savePath, filePrefix, options) {
+        options = options || {};
         this.savePath = savePath || '';
-        this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
-        this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
+        this.consolidateAll = options.consolidateAll === jasmine.undefined ? false : options.consolidateAll;
+        this.consolidate = options.consolidate === jasmine.undefined ? true : options.consolidate;
+        this.useDotNotation = options.useDotNotation === jasmine.undefined ? true : options.useDotNotation;
         this.filePrefix = filePrefix || 'TEST-';
     };
     JUnitXmlReporter.started_at = null; // will be updated when test runner start
@@ -126,25 +132,40 @@
         },
 
         reportRunnerResults: function(runner) {
+            if (this.consolidateAll) {
+                var fileName = this.filePrefix + '.xml';
+                var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                output += "\n<testsuites>";
+            }
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
                 var fileName = this.filePrefix + this.getFullName(suite, true) + '.xml';
-                var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                if (!this.consolidateAll) {
+                    var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                }
                 // if we are consolidating, only write out top-level suites
-                if (this.consolidate && suite.parentSuite) {
+                if ((this.consolidate || this.consolidateAll) && suite.parentSuite) {
                     continue;
                 }
-                else if (this.consolidate) {
-                    output += "\n<testsuites>";
+                else if (this.consolidate || this.consolidateAll) {
+                    if (!this.consolidateAll) {
+                        output += "\n<testsuites>";
+                    }
                     output += this.getNestedOutput(suite);
-                    output += "\n</testsuites>";
-                    this.writeFile(this.savePath, fileName, output);
+                    if (!this.consolidateAll) {
+                        output += "\n</testsuites>";
+                        this.writeFile(this.savePath, fileName, output);
+                    }
                 }
                 else {
                     output += suite.output;
                     this.writeFile(this.savePath, fileName, output);
                 }
+            }
+            if (this.consolidateAll) {
+                output += "\n</testsuites>";
+                this.writeFile(this.savePath, fileName, output);
             }
             // When all done, make it known on JUnitXmlReporter
             JUnitXmlReporter.finished_at = (new Date()).getTime();
