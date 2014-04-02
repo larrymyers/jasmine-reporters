@@ -43,13 +43,17 @@
      *                  dots rather than spaces (ie "Class.init" not
      *                  "Class init"); default: true
      * @param {string} [filePrefix] is the string value that is prepended to the
-     *                  xml output file; default: 'TEST-'
+     *                 xml output file; default: 'TEST-'
+     * @param {boolean} [consolidateAll] whether to save test results from different
+     *                  specs all in a single file; filePrefix is then the whole file
+     *                  name without extension; default: false
      */
-    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix) {
+    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix, consolidateAll) {
         this.savePath = savePath || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
+        this.consolidateAll = consolidateAll === jasmine.undefined ? false : consolidateAll;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
-        this.filePrefix = filePrefix || 'TEST-';
+        this.filePrefix = filePrefix || (this.consolidateAll ? 'junitresults' : 'TEST-');
     };
     JUnitXmlReporter.started_at = null; // will be updated when test runner start
     JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
@@ -126,25 +130,41 @@
         },
 
         reportRunnerResults: function(runner) {
+            var fileName;
+            if (this.consolidateAll) {
+                fileName = this.filePrefix + '.xml';
+                var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                output += "\n<testsuites>";
+            }
             var suites = runner.suites();
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
-                var fileName = this.filePrefix + this.getFullName(suite, true) + '.xml';
-                var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                fileName = this.consolidateAll ? fileName : this.filePrefix + this.getFullName(suite, true) + '.xml';
+                if (!this.consolidateAll) {
+                    var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                }
                 // if we are consolidating, only write out top-level suites
-                if (this.consolidate && suite.parentSuite) {
+                if ((this.consolidate || this.consolidateAll) && suite.parentSuite) {
                     continue;
                 }
-                else if (this.consolidate) {
-                    output += "\n<testsuites>";
+                else if (this.consolidate || this.consolidateAll) {
+                    if (!this.consolidateAll) {
+                        output += "\n<testsuites>";
+                    }
                     output += this.getNestedOutput(suite);
-                    output += "\n</testsuites>";
-                    this.writeFile(this.savePath, fileName, output);
+                    if (!this.consolidateAll) {
+                        output += "\n</testsuites>";
+                        this.writeFile(this.savePath, fileName, output);
+                    }
                 }
                 else {
                     output += suite.output;
                     this.writeFile(this.savePath, fileName, output);
                 }
+            }
+            if (this.consolidateAll) {
+                output += "\n</testsuites>";
+                this.writeFile(this.savePath, fileName, output);
             }
             // When all done, make it known on JUnitXmlReporter
             JUnitXmlReporter.finished_at = (new Date()).getTime();
