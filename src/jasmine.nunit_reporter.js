@@ -55,6 +55,10 @@
             }
         },
 
+        reportSpecStarting: function(spec) {
+            spec.startTime = new Date();
+        },
+
         reportRunnerResults: function(runner) {
             var output = printTestResults(runner, this);
             this.writeFile(output);
@@ -70,37 +74,25 @@
             testSuite.success = results.passed();
         },
 
-        reportSpecStarting: function(spec) {
+        reportSpecResults: function(spec) {
+            var elapsed = spec.startTime ? (new Date() - spec.startTime) / 1000 : 0;
+            var results = spec.results();
+            var skipped = !!results.skipped;
+            var id = spec.id;
             var suite = spec.suite;
-
             var testSuite = this.testSuites[suite.id];
             var testSpec = {
-                elapsed: null,
-                executed: false,
+                elapsed: elapsed,
+                executed: !skipped,
                 failures: [],
                 id: spec.id,
                 name: spec.description,
-                success: false,
-                startTime: new Date()
+                success: results.passed()
             };
-
             this.testSpecs[spec.id] = testSpec;
-
             testSuite.specs.push(testSpec);
-        },
 
-        reportSpecResults: function(spec) {
-            var endTime = new Date();
-
-            var id = spec.id;
-            var results = spec.results();
-
-            var testSpec = this.testSpecs[id];
-            testSpec.executed = true;
-
-            var success = results.passed();
-            testSpec.success = success;
-            if (!success) {
+            if (!testSpec.success) {
                 var items = results.getItems();
 
                 for (var i = 0; i < items.length; i++) {
@@ -110,18 +102,15 @@
                             message: result.toString(),
                             stack: result.trace.stack ? result.trace.stack : ""
                         };
-
                         testSpec.failures.push(failure);
                     }
                 }
             }
 
-            var elapsed = (endTime - testSpec.startTime) / 1000;
-            testSpec.elapsed = elapsed;
-
-            for (var suite = spec.suite; suite; suite = suite.parentSuite) {
-                var testSuite = this.testSuites[suite.id];
+            while (suite) {
+                testSuite = this.testSuites[suite.id];
                 testSuite.elapsed = testSuite.elapsed ? (testSuite.elapsed + elapsed) : elapsed;
+                suite = suite.parentSuite;
             }
         },
 
@@ -198,19 +187,30 @@
             .replace(/\&/g, "&amp;");
     }
 
+    function getSkippedCount(specs) {
+        if (!specs.length) { return 0; }
+        for (var i = 0, count = 0; i < specs.length; i++) {
+            if (specs[i].results().skipped) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     function printTestResults(runner, reporter) {
         var testRun = reporter.testRun;
         var output = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
 
-        var specCount = runner.specs().length;
-        var results = runner.results();
-
         var date = new Date();
+        var results = runner.results();
+        var specs = runner.specs();
+        var specCount = specs.length;
+        var skippedCount = getSkippedCount(specs);
 
         output += "<test-results name=\"" + escapeInvalidXmlChars(reporter.reportName) + "\" ";
         output += "total=\"" + specCount + "\" ";
         output += "failures=\"" + results.failedCount + "\" ";
-        output += "not-run=\"0\" ";
+        output += "not-run=\"" + skippedCount + "\" ";
         output += "date=\"" + dateString(date) + "\" ";
         output += "time=\"" + timeString(date) + "\">";
 
