@@ -5,7 +5,6 @@ the [JasmineBDD testing framework](http://pivotal.github.com/jasmine/).
 
 Included reporters:
 
-* ConsoleReporter - Report test results to the browser console.
 * JUnitXmlReporter - Report test results to a file in JUnit XML Report format.
 * NUnitXmlReporter - Report test results to a file in NUnit XML Report format.
 * TapReporter - Test Anything Protocol, report tests results to console.
