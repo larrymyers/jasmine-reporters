@@ -1,4 +1,4 @@
-/* globals jasmine, phantom */
+/* globals jasmineRequire, phantom */
 // Verify arguments
 if (phantom.args.length === 0) {
     console.log("Simple JasmineBDD test runner for phantom.js");
@@ -162,8 +162,8 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (jasmine && jasmine.JUnitXmlReporter && jasmine.JUnitXmlReporter.started_at !== null) {
-                    return jasmine.JUnitXmlReporter.finished_at !== null;
+                if (jasmineRequire && jasmineRequire.JUnitXmlReporter && jasmineRequire.JUnitXmlReporter.startTime) {
+                    return !!jasmineRequire.JUnitXmlReporter.endTime;
                 }
                 // otherwise, scrape the DOM for the HtmlReporter "finished in ..." output
                 var durElem = document.querySelector(".html-reporter .duration");
