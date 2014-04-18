@@ -9,12 +9,12 @@
         exportObject = window.jasmineReporters = window.jasmineReporters || {};
     }
 
-    function elapsed(startTime, endTime) {
-        return (endTime - startTime)/1000;
-    }
-
+    function trim(str) { return str.replace(/^\s+/, "" ).replace(/\s+$/, "" ); }
+    function elapsed(startTime, endTime) { return (endTime - startTime)/1000; }
+    function isFailed(obj) { return obj.status === "failed"; }
+    function isSkipped(obj) { return obj.status === "pending"; }
+    function pad(n) { return n < 10 ? '0'+n : n; }
     function ISODateString(d) {
-        function pad(n) { return n < 10 ? '0'+n : n; }
         return d.getFullYear() + '-' +
             pad(d.getMonth()+1) + '-' +
             pad(d.getDate()) + 'T' +
@@ -22,11 +22,6 @@
             pad(d.getMinutes()) + ':' +
             pad(d.getSeconds());
     }
-
-    function trim(str) {
-        return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
-    }
-
     function escapeInvalidXmlChars(str) {
         return str.replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
@@ -35,12 +30,6 @@
             .replace(/\&/g, "&amp;");
     }
 
-    function isFailed(obj) {
-        return obj.status === "failed";
-    }
-    function isSkipped(obj) {
-        return obj.status === "pending";
-    }
 
     /**
      * Generates JUnit XML for the given spec run. There are various options
@@ -190,7 +179,7 @@
             } catch (g) {}
         };
 
-        /************* Helper functions that need closure access *************/
+        /******** Helper functions with closure access for simplicity ********/
         function generateFilename(suite) {
             return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
         }
