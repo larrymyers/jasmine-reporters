@@ -162,8 +162,8 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (jasmineRequire && jasmineRequire.JUnitXmlReporter && jasmineRequire.JUnitXmlReporter.startTime) {
-                    return !!jasmineRequire.JUnitXmlReporter.endTime;
+                if (window.jasmineReporters && window.jasmineReporters.startTime) {
+                    return !!window.jasmineReporters.endTime;
                 }
                 // otherwise, scrape the DOM for the HtmlReporter "finished in ..." output
                 var durElem = document.querySelector(".html-reporter .duration");

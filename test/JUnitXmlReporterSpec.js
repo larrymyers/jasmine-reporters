@@ -1,4 +1,4 @@
-/* globals jasmine, jasmineRequire, describe, beforeEach, it, expect, spyOn */
+/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect, spyOn */
 (function(){
     var env, spec, suite, reporter, writeFile, calls, suiteId=0, specId=0;
     function fakeSpec(ste, name) {
@@ -29,7 +29,7 @@
     }
 
     function setupReporterWithOptions(options) {
-        reporter = new jasmineRequire.JUnitXmlReporter(options);
+        reporter = new jasmineReporters.JUnitXmlReporter(options);
         writeFile = reporter.writeFile = jasmine.createSpy();
     }
 

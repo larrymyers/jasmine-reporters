@@ -1,17 +1,12 @@
 /* global java, __phantom_writeFile */
 (function() {
-    var UNDEFINED;
-    function getJasmineRequireObj() {
-        if (typeof module !== "undefined" && module.exports) {
-            return exports;
-        } else {
-            window.jasmineRequire = window.jasmineRequire || {};
-            return window.jasmineRequire;
-        }
-    }
+    var UNDEFINED,
+        exportObject;
 
-    if (typeof getJasmineRequireObj() == 'undefined') {
-        throw new Error("jasmine 2.0 must be loaded before jasmine-junit");
+    if (typeof module !== "undefined" && module.exports) {
+        exportObject = exports;
+    } else {
+        exportObject = window.jasmineReporters = window.jasmineReporters || {};
     }
 
     function elapsed(startTime, endTime) {
@@ -74,7 +69,7 @@
      *                    "junitresults" and this becomes the actual filename,
      *                    ie "junitresults.xml"
      */
-    var JUnitXmlReporter = function(options) {
+    exportObject.JUnitXmlReporter = function(options) {
         var self = this;
         options = options || {};
         self.savePath = options.savePath || '';
@@ -90,7 +85,7 @@
 
         self.jasmineStarted = function(summary) {
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
-            JUnitXmlReporter.startTime = (new Date()).getTime();
+            exportObject.startTime = new Date();
         };
         self.suiteStarted = function(suite) {
             suite._startTime = new Date();
@@ -133,7 +128,7 @@
             //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
             // this is so phantomjs-testrunner.js can tell if we're done executing
-            JUnitXmlReporter.endTime = new Date();
+            exportObject.endTime = new Date();
         };
 
         self.getOrWriteNestedOutput = function(suite) {
@@ -278,7 +273,4 @@
             self.writeFile(filename, (prefix + text + suffix));
         }
     };
-
-    // export public
-    getJasmineRequireObj().JUnitXmlReporter = JUnitXmlReporter;
 })();
