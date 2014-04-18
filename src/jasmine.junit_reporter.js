@@ -75,21 +75,24 @@
      *                    ie "junitresults.xml"
      */
     var JUnitXmlReporter = function(options) {
+        var self = this;
         options = options || {};
-        options.savePath = options.savePath || '';
-        options.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
-        options.consolidateAll = options.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
-        options.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
-        options.filePrefix = options.filePrefix || (options.consolidateAll ? 'junitresults' : 'junitresults-');
+        self.savePath = options.savePath || '';
+        self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
+        self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
+        self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
+        self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
 
         var suites = [],
             currentSuite = null,
-            failedCount = 0;
+            totalSpecsExecuted = 0,
+            totalSpecsDefined;
 
-        this.jasmineStarted = function(started) {
+        self.jasmineStarted = function(summary) {
+            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             JUnitXmlReporter.startTime = (new Date()).getTime();
         };
-        this.suiteStarted = function(suite) {
+        self.suiteStarted = function(suite) {
             suite._startTime = new Date();
             suite._specs = [];
             suite._suites = [];
@@ -103,56 +106,52 @@
             }
             currentSuite = suite;
         };
-        this.specStarted = function(spec) {
+        self.specStarted = function(spec) {
             spec._startTime = new Date();
             spec._suite = currentSuite;
             currentSuite._specs.push(spec);
         };
-        this.specDone = function(spec) {
+        self.specDone = function(spec) {
             spec._endTime = new Date();
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isFailed(spec)) { spec._suite._failures++; }
+            totalSpecsExecuted++;
         };
-        this.suiteDone = function(suite) {
+        self.suiteDone = function(suite) {
             suite._endTime = new Date();
             currentSuite = suite._parent;
         };
-        this.jasmineDone = function() {
+        self.jasmineDone = function() {
             var output = '';
             for (var i = 0; i < suites.length; i++) {
-                output += this.getOrWriteNestedOutput(suites[i]);
+                output += self.getOrWriteNestedOutput(suites[i]);
             }
             // if we have anything to write here, write out the consolidated file
             if (output) {
-                this.writeFile(options.filePrefix, output);
+                wrapOutputAndWriteFile(self.filePrefix, output);
             }
+            //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+
             // this is so phantomjs-testrunner.js can tell if we're done executing
             JUnitXmlReporter.endTime = new Date();
         };
 
-        this.getOrWriteNestedOutput = function(suite) {
+        self.getOrWriteNestedOutput = function(suite) {
             var output = suiteAsXml(suite);
             for (var i = 0; i < suite._suites.length; i++) {
-                output += this.getOrWriteNestedOutput(suite._suites[i]);
+                output += self.getOrWriteNestedOutput(suite._suites[i]);
             }
-            if (options.consolidateAll || options.consolidate && suite._parent) {
+            if (self.consolidateAll || self.consolidate && suite._parent) {
                 return output;
             } else {
                 // if we aren't supposed to consolidate output, just write it now
-                this.writeFile(generateFilename(suite), output);
+                wrapOutputAndWriteFile(generateFilename(suite), output);
                 return '';
             }
         };
 
-        var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
-        prefix += '\n<testsuites>';
-        var suffix = '\n</testsuites>';
-        this.writeFile = function(filename, text) {
-            if (filename.substr(-4) !== '.xml') { filename += '.xml'; }
-            // Add the prefix and suffix once for each file
-            text = prefix + text + suffix;
-
-            var path = options.savePath;
+        self.writeFile = function(filename, text) {
+            var path = self.savePath;
             function getQualifiedFilename(separator) {
                 if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
                     path += separator;
@@ -198,12 +197,12 @@
 
         /************* Helper functions that need closure access *************/
         function generateFilename(suite) {
-            return options.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
+            return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
         }
 
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
-            if (options.useDotNotation) {
+            if (self.useDotNotation || isFilename) {
                 fullName = suite.description;
                 for (var parent = suite._parent; parent; parent = parent._parent) {
                     fullName = parent.description + '.' + fullName;
@@ -214,14 +213,26 @@
 
             // Either remove or escape invalid XML characters
             if (isFilename) {
-                return fullName.replace(/[^\w]/g, "");
+                var fileName = "",
+                    rFileChars = /[\w\.]/,
+                    chr;
+                while (fullName.length) {
+                    chr = fullName[0];
+                    fullName = fullName.substr(1);
+                    if (rFileChars.test(chr)) {
+                        fileName += chr;
+                    }
+                }
+                return fileName;
+            } else {
+                return escapeInvalidXmlChars(fullName);
             }
-            return escapeInvalidXmlChars(fullName);
         }
 
         function suiteAsXml(suite) {
             var xml = '\n <testsuite name="' + getFullyQualifiedSuiteName(suite) + '"';
             xml += ' timestamp="' + ISODateString(suite._startTime) + '"';
+            xml += ' hostname="localhost"'; // many CI systems like Jenkins don't care about this, but junit spec says it is required
             xml += ' time="' + elapsed(suite._startTime, suite._endTime) + '"';
             xml += ' errors="0"';
             xml += ' tests="' + suite._specs.length + '"';
@@ -256,6 +267,15 @@
             }
             xml += '\n  </testcase>';
             return xml;
+        }
+
+        // To remove complexity and be more DRY about the silly preamble and <testsuites> element
+        var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
+        prefix += '\n<testsuites>';
+        var suffix = '\n</testsuites>';
+        function wrapOutputAndWriteFile(filename, text) {
+            if (filename.substr(-4) !== '.xml') { filename += '.xml'; }
+            self.writeFile(filename, (prefix + text + suffix));
         }
     };
 
