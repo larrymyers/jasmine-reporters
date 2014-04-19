@@ -29,7 +29,7 @@
         var hours = date.getHours();
         var minutes = date.getMinutes();
         var seconds = date.getSeconds();
-        return hours + ":" + pad(minutes) + ":" + pad(seconds);
+        return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
     }
 
 
