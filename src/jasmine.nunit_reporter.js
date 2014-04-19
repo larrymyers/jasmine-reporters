@@ -152,9 +152,12 @@
             try {
                 var fs = require("fs");
                 var nodejs_path = require("path");
-                var fd = fs.openSync(nodejs_path.join(path, filename), "w");
-                fs.writeSync(fd, text, 0);
-                fs.closeSync(fd);
+                // make sure the path exists
+                require("mkdirp").sync(path);
+
+                var xmlfile = fs.openSync(nodejs_path.join(path, filename), "w");
+                fs.writeSync(xmlfile, text, 0);
+                fs.closeSync(xmlfile);
                 return;
             } catch (g) {}
         };
