@@ -102,6 +102,11 @@
             totalSpecsExecuted++;
         };
         self.suiteDone = function(suite) {
+            // disabled suite (xdescribe) -- suiteStarted was never called
+            if (suite._parent === UNDEFINED) {
+                self.suiteStarted(suite);
+                suite._disabled = true;
+            }
             suite._endTime = new Date();
             currentSuite = suite._parent;
         };

@@ -1,5 +1,6 @@
 (function(global) {
-    var exportObject;
+    var UNDEFINED,
+        exportObject;
 
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
@@ -43,10 +44,8 @@
 
         self.started = false;
         self.finished = false;
-        var current_suite_hierarchy = [],
-            indent_string = '  ';
-
-        var startTime,
+        var indent_string = '  ',
+            startTime,
             suites = [],
             currentSuite = null,
             totalSpecsExecuted = 0,
@@ -61,25 +60,31 @@
         };
         self.suiteStarted = function(suite) {
             suite._specs = 0;
+            suite._nestedSpecs = 0;
             suite._failures = 0;
+            suite._nestedFailures = 0;
             suite._skipped = 0;
+            suite._nestedSkipped = 0;
+            suite._depth = currentSuite ? currentSuite._depth+1 : 1;
             suite._parent = currentSuite;
             currentSuite = suite;
+            if (self.verbosity > 2) {
+                log(indentWithLevel(suite._depth, inColor(suite.description, "bold")));
+            }
         };
         self.specStarted = function(spec) {
             spec._suite = currentSuite;
+            spec._depth = currentSuite._depth+1;
             currentSuite._specs++;
-
             if (self.verbosity > 2) {
-                logCurrentSuite(spec._suite);
-                log(indentWithCurrentLevel(indent_string + spec.description + ' ...'));
+                log(indentWithLevel(spec._depth, spec.description + ' ...'));
             }
         };
         self.specDone = function(spec) {
             var failed = false,
                 skipped = false,
                 color = 'green',
-                resultText;
+                resultText = '';
             if (isSkipped(spec)) {
                 skipped = true;
                 color = '';
@@ -95,40 +100,48 @@
             totalSpecsExecuted++;
 
             if (self.verbosity === 2) {
-                resultText = failed ? 'F' : skipped ? 'S' : '.';
-                log(inColor(resultText, color));
+                resultText = ' ' + (failed ? 'F' : skipped ? 'S' : '.');
             } else if (self.verbosity > 2) {
-                resultText = failed ? 'Failed' : skipped ? 'Skipped' : 'Passed';
-                log(' ' + inColor(resultText, color));
+                resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : 'Passed');
             }
+            log(inColor(resultText, color));
 
             if (failed) {
                 if (self.verbosity === 1) {
                     log(spec.fullName);
                 } else if (self.verbosity === 2) {
                     log(' ');
-                    log(indentWithCurrentLevel(indent_string + spec.fullName));
+                    log(indentWithLevel(spec._depth, spec.fullName));
                 }
 
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
-                    log(inColor(indentWithCurrentLevel(indent_string + indent_string + spec.failedExpectations[i].message), color));
+                    log(inColor(indentWithLevel(spec._depth, indent_string + spec.failedExpectations[i].message), color));
                 }
             }
         };
         self.suiteDone = function(suite) {
+            // disabled suite (xdescribe) -- suiteStarted was never called
+            if (suite._parent === UNDEFINED) {
+                self.suiteStarted(suite);
+                suite._disabled = true;
+            }
+            if (suite._parent) {
+                suite._parent._specs += suite._specs + suite._nestedSpecs;
+                suite._parent._failures += suite._failures + suite._nestedFailures;
+                suite._parent._skipped += suite._skipped + suite._nestedSkipped;
+            }
             currentSuite = suite._parent;
             if (self.verbosity < 3) {
                 return;
             }
 
-            var total = suite._specs,
-                failed = suite._failures,
-                skipped = suite._skipped,
+            var total = suite._specs + suite._nestedSpecs,
+                failed = suite._failures + suite._nestedFailures,
+                skipped = suite._skipped + suite._nestedSkipped,
                 passed = total - failed - skipped,
                 color = failed ? 'red+bold' : 'green+bold',
                 str = passed + ' of ' + total + ' passed (' + skipped + ' skipped)';
-            logCurrentSuite(suite);
-            log(indentWithCurrentLevel(inColor(str+'.', color)));
+            log(indentWithLevel(suite._depth, inColor(str+'.', color)));
         };
         self.jasmineDone = function() {
             var now = new Date(),
@@ -141,7 +154,7 @@
                 result_color = totalSpecsFailed && "red+bold" || "green+bold";
 
             if (self.verbosity === 2) {
-                log("");
+                log('');
             }
 
             if (self.verbosity > 0) {
@@ -153,34 +166,9 @@
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = now;
         };
-        function indentWithCurrentLevel(string) {
-            return new Array(current_suite_hierarchy.length).join(indent_string) + string;
+        function indentWithLevel(level, string) {
+            return new Array(level).join(indent_string) + string;
         }
-        function logCurrentSuite(suite) {
-            var suite_path = recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite);
-            // If we just popped down from a higher path, we need to update here
-            current_suite_hierarchy = suite_path;
-        }
-        function recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite) {
-            var suite_path = [],
-                current_level;
-
-            if (suite._parent) {
-                suite_path = recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite._parent);
-            }
-
-            suite_path.push(suite);
-            current_level = suite_path.length - 1;
-
-            if (current_suite_hierarchy.length <= current_level ||
-                current_suite_hierarchy[current_level] !== suite) {
-
-                current_suite_hierarchy = suite_path.slice(0);
-                log(indentWithCurrentLevel(inColor(suite.description, "bold")));
-            }
-            return suite_path;
-        }
-
         function log(str) {
             var console = global.console;
             if (console && console.log) {

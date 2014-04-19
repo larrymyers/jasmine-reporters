@@ -1,6 +1,7 @@
 /* global java, __phantom_writeFile */
 (function(global) {
-    var exportObject;
+    var UNDEFINED,
+        exportObject;
 
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
@@ -102,6 +103,11 @@
             totalSpecsExecuted++;
         };
         self.suiteDone = function(suite) {
+            // disabled suite (xdescribe) -- suiteStarted was never called
+            if (suite._parent === UNDEFINED) {
+                self.suiteStarted(suite);
+                suite._disabled = true;
+            }
             suite._endTime = new Date();
             currentSuite = suite._parent;
         };
@@ -189,7 +195,7 @@
         indent = indent || '';
         var i, xml = '\n' + indent + '<test-suite';
         xml += ' name="' + escapeInvalidXmlChars(suite.description) + '"';
-        xml += ' executed="true"'; // TODO: handle xdescribe
+        xml += ' executed="' + !suite._disabled + '"';
         xml += ' success="' + !(suite._failures || suite._nestedFailures) + '"';
         xml += ' time="' + elapsed(suite._startTime, suite._endTime) + '"';
         xml += '>';

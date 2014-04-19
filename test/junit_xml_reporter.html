@@ -11,12 +11,55 @@
     <script type="text/javascript" src="../src/jasmine.junit_reporter.js"></script>
     <script type="text/javascript" src="../lib/jasmine-2.0.0/boot.js"></script>
     <script>
-        jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({savePath:".."}));
+        jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+            savePath: '..',
+            consolidateAll: false
+        }));
     </script>
 
     <!-- Include spec file -->
     <script type="text/javascript" src="JUnitXmlReporterSpec.js"></script>
 </head>
 <body>
+    <script type="text/javascript">
+        describe("Some base suite", function() {
+            describe("Basic Suite", function() {
+                it("Should pass a basic truthiness test.", function() {
+                    expect(true).toEqual(true);
+                    expect(false).toEqual(false);
+                });
+
+                it("Should fail when it hits an inequal statement.", function() {
+                    expect(1+1).toEqual(3);
+                });
+            });
+
+            xdescribe("A skipped suite", function() {
+                it("Should pass this test as well.", function() {
+                    expect(0).toEqual(0);
+                });
+            });
+            describe("A suite with a skipped suite", function() {
+                describe("A suite with a skipped test", function() {
+                    xit("Should be skipped.", function() {
+                        expect(0).toEqual(0);
+                    });
+                    it("Should not be skipped.", function() {
+                        expect(0).toEqual(0);
+                    });
+                });
+                xdescribe("A nested skipped suite", function() {
+                    it("Should not be reported.", function() {
+                        expect(0).toEqual(0);
+                    });
+                });
+            });
+        });
+        describe("Another Suite", function() {
+            it("Should pass this test as well.", function() {
+                expect(0).toEqual(0);
+            });
+        });
+    </script>
 </body>
 </html>
