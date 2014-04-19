@@ -54,11 +54,6 @@
         self.savePath = options.savePath || '';
         self.filename = options.filename || 'nunitresults.xml';
         self.reportName = options.reportName || 'Jasmine Results';
-        self.testSuites = {};
-        self.testSpecs = {};
-        self.testRun = {
-            suites: []
-        };
         var suites = [],
             currentSuite = null,
             totalSpecsExecuted = 0,
