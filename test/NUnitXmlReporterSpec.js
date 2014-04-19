@@ -148,12 +148,9 @@
                     specs = rootNode.getElementsByTagName("test-case");
                 });
                 it("should report the date / time that the tests were run", function() {
-                    function twoDigits(number) { return number >= 10 ? number : ("0" + number); }
                     var now = new Date();
-                    var date = now.getFullYear() + "-" + twoDigits(now.getMonth()+1) + "-" + twoDigits(now.getDate());
-                    var time = now.getHours() + ":" + twoDigits(now.getMinutes()) + ":" + twoDigits(now.getSeconds());
-                    expect(rootNode.getAttribute("date")).toBe(date);
-                    expect(rootNode.getAttribute("time")).toBe(time); // this could fail extremely rarely
+                    expect(rootNode.getAttribute("date")).toMatch(/\d{4}-\d{2}-\d{2}/);
+                    expect(rootNode.getAttribute("time")).toMatch(/\d{2}:\d{2}:\d{2}/);
                 });
                 it("should report the appropriate number of suites", function() {
                     expect(suites.length).toBe(4);
