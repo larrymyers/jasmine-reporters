@@ -2,23 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>JUnit XML Reporter Spec</title>
+    <title>NUnit XML Reporter Spec</title>
 
-    <link rel="stylesheet" href="../ext/jasmine.css" type="text/css" />
+    <link rel="stylesheet" href="../lib/jasmine-2.0.0/jasmine.css" type="text/css" />
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/jasmine.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/jasmine-html.js"></script>
 
-    <script type="text/javascript" src="../ext/jasmine.js"></script>
-    <script type="text/javascript" src="../ext/jasmine-html.js"></script>
     <script type="text/javascript" src="../src/jasmine.nunit_reporter.js"></script>
-    <script type="text/javascript" src="../src/jasmine.terminal_reporter.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/boot.js"></script>
+    <script>
+        jasmine.getEnv().addReporter(new jasmineReporters.NUnitXmlReporter({savePath:'..'}));
+    </script>
 
     <!-- Include spec file -->
     <script type="text/javascript" src="NUnitXmlReporterSpec.js"></script>
 </head>
 <body>
-    <script type="text/javascript">
-        jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-        jasmine.getEnv().addReporter(new jasmine.NUnitXmlReporter());
-        jasmine.getEnv().execute();
-    </script>
 </body>
 </html>

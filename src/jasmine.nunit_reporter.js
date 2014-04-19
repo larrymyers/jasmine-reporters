@@ -1,5 +1,38 @@
-/* globals jasmine */
+/* global java, __phantom_writeFile */
 (function() {
+    var exportObject;
+
+    if (typeof module !== "undefined" && module.exports) {
+        exportObject = exports;
+    } else {
+        exportObject = window.jasmineReporters = window.jasmineReporters || {};
+    }
+
+    function elapsed(startTime, endTime) { return (endTime - startTime)/1000; }
+    function isFailed(obj) { return obj.status === "failed"; }
+    function isSkipped(obj) { return obj.status === "pending"; }
+    function pad(n) { return n < 10 ? '0'+n : n; }
+    function escapeInvalidXmlChars(str) {
+        return str.replace(/</g, "&lt;")
+            .replace(/\>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/\'/g, "&apos;")
+            .replace(/\&/g, "&amp;");
+    }
+    function dateString(date) {
+        var year = date.getFullYear();
+        var month = date.getMonth()+1; // 0-based
+        var day = date.getDate();
+        return year + "-" + pad(month) + "-" + pad(day);
+    }
+    function timeString(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        return hours + ":" + pad(minutes) + ":" + pad(seconds);
+    }
+
+
     /**
      * Generates NUnit XML for the given spec run.
      * Allows the test results to be used in java based CI
@@ -12,111 +45,82 @@
      *
      * @param {object} [options]
      * @param {string} [options.savePath] directory to save the files (default: '')
-     * @param {string} [options.filename] name of xml output file (default: 'nunit-results.xml')
+     * @param {string} [options.filename] name of xml output file (default: 'nunitresults.xml')
      * @param {string} [options.reportName] name for parent test-results node (default: 'Jasmine Results')
      */
-    jasmine.NUnitXmlReporter = function(options) {
+    exportObject.NUnitXmlReporter = function(options) {
+        var self = this;
         options = options || {};
-        this.savePath = options.savePath || '';
-        this.filename = options.filename || 'nunit-results.xml';
-        this.reportName = options.reportName || 'Jasmine Results';
-        this.testSuites = {};
-        this.testSpecs = {};
-        this.testRun = {
+        self.savePath = options.savePath || '';
+        self.filename = options.filename || 'nunitresults.xml';
+        self.reportName = options.reportName || 'Jasmine Results';
+        self.testSuites = {};
+        self.testSpecs = {};
+        self.testRun = {
             suites: []
         };
-    };
+        var suites = [],
+            currentSuite = null,
+            totalSpecsExecuted = 0,
+            totalSpecsSkipped = 0,
+            totalSpecsFailed = 0,
+            totalSpecsDefined;
 
-    jasmine.NUnitXmlReporter.prototype = {
-        reportRunnerStarting: function(runner) {
-            var suites = runner.suites();
-
-            for (var i = 0; i < suites.length; i++) {
-                var currentSuite = suites[i];
-
-                var suite = {
-                    elapsed: 0,
-                    executed: false,
-                    id: currentSuite.id,
-                    name: currentSuite.description,
-                    specs: [],
-                    success: false,
-                    suites: []
-                };
-
-                this.testSuites[currentSuite.id] = suite;
-
-                var parent = this.testRun.suites;
-                if (currentSuite.parentSuite) {
-                    parent = this.testSuites[currentSuite.parentSuite.id].suites;
+        self.jasmineStarted = function(summary) {
+            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+            exportObject.startTime = new Date();
+        };
+        self.suiteStarted = function(suite) {
+            suite._startTime = new Date();
+            suite._specs = [];
+            suite._suites = [];
+            suite._failures = 0;
+            suite._nestedFailures = 0;
+            suite._skipped = 0;
+            suite._parent = currentSuite;
+            if (!currentSuite) {
+                suites.push(suite);
+            } else {
+                currentSuite._suites.push(suite);
+            }
+            currentSuite = suite;
+        };
+        self.specStarted = function(spec) {
+            spec._startTime = new Date();
+            spec._suite = currentSuite;
+            currentSuite._specs.push(spec);
+        };
+        self.specDone = function(spec) {
+            spec._endTime = new Date();
+            if (isSkipped(spec)) {
+                spec._suite._skipped++;
+                totalSpecsSkipped++;
+            }
+            if (isFailed(spec)) {
+                spec._suite._failures++;
+                // NUnit wants to know nested failures, so add for parents too
+                for (var parent=spec._suite._parent; parent; parent=parent._parent) {
+                    parent._nestedFailures++;
                 }
-
-                parent.push(suite);
+                totalSpecsFailed++;
             }
-        },
+            totalSpecsExecuted++;
+        };
+        self.suiteDone = function(suite) {
+            suite._endTime = new Date();
+            currentSuite = suite._parent;
+        };
+        self.jasmineDone = function() {
+            self.writeFile(resultsAsXml());
+            //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
-        reportSpecStarting: function(spec) {
-            spec.startTime = new Date();
-        },
+            // this is so phantomjs-testrunner.js can tell if we're done executing
+            exportObject.endTime = new Date();
+        };
 
-        reportRunnerResults: function(runner) {
-            var output = printTestResults(runner, this);
-            this.writeFile(output);
-        },
-
-        reportSuiteResults: function(suite) {
-            var id = suite.id;
-
-            var results = suite.results();
-
-            var testSuite = this.testSuites[id];
-            testSuite.executed = true;
-            testSuite.success = results.passed();
-        },
-
-        reportSpecResults: function(spec) {
-            var elapsed = spec.startTime ? (new Date() - spec.startTime) / 1000 : 0;
-            var results = spec.results();
-            var skipped = !!results.skipped;
-            var id = spec.id;
-            var suite = spec.suite;
-            var testSuite = this.testSuites[suite.id];
-            var testSpec = {
-                elapsed: elapsed,
-                executed: !skipped,
-                failures: [],
-                id: spec.id,
-                name: spec.description,
-                success: results.passed()
-            };
-            this.testSpecs[spec.id] = testSpec;
-            testSuite.specs.push(testSpec);
-
-            if (!testSpec.success) {
-                var items = results.getItems();
-
-                for (var i = 0; i < items.length; i++) {
-                    var result = items[i];
-                    if (result.passed && !result.passed()) {
-                        var failure = {
-                            message: result.toString(),
-                            stack: result.trace.stack ? result.trace.stack : ""
-                        };
-                        testSpec.failures.push(failure);
-                    }
-                }
-            }
-
-            while (suite) {
-                testSuite = this.testSuites[suite.id];
-                testSuite.elapsed = testSuite.elapsed ? (testSuite.elapsed + elapsed) : elapsed;
-                suite = suite.parentSuite;
-            }
-        },
-
-        writeFile: function(text) {
-            var path = this.savePath;
-            var filename = this.filename;
+        self.writeFile = function(text) {
+            var path = self.savePath;
+            var filename = self.filename;
             function getQualifiedFilename(separator) {
                 if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
                     path += separator;
@@ -158,117 +162,67 @@
                 fs.closeSync(fd);
                 return;
             } catch (g) {}
+        };
+
+        /******** Helper functions with closure access for simplicity ********/
+        function resultsAsXml() {
+            var date = new Date(),
+                totalSpecs = totalSpecsDefined || totalSpecsExecuted,
+                disabledSpecCount = totalSpecs - totalSpecsExecuted;
+
+            var xml = '<?xml version="1.0" encoding="utf-8" ?>';
+            xml += '\n<test-results name="' + escapeInvalidXmlChars(self.reportName) + '"';
+            xml += ' total="' + totalSpecs + '"';
+            xml += ' failures="' + totalSpecsFailed + '"';
+            xml += ' not-run="' + (totalSpecsSkipped + disabledSpecCount) + '"';
+            xml += ' date="' + dateString(date) + '"';
+            xml += ' time="' + timeString(date) + '"';
+            xml += '>';
+
+            for (var i=0; i<suites.length; i++) {
+                xml += suiteAsXml(suites[i]);
+            }
+            xml += '</test-results>';
+            return xml;
         }
     };
 
-    function dateString(date) {
-        var year = date.getFullYear();
-        var month = date.getMonth()+1; // 0-based
-        var day = date.getDate();
-        return year + "-" + formatAsTwoDigits(month) + "-" + formatAsTwoDigits(day);
-    }
+    function suiteAsXml(suite, indent) {
+        indent = indent || '';
+        var i, xml = '\n' + indent + '<test-suite';
+        xml += ' name="' + escapeInvalidXmlChars(suite.description) + '"';
+        xml += ' executed="true"'; // TODO: handle xdescribe
+        xml += ' success="' + !(suite._failures || suite._nestedFailures) + '"';
+        xml += ' time="' + elapsed(suite._startTime, suite._endTime) + '"';
+        xml += '>';
+        xml += '\n' + indent + ' <results>';
 
-    function timeString(date) {
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var seconds = date.getSeconds();
-        return hours + ":" + formatAsTwoDigits(minutes) + ":" + formatAsTwoDigits(seconds);
-    }
-
-    function formatAsTwoDigits(digit) {
-        return (digit < 10) ? "0" + digit : "" + digit;
-    }
-
-    function escapeInvalidXmlChars(str) {
-        return str.replace(/</g, "&lt;")
-            .replace(/\>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/\&/g, "&amp;");
-    }
-
-    function getSkippedCount(specs) {
-        if (!specs.length) { return 0; }
-        for (var i = 0, count = 0; i < specs.length; i++) {
-            if (specs[i].results().skipped) {
-                count++;
-            }
+        for (i=0; i<suite._suites.length; i++) {
+            xml += suiteAsXml(suite._suites[i], indent+"  ");
         }
-        return count;
-    }
-
-    function printTestResults(runner, reporter) {
-        var testRun = reporter.testRun;
-        var output = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
-
-        var date = new Date();
-        var results = runner.results();
-        var specs = runner.specs();
-        var specCount = specs.length;
-        var skippedCount = getSkippedCount(specs);
-
-        output += "<test-results name=\"" + escapeInvalidXmlChars(reporter.reportName) + "\" ";
-        output += "total=\"" + specCount + "\" ";
-        output += "failures=\"" + results.failedCount + "\" ";
-        output += "not-run=\"" + skippedCount + "\" ";
-        output += "date=\"" + dateString(date) + "\" ";
-        output += "time=\"" + timeString(date) + "\">";
-
-        output += printSuites(testRun.suites);
-
-        output += "</test-results>";
-
-        return output;
-    }
-
-    function printSuites(suites) {
-        var output = "";
-
-        for (var i = 0; i < suites.length; i++) {
-            output += "<test-suite ";
-            output += "name=\"" + escapeInvalidXmlChars(suites[i].name) + "\" ";
-            output += "executed=\"" + suites[i].executed + "\" ";
-            output += "success=\"" + suites[i].success + "\" ";
-            output += "time=\"" + suites[i].elapsed + "\">";
-            output += "<results>";
-
-            output += printSuites(suites[i].suites);
-
-            if (suites[i].specs.length > 0) {
-                output += printSpecs(suites[i].specs);
-            }
-
-            output += "</results>";
-            output += "</test-suite>";
+        for (i=0; i<suite._specs.length; i++) {
+            xml += specAsXml(suite._specs[i], indent+"  ");
         }
-
-        return output;
+        xml += '\n' + indent + ' </results>';
+        xml += '\n' + indent + '</test-suite>';
+        return xml;
     }
-
-    function printSpecs(specs) {
-        var output = "";
-
-        for (var i = 0; i < specs.length; i++) {
-            var spec = specs[i];
-
-            output += "<test-case ";
-            output += "name=\"" + escapeInvalidXmlChars(spec.name) + "\" ";
-            output += "executed=\"" + spec.executed + "\" ";
-            output += "success=\"" + spec.success + "\" ";
-            output += "time=\"" + spec.elapsed + "\">";
-
-            for (var j = 0; j < spec.failures.length; j++) {
-                var failure = spec.failures[j];
-
-                output += "<failure>";
-                output += "<message><![CDATA[" + failure.message + "]]></message>";
-                output += "<stack-trace><![CDATA[" + failure.stack + "]]></stack-trace>";
-                output += "</failure>";
-            }
-
-            output += "</test-case>";
+    function specAsXml(spec, indent) {
+        indent = indent || '';
+        var xml = '\n' + indent + '<test-case';
+        xml += ' name="' + escapeInvalidXmlChars(spec.description) + '"';
+        xml += ' executed="' + !isSkipped(spec) + '"';
+        xml += ' success="' + !isFailed(spec) + '"';
+        xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
+        xml += '>';
+        for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
+            failure = spec.failedExpectations[i];
+            xml += '\n' + indent + ' <failure>';
+            xml += '\n' + indent + '  <message><![CDATA[' + failure.message + ']]></message>';
+            xml += '\n' + indent + '  <stack-trace><![CDATA[' + failure.stack + ']]></stack-trace>';
+            xml += '\n' + indent + ' </failure>';
         }
-
-        return output;
+        xml += '\n' + indent + '</test-case>';
+        return xml;
     }
 })();
