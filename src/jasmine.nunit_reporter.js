@@ -1,14 +1,14 @@
 /* global java, __phantom_writeFile */
-(function() {
+(function(global) {
     var exportObject;
 
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
     } else {
-        exportObject = window.jasmineReporters = window.jasmineReporters || {};
+        exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
 
-    function elapsed(startTime, endTime) { return (endTime - startTime)/1000; }
+    function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
     function pad(n) { return n < 10 ? '0'+n : n; }
@@ -220,4 +220,4 @@
         xml += '\n' + indent + '</test-case>';
         return xml;
     }
-})();
+})(this);
