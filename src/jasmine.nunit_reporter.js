@@ -178,9 +178,9 @@
             xml += '>';
 
             for (var i=0; i<suites.length; i++) {
-                xml += suiteAsXml(suites[i]);
+                xml += suiteAsXml(suites[i], ' ');
             }
-            xml += '</test-results>';
+            xml += '\n</test-results>';
             return xml;
         }
     };
