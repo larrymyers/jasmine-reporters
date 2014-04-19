@@ -4,11 +4,18 @@
     <meta charset="utf-8" />
     <title>Terminal Reporter Spec</title>
 
-    <link rel="stylesheet" href="../ext/jasmine.css" type="text/css" />
+    <link rel="stylesheet" href="../lib/jasmine-2.0.0/jasmine.css" type="text/css" />
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/jasmine.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/jasmine-html.js"></script>
 
-    <script type="text/javascript" src="../ext/jasmine.js"></script>
-    <script type="text/javascript" src="../ext/jasmine-html.js"></script>
     <script type="text/javascript" src="../src/jasmine.terminal_reporter.js"></script>
+    <script type="text/javascript" src="../lib/jasmine-2.0.0/boot.js"></script>
+    <script>
+        jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter({
+            verbosity: 3,
+            color: true
+        }));
+    </script>
 </head>
 <body>
     <script type="text/javascript">
@@ -16,7 +23,6 @@
             it("Should pass a basic truthiness test.", function() {
                 expect(true).toEqual(true);
             });
-
             it("Should fail when it hits an inequal statement.", function() {
                 expect(1+1).toEqual(3);
             });
@@ -26,14 +32,8 @@
             it("Should pass this test as well.", function() {
                 expect(0).toEqual(0);
             });
+            xit("Should say something about skipped specs.", function() {});
         });
-
-        jasmine.getEnv().addReporter(new jasmine.TerminalReporter({
-            verbosity: 3,
-            color: true
-        }));
-        jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-        jasmine.getEnv().execute();
     </script>
 </body>
 </html>

@@ -1,7 +1,15 @@
-(function() {
-    if (! jasmine) {
-        throw new Exception("jasmine library does not exist in global namespace!");
+(function(global) {
+    var exportObject;
+
+    if (typeof module !== "undefined" && module.exports) {
+        exportObject = exports;
+    } else {
+        exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
+
+    function elapsed(start, end) { return (end - start)/1000; }
+    function isFailed(obj) { return obj.status === "failed"; }
+    function isSkipped(obj) { return obj.status === "pending"; }
 
     /**
      * Basic reporter that outputs spec results to the terminal.
@@ -9,11 +17,10 @@
      *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmine.TerminalReporter({
+     * jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter({
            verbosity: 2,
            color: true
        }));
-     * jasmine.getEnv().execute();
      */
     var DEFAULT_VERBOSITY = 2,
         ATTRIBUTES_TO_ANSI = {
@@ -23,152 +30,169 @@
             "green": 32
         };
 
-    var TerminalReporter = function(params) {
-        var parameters = params || {};
+    exportObject.TerminalReporter = function(params) {
+        var self = this;
+        params = params || {};
 
-        if (parameters.verbosity === 0) {
-            this.verbosity = 0;
+        if (params.verbosity === 0) {
+            self.verbosity = 0;
         } else {
-            this.verbosity = parameters.verbosity || DEFAULT_VERBOSITY;
+            self.verbosity = params.verbosity || DEFAULT_VERBOSITY;
         }
-        this.color = parameters.color;
+        self.color = params.color;
 
-        this.started = false;
-        this.finished = false;
-        this.current_suite_hierarchy = [];
-        this.indent_string = '  ';
-    };
+        self.started = false;
+        self.finished = false;
+        var current_suite_hierarchy = [],
+            indent_string = '  ';
 
-    TerminalReporter.prototype = {
-        reportRunnerResults: function(runner) {
-            var dur = (new Date()).getTime() - this.start_time,
-                failed = this.executed_specs - this.passed_specs,
-                spec_str = this.executed_specs + (this.executed_specs === 1 ? " spec, " : " specs, "),
-                fail_str = failed + (failed === 1 ? " failure in " : " failures in "),
-                summary_str = spec_str + fail_str + (dur/1000) + "s.",
-                result_str = (failed && "FAILURE: " || "SUCCESS: ") + summary_str,
-                result_color = failed && "red+bold" || "green+bold";
+        var startTime,
+            suites = [],
+            currentSuite = null,
+            totalSpecsExecuted = 0,
+            totalSpecsSkipped = 0,
+            totalSpecsFailed = 0,
+            totalSpecsDefined;
 
-            if (this.verbosity === 2) {
-                this.log("");
+        self.jasmineStarted = function(summary) {
+            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+            startTime = exportObject.startTime = new Date();
+            self.started = true;
+        };
+        self.suiteStarted = function(suite) {
+            suite._specs = 0;
+            suite._failures = 0;
+            suite._skipped = 0;
+            suite._parent = currentSuite;
+            currentSuite = suite;
+        };
+        self.specStarted = function(spec) {
+            spec._suite = currentSuite;
+            currentSuite._specs++;
+
+            if (self.verbosity > 2) {
+                logCurrentSuite(spec._suite);
+                log(indentWithCurrentLevel(indent_string + spec.description + ' ...'));
+            }
+        };
+        self.specDone = function(spec) {
+            var failed = false,
+                skipped = false,
+                color = 'green',
+                resultText;
+            if (isSkipped(spec)) {
+                skipped = true;
+                color = '';
+                spec._suite._skipped++;
+                totalSpecsSkipped++;
+            }
+            if (isFailed(spec)) {
+                failed = true;
+                color = 'red';
+                spec._suite._failures++;
+                totalSpecsFailed++;
+            }
+            totalSpecsExecuted++;
+
+            if (self.verbosity === 2) {
+                resultText = failed ? 'F' : skipped ? 'S' : '.';
+                log(inColor(resultText, color));
+            } else if (self.verbosity > 2) {
+                resultText = failed ? 'Failed' : skipped ? 'Skipped' : 'Passed';
+                log(' ' + inColor(resultText, color));
             }
 
-            if (this.verbosity > 0) {
-                this.log(this.inColor(result_str, result_color));
+            if (failed) {
+                if (self.verbosity === 1) {
+                    log(spec.fullName);
+                } else if (self.verbosity === 2) {
+                    log(' ');
+                    log(indentWithCurrentLevel(indent_string + spec.fullName));
+                }
+
+                for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
+                    log(inColor(indentWithCurrentLevel(indent_string + indent_string + spec.failedExpectations[i].message), color));
+                }
             }
-
-            this.finished = true;
-        },
-
-        reportRunnerStarting: function(runner) {
-            this.started = true;
-            this.start_time = (new Date()).getTime();
-            this.executed_specs = 0;
-            this.passed_specs = 0;
-        },
-
-        reportSpecResults: function(spec) {
-            var color = "red";
-
-            if (spec.results().skipped) {
+        };
+        self.suiteDone = function(suite) {
+            currentSuite = suite._parent;
+            if (self.verbosity < 3) {
                 return;
             }
 
-            if (spec.results().passed()) {
-                this.passed_specs++;
-                color = "green";
+            var total = suite._specs,
+                failed = suite._failures,
+                skipped = suite._skipped,
+                passed = total - failed - skipped,
+                color = failed ? 'red+bold' : 'green+bold',
+                str = passed + ' of ' + total + ' passed (' + skipped + ' skipped)';
+            logCurrentSuite(suite);
+            log(indentWithCurrentLevel(inColor(str+'.', color)));
+        };
+        self.jasmineDone = function() {
+            var now = new Date(),
+                dur = elapsed(startTime, now),
+                spec_str = totalSpecsExecuted + (totalSpecsExecuted === 1 ? " spec, " : " specs, "),
+                fail_str = totalSpecsFailed + (totalSpecsFailed === 1 ? " failure, " : " failures, "),
+                skip_str = totalSpecsSkipped + " skipped in ",
+                summary_str = spec_str + fail_str + skip_str + dur + "s.",
+                result_str = (totalSpecsFailed && "FAILURE: " || "SUCCESS: ") + summary_str,
+                result_color = totalSpecsFailed && "red+bold" || "green+bold";
+
+            if (self.verbosity === 2) {
+                log("");
             }
 
-            if (this.verbosity === 2) {
-                var resultText = 'F';
-
-                if (spec.results().passed()) {
-                    resultText = '.';
-                }
-                this.log(this.inColor(resultText, color));
-            } else if (this.verbosity > 2) {
-                resultText = "Failed";
-
-                if (spec.results().passed()) {
-                    resultText = 'Passed';
-                }
-                this.log(' ' + this.inColor(resultText, color));
+            if (self.verbosity > 0) {
+                log(inColor(result_str, result_color));
             }
-            if (!spec.results().passed()) {
-                if (this.verbosity === 2) {
-                  this.log(" ");
-                  this.log(this.indentWithCurrentLevel(this.indent_string + spec.getFullName()));
-                } else if (this.verbosity === 1) {
-                  this.log(spec.getFullName());
-                }
-                var items = spec.results().getItems()
-                for (var i = 0; i < items.length; i++) {
-                    var item = items[i];
-                    if (item instanceof jasmine.ExpectationResult && !item.passed()) {
-                        this.log(this.inColor(this.indentWithCurrentLevel(this.indent_string + this.indent_string + item.toString()), color));
-                    }
-                }
-            }
+            //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
-        },
-
-        reportSpecStarting: function(spec) {
-            this.executed_specs++;
-            if (this.verbosity > 2) {
-                this.logCurrentSuite(spec.suite);
-
-                this.log(this.indentWithCurrentLevel(this.indent_string + spec.description + ' ...'));
-            }
-        },
-
-        reportSuiteResults: function(suite) {
-            var results = suite.results(),
-                failed = results.totalCount - results.passedCount,
-                color = failed ? "red+bold" : "green+bold";
-
-            if (this.verbosity > 2) {
-                this.logCurrentSuite(suite);
-                this.log(this.indentWithCurrentLevel(this.inColor(results.passedCount + " of "
-                    + results.totalCount + " passed.", color)));
-            }
-        },
-
-        indentWithCurrentLevel: function(string) {
-            return new Array(this.current_suite_hierarchy.length).join(this.indent_string) + string;
-        },
-
-        recursivelyUpdateHierarchyUpToRootAndLogNewBranches: function(suite) {
+            self.finished = true;
+            // this is so phantomjs-testrunner.js can tell if we're done executing
+            exportObject.endTime = now;
+        };
+        function indentWithCurrentLevel(string) {
+            return new Array(current_suite_hierarchy.length).join(indent_string) + string;
+        }
+        function logCurrentSuite(suite) {
+            var suite_path = recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite);
+            // If we just popped down from a higher path, we need to update here
+            current_suite_hierarchy = suite_path;
+        }
+        function recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite) {
             var suite_path = [],
                 current_level;
 
-            if (suite.parentSuite != null) {
-                suite_path = this.recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite.parentSuite);
+            if (suite._parent) {
+                suite_path = recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite._parent);
             }
 
             suite_path.push(suite);
             current_level = suite_path.length - 1;
 
-            if (this.current_suite_hierarchy.length <= current_level
-                || this.current_suite_hierarchy[current_level] !== suite) {
+            if (current_suite_hierarchy.length <= current_level ||
+                current_suite_hierarchy[current_level] !== suite) {
 
-                this.current_suite_hierarchy = suite_path.slice(0);
-                this.log(this.indentWithCurrentLevel(this.inColor(suite.description, "bold")));
+                current_suite_hierarchy = suite_path.slice(0);
+                log(indentWithCurrentLevel(inColor(suite.description, "bold")));
             }
             return suite_path;
-        },
+        }
 
-        logCurrentSuite: function(suite) {
-            var suite_path = this.recursivelyUpdateHierarchyUpToRootAndLogNewBranches(suite);
-            // If we just popped down from a higher path, we need to update here
-            this.current_suite_hierarchy = suite_path;
-        },
-
-        inColor: function (string, color) {
+        function log(str) {
+            var console = global.console;
+            if (console && console.log) {
+                console.log(str);
+            }
+        }
+        function inColor(string, color) {
             var color_attributes = color && color.split("+"),
                 ansi_string = "",
                 i, attr;
 
-            if (! this.color || ! color_attributes) {
+            if (!self.color || !color_attributes) {
                 return string;
             }
 
@@ -178,16 +202,6 @@
             ansi_string += string + "\033[" + ATTRIBUTES_TO_ANSI["off"] + "m";
 
             return ansi_string;
-        },
-
-        log: function(str) {
-            var console = jasmine.getGlobal().console;
-            if (console && console.log) {
-                console.log(str);
-            }
         }
     };
-
-    // export public
-    jasmine.TerminalReporter = TerminalReporter;
-})();
+})(this);
