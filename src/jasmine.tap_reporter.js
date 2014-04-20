@@ -1,96 +1,102 @@
-(function() {
-    if (! jasmine) {
-        throw new Exception("jasmine library does not exist in global namespace!");
+(function(global) {
+    var UNDEFINED,
+        exportObject;
+
+    if (typeof module !== "undefined" && module.exports) {
+        exportObject = exports;
+    } else {
+        exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
+
+    function trim(str) { return str.replace(/^\s+/, "" ).replace(/\s+$/, "" ); }
+    function elapsed(start, end) { return (end - start)/1000; }
+    function isFailed(obj) { return obj.status === "failed"; }
+    function isSkipped(obj) { return obj.status === "pending"; }
 
     /**
      * TAP (http://en.wikipedia.org/wiki/Test_Anything_Protocol) reporter.
      * outputs spec results to the console.
      *
-     * Heavily inspired by ConsoleReporter found at:
-     * https://github.com/larrymyers/jasmine-reporters/
-     *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmine.TapReporter());
-     * jasmine.getEnv().execute();
+     * jasmine.addReporter(new jasmineReporters.TapReporter());
      */
-    var TapReporter = function() {
+    exportObject.TapReporter = function() {
+        var self = this;
         this.started = false;
         this.finished = false;
-    };
 
-    TapReporter.prototype = {
+        var startTime,
+            endTime,
+            totalSpecsExecuted = 0,
+            totalSpecsSkipped = 0,
+            totalSpecsFailed = 0,
+            totalSpecsDefined,
+            currentSuite = null;
 
-        reportRunnerStarting: function(runner) {
-            this.started = true;
-            this.start_time = (new Date()).getTime();
-            this.executed_specs = 0;
-            this.passed_specs = 0;
-            this.executed_asserts = 0;
-            this.passed_asserts = 0;
-            // should have at least 1 spec, otherwise it's considered a failure
-            this.log('1..'+ Math.max(runner.specs().length, 1));
-        },
-
-        reportSpecStarting: function(spec) {
-            this.executed_specs++;
-        },
-
-        reportSpecResults: function(spec) {
-            var resultText = "not ok";
-            var errorMessage = '';
-
-            var results = spec.results();
-            if (results.skipped) {
-                return;
-            }
-            var passed = results.passed();
-
-            this.passed_asserts += results.passedCount;
-            this.executed_asserts += results.totalCount;
-
-            if (passed) {
-                this.passed_specs++;
-                resultText = "ok";
-            } else {
-                var items = results.getItems();
-                var i = 0;
-                var expectationResult, stackMessage;
-                while (expectationResult = items[i++]) {
-                    if (expectationResult.trace) {
-                        stackMessage = expectationResult.trace.stack? expectationResult.trace.stack : expectationResult.message;
-                        errorMessage += '\n  '+ stackMessage;
+        self.jasmineStarted = function(summary) {
+            self.started = true;
+            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+            startTime = exportObject.startTime = new Date();
+        };
+        self.suiteStarted = function(suite) {
+            currentSuite = suite;
+        };
+        self.specStarted = function(spec) {
+            totalSpecsExecuted++;
+            spec._suite = currentSuite;
+        };
+        self.specDone = function(spec) {
+            var resultStr = 'ok ' + totalSpecsExecuted + ' - ' + spec._suite.description + ' : ' + spec.description;
+            var failedStr = '';
+            if (isFailed(spec)) {
+                totalSpecsFailed++;
+                resultStr = 'not ' + resultStr;
+                for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
+                    failure = spec.failedExpectations[i];
+                    failedStr += '\n  ' + trim(failure.message);
+                    if (failure.stack && failure.stack !== failure.message) {
+                        failedStr += '\n  === STACK TRACE ===';
+                        failedStr += '\n  ' + failure.stack;
+                        failedStr += '\n  === END STACK TRACE ===';
                     }
                 }
             }
-
-            this.log(resultText +" "+ (spec.id + 1) +" - "+ spec.suite.description +" : "+ spec.description + errorMessage);
-        },
-
-        reportRunnerResults: function(runner) {
-            var dur = (new Date()).getTime() - this.start_time;
-            var failed = this.executed_specs - this.passed_specs;
-            var spec_str = this.executed_specs + (this.executed_specs === 1 ? " spec, " : " specs, ");
-            var fail_str = failed + (failed === 1 ? " failure in " : " failures in ");
-            var assert_str = this.executed_asserts + (this.executed_asserts === 1 ? " assertion, " : " assertions, ");
-
-            if (this.executed_asserts) {
-                this.log("# "+ spec_str + assert_str + fail_str + (dur/1000) + "s.");
-            } else {
-                this.log('not ok 1 - no asserts run.');
+            if (isSkipped(spec)) {
+                totalSpecsSkipped++;
+                resultStr += ' # SKIP disabled by xit or similar';
             }
-            this.finished = true;
-        },
+            log(resultStr);
+        };
+        self.jasmineDone = function() {
+            endTime = new Date();
+            var dur = elapsed(startTime, endTime),
+                totalSpecs = totalSpecsDefined || totalSpecsExecuted,
+                disabledSpecs = totalSpecs - totalSpecsExecuted;
 
-        log: function(str) {
-            var console = jasmine.getGlobal().console;
+            if (totalSpecsExecuted === 0) {
+                log('1..0 # All tests disabled');
+            } else {
+                log('1..' + totalSpecsExecuted);
+            }
+            var diagStr = '#';
+            diagStr = '# ' + totalSpecs + ' spec' + (totalSpecs === 1 ? '' : 's');
+            diagStr += ', ' + totalSpecsFailed + ' failure' + (totalSpecsFailed === 1 ? '' : 's');
+            diagStr += ', ' + totalSpecsSkipped + ' skipped';
+            diagStr += ', ' + disabledSpecs + ' disabled';
+            diagStr += ' in ' + dur + 's.';
+            log(diagStr);
+            log('# NOTE: disabled specs are usually a result of xdescribe.');
+
+            self.finished = true;
+            // this is so phantomjs-testrunner.js can tell if we're done executing
+            exportObject.endTime = endTime;
+        };
+        function log(str) {
+            var console = global.console;
             if (console && console.log) {
                 console.log(str);
             }
         }
     };
-
-    // export public
-    jasmine.TapReporter = TapReporter;
-})();
+})(this);
