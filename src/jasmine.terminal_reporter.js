@@ -146,9 +146,12 @@
         self.jasmineDone = function() {
             var now = new Date(),
                 dur = elapsed(startTime, now),
-                spec_str = totalSpecsExecuted + (totalSpecsExecuted === 1 ? " spec, " : " specs, "),
+                total = totalSpecsDefined || totalSpecsExecuted,
+                disabled = total - totalSpecsExecuted,
+                skipped = totalSpecsSkipped + disabled,
+                spec_str = total + (total === 1 ? " spec, " : " specs, "),
                 fail_str = totalSpecsFailed + (totalSpecsFailed === 1 ? " failure, " : " failures, "),
-                skip_str = totalSpecsSkipped + " skipped in ",
+                skip_str = skipped + " skipped in ",
                 summary_str = spec_str + fail_str + skip_str + dur + "s.",
                 result_str = (totalSpecsFailed && "FAILURE: " || "SUCCESS: ") + summary_str,
                 result_color = totalSpecsFailed && "red+bold" || "green+bold";

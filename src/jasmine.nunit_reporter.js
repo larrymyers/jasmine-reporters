@@ -172,13 +172,14 @@
         function resultsAsXml() {
             var date = new Date(),
                 totalSpecs = totalSpecsDefined || totalSpecsExecuted,
-                disabledSpecCount = totalSpecs - totalSpecsExecuted;
+                disabledSpecs = totalSpecs - totalSpecsExecuted,
+                skippedSpecs = totalSpecsSkipped + disabledSpecs;
 
             var xml = '<?xml version="1.0" encoding="utf-8" ?>';
             xml += '\n<test-results name="' + escapeInvalidXmlChars(self.reportName) + '"';
             xml += ' total="' + totalSpecs + '"';
             xml += ' failures="' + totalSpecsFailed + '"';
-            xml += ' not-run="' + (totalSpecsSkipped + disabledSpecCount) + '"';
+            xml += ' not-run="' + skippedSpecs + '"';
             xml += ' date="' + dateString(date) + '"';
             xml += ' time="' + timeString(date) + '"';
             xml += '>';
