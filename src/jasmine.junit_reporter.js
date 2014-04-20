@@ -60,6 +60,9 @@
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
+        self.started = false;
+        self.finished = false;
+        // sanitize arguments
         options = options || {};
         self.savePath = options.savePath || '';
         self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
@@ -75,6 +78,7 @@
         self.jasmineStarted = function(summary) {
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             exportObject.startTime = new Date();
+            self.started = true;
         };
         self.suiteStarted = function(suite) {
             suite._startTime = new Date();
@@ -121,6 +125,7 @@
             }
             //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
+            self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = new Date();
         };

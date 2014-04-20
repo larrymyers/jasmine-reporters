@@ -31,19 +31,16 @@
             "green": 32
         };
 
-    exportObject.TerminalReporter = function(params) {
+    exportObject.TerminalReporter = function(options) {
         var self = this;
-        params = params || {};
-
-        if (params.verbosity === 0) {
-            self.verbosity = 0;
-        } else {
-            self.verbosity = params.verbosity || DEFAULT_VERBOSITY;
-        }
-        self.color = params.color;
-
         self.started = false;
         self.finished = false;
+
+        // sanitize arguments
+        options = options || {};
+        self.verbosity = typeof options.verbosity === "number" ? options.verbosity : DEFAULT_VERBOSITY;
+        self.color = options.color;
+
         var indent_string = '  ',
             startTime,
             suites = [],
