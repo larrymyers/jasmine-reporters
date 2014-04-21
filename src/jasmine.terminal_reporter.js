@@ -169,11 +169,12 @@
                 dur = elapsed(startTime, now),
                 total = totalSpecsDefined || totalSpecsExecuted,
                 disabled = total - totalSpecsExecuted,
-                skipped = totalSpecsSkipped + disabled,
+                skipped = totalSpecsSkipped,
                 spec_str = total + (total === 1 ? " spec, " : " specs, "),
                 fail_str = totalSpecsFailed + (totalSpecsFailed === 1 ? " failure, " : " failures, "),
-                skip_str = skipped + " skipped in ",
-                summary_str = spec_str + fail_str + skip_str + dur + "s.",
+                skip_str = skipped + " skipped, ",
+                disabled_str = disabled + " disabled in ",
+                summary_str = spec_str + fail_str + skip_str + disabled_str + dur + "s.",
                 result_str = (totalSpecsFailed && "FAILURE: " || "SUCCESS: ") + summary_str,
                 result_color = totalSpecsFailed && "red+bold" || "green+bold";
 
