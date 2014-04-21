@@ -12,6 +12,14 @@
     function isSkipped(obj) { return obj.status === "pending"; }
     function pad(n) { return n < 10 ? '0'+n : n; }
     function padThree(n) { return n < 10 ? '00'+n : n < 100 ? '0'+n : n; }
+    function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                dupe[prop] = obj[prop];
+            }
+        }
+        return dupe;
+    }
     function ISODateString(d) {
         return d.getUTCFullYear() + '-' +
             pad(d.getUTCMonth()+1) + '-' +
@@ -42,6 +50,16 @@
             totalSpecsFailed = 0,
             totalSpecsDefined;
 
+        var __suites = {}, __specs = {};
+        function getSuite(suite) {
+            __suites[suite.id] = extend(__suites[suite.id] || {}, suite);
+            return __suites[suite.id];
+        }
+        function getSpec(spec) {
+            __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
+            return __specs[spec.id];
+        }
+
         self.jasmineStarted = function(summary) {
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             exportObject.startTime = new Date();
@@ -49,6 +67,7 @@
             tclog("progressStart 'Running Jasmine Tests'");
         };
         self.suiteStarted = function(suite) {
+            suite = getSuite(suite);
             suite._parent = currentSuite;
             currentSuite = suite;
             tclog("testSuiteStarted", {
@@ -56,12 +75,14 @@
             });
         };
         self.specStarted = function(spec) {
+            spec = getSpec(spec);
             tclog("testStarted", {
                 name: spec.description,
                 captureStandardOutput: 'true'
             });
         };
         self.specDone = function(spec) {
+            spec = getSpec(spec);
             if (isSkipped(spec)) {
                 tclog("testIgnored", {
                     name: spec.description
@@ -82,6 +103,7 @@
             });
         };
         self.suiteDone = function(suite) {
+            suite = getSuite(suite);
             // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
                 self.suiteStarted(suite);

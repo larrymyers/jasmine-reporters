@@ -11,6 +11,14 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                dupe[prop] = obj[prop];
+            }
+        }
+        return dupe;
+    }
 
     /**
      * Basic reporter that outputs spec results to the terminal.
@@ -52,12 +60,23 @@
             totalSpecsFailed = 0,
             totalSpecsDefined;
 
+        var __suites = {}, __specs = {};
+        function getSuite(suite) {
+            __suites[suite.id] = extend(__suites[suite.id] || {}, suite);
+            return __suites[suite.id];
+        }
+        function getSpec(spec) {
+            __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
+            return __specs[spec.id];
+        }
+
         self.jasmineStarted = function(summary) {
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             startTime = exportObject.startTime = new Date();
             self.started = true;
         };
         self.suiteStarted = function(suite) {
+            suite = getSuite(suite);
             suite._specs = 0;
             suite._nestedSpecs = 0;
             suite._failures = 0;
@@ -72,6 +91,7 @@
             }
         };
         self.specStarted = function(spec) {
+            spec = getSpec(spec);
             spec._suite = currentSuite;
             spec._depth = currentSuite._depth+1;
             currentSuite._specs++;
@@ -80,6 +100,7 @@
             }
         };
         self.specDone = function(spec) {
+            spec = getSpec(spec);
             var failed = false,
                 skipped = false,
                 color = 'green',
@@ -119,6 +140,7 @@
             }
         };
         self.suiteDone = function(suite) {
+            suite = getSuite(suite);
             // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
                 self.suiteStarted(suite);

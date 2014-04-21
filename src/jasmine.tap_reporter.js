@@ -12,6 +12,14 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                dupe[prop] = obj[prop];
+            }
+        }
+        return dupe;
+    }
 
     /**
      * TAP (http://en.wikipedia.org/wiki/Test_Anything_Protocol) reporter.
@@ -34,19 +42,32 @@
             totalSpecsDefined,
             currentSuite = null;
 
+        var __suites = {}, __specs = {};
+        function getSuite(suite) {
+            __suites[suite.id] = extend(__suites[suite.id] || {}, suite);
+            return __suites[suite.id];
+        }
+        function getSpec(spec) {
+            __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
+            return __specs[spec.id];
+        }
+
         self.jasmineStarted = function(summary) {
             self.started = true;
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             startTime = exportObject.startTime = new Date();
         };
         self.suiteStarted = function(suite) {
+            suite = getSuite(suite);
             currentSuite = suite;
         };
         self.specStarted = function(spec) {
+            spec = getSpec(spec);
             totalSpecsExecuted++;
             spec._suite = currentSuite;
         };
         self.specDone = function(spec) {
+            spec = getSpec(spec);
             var resultStr = 'ok ' + totalSpecsExecuted + ' - ' + spec._suite.description + ' : ' + spec.description;
             var failedStr = '';
             if (isFailed(spec)) {
@@ -67,6 +88,9 @@
                 resultStr += ' # SKIP disabled by xit or similar';
             }
             log(resultStr);
+        };
+        self.suiteDone = function(suite) {
+            suite = getSuite(suite);
         };
         self.jasmineDone = function() {
             endTime = new Date();
