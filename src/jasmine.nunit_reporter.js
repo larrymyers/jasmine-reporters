@@ -44,6 +44,10 @@
      * Also fixed a couple minor bugs (ie month being reported incorrectly) and
      * added a few options to control how / where the file is generated.
      *
+     * Usage:
+     *
+     * jasmine.getEnv().addReporter(new jasmineReporters.NUnitXmlReporter(options);
+     *
      * @param {object} [options]
      * @param {string} [options.savePath] directory to save the files (default: '')
      * @param {string} [options.filename] name of xml output file (default: 'nunitresults.xml')

@@ -38,25 +38,26 @@
      * single XML file, or an XML file for each top-level `describe`, or an
      * XML file for each `describe` regardless of nesting.
      *
-     * Accepts the following options:
+     * Usage:
      *
-     * @param {string} savePath directory to save the files (default: '')
-     * @param {boolean} consolidateAll whether to save all test results in a
-     *                  single file (default: true)
-     *                  NOTE: if true, {filePrefix} is treated as the full
-     *                    filename (excluding extension)
-     * @param {boolean} consolidate whether to save nested describes within the
-     *                  same file as their parent (default: true)
-     *                  NOTE: true does nothing if consolidateAll is also true.
-     *                  NOTE: false also sets consolidateAll to false.
-     * @param {boolean} useDotNotation whether to separate suite names with
-     *                  dots instead of spaces, ie "Class.init" not "Class init"
-     *                  (default: true)
-     * @param {string} filePrefix is the string value that is prepended to the
-     *                  xml output file (default: junitresults-)
-     *                  NOTE: if consolidateAll is true, the default is simply
-     *                    "junitresults" and this becomes the actual filename,
-     *                    ie "junitresults.xml"
+     * jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter(options);
+     *
+     * @param {object} [options]
+     * @param {string} [savePath] directory to save the files (default: '')
+     * @param {boolean} [consolidateAll] whether to save all test results in a
+     *   single file (default: true)
+     *   NOTE: if true, {filePrefix} is treated as the full filename (excluding
+     *     extension)
+     * @param {boolean} [consolidate] whether to save nested describes within the
+     *   same file as their parent (default: true)
+     *   NOTE: true does nothing if consolidateAll is also true.
+     *   NOTE: false also sets consolidateAll to false.
+     * @param {boolean} [useDotNotation] whether to separate suite names with
+     *   dots instead of spaces, ie "Class.init" not "Class init" (default: true)
+     * @param {string} [filePrefix] is the string value that is prepended to the
+     *   xml output file (default: junitresults-)
+     *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
+     *     this becomes the actual filename, ie "junitresults.xml"
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;

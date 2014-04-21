@@ -18,10 +18,12 @@
      *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter({
-           verbosity: 2,
-           color: true
-       }));
+     * jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter(options);
+     *
+     * @param {object} [options]
+     * @param {number} [options.verbosity] meaningful values are 0 through 3; anything
+     *   greater than 3 is treated as 3 (default: 2)
+     * @param {boolean} [options.color] print in color or not (default: true)
      */
     var DEFAULT_VERBOSITY = 2,
         ATTRIBUTES_TO_ANSI = {

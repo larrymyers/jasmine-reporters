@@ -19,7 +19,7 @@
      *
      * Usage:
      *
-     * jasmine.addReporter(new jasmineReporters.TapReporter());
+     * jasmine.getEnv().addReporter(new jasmineReporters.TapReporter());
      */
     exportObject.TapReporter = function() {
         var self = this;

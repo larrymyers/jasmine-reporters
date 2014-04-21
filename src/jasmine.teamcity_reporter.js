@@ -29,7 +29,7 @@
      *
      * Usage:
      *
-     * jasmine.addReporter(new jasmineReporters.TeamCityReporter());
+     * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter());
      */
     exportObject.TeamCityReporter = function() {
         var self = this;
