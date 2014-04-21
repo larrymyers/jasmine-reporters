@@ -120,7 +120,7 @@
             totalSpecsExecuted++;
 
             if (self.verbosity === 2) {
-                resultText = ' ' + (failed ? 'F' : skipped ? 'S' : '.');
+                resultText = failed ? 'F' : skipped ? 'S' : '.';
             } else if (self.verbosity > 2) {
                 resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : 'Passed');
             }
