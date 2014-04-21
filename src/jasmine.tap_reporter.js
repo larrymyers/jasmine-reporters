@@ -23,8 +23,8 @@
      */
     exportObject.TapReporter = function() {
         var self = this;
-        this.started = false;
-        this.finished = false;
+        self.started = false;
+        self.finished = false;
 
         var startTime,
             endTime,
