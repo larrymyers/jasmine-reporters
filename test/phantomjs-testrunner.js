@@ -125,7 +125,7 @@ function setupWriteFileFunction(page, key, path_separator) {
         window.__phantom_writeFile = function(filename, text) {
             window["%resultsObj%"][filename] = text;
         };
-    }, {resultsObj: key, fs_path_separator: path_separator});
+    }, {resultsObj: key, fs_path_separator: path_separator.replace("\\", "\\\\")});
 }
 
 /**
