@@ -36,13 +36,13 @@
      * Allows the test results to be used in java based CI
      * systems like CruiseControl and Hudson.
      *
-     * @param {string} savePath where to save the files
-     * @param {boolean} consolidate whether to save nested describes within the
+     * @param {string} [savePath] where to save the files
+     * @param {boolean} [consolidate] whether to save nested describes within the
      *                  same file as their parent; default: true
-     * @param {boolean} useDotNotation whether to separate suite names with
+     * @param {boolean} [useDotNotation] whether to separate suite names with
      *                  dots rather than spaces (ie "Class.init" not
      *                  "Class init"); default: true
-     * @param {string} filePrefix is the string value that is prepended to the
+     * @param {string} [filePrefix] is the string value that is prepended to the
      *                  xml output file; default: 'TEST-'
      */
     var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix) {
