@@ -40,6 +40,12 @@
         var seconds = date.getSeconds();
         return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
     }
+    function getQualifiedFilename(path, filename, separator) {
+        if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
+            path += separator;
+        }
+        return path + filename;
+    }
 
 
     /**
@@ -152,52 +158,43 @@
         };
 
         self.writeFile = function(text) {
+            var errors = [];
             var path = self.savePath;
             var filename = self.filename;
-            function getQualifiedFilename(separator) {
-                if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
-                    path += separator;
-                }
-                return path + filename;
+
+            function phantomWrite(path, filename, text) {
+                // turn filename into a qualified path
+                filename = getQualifiedFilename(path, filename, window.fs_path_separator);
+                // write via a method injected by phantomjs-testrunner.js
+                __phantom_writeFile(filename, text);
             }
 
-            // Rhino
-            try {
-                // turn filename into a qualified path
-                if (path) {
-                    filename = getQualifiedFilename(java.lang.System.getProperty("file.separator"));
-                    // create parent dir and ancestors if necessary
-                    var file = java.io.File(filename);
-                    var parentDir = file.getParentFile();
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
-                    }
-                }
-                // finally write the file
-                var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
-                out.write(text);
-                out.close();
-                return;
-            } catch (e) {}
-            // PhantomJS, via a method injected by phantomjs-testrunner.js
-            try {
-                // turn filename into a qualified path
-                filename = getQualifiedFilename(window.fs_path_separator);
-                __phantom_writeFile(filename, text);
-                return;
-            } catch (f) {}
-            // Node.js
-            try {
+            function nodeWrite(path, filename, text) {
                 var fs = require("fs");
                 var nodejs_path = require("path");
-                // make sure the path exists
-                require("mkdirp").sync(path);
-
-                var xmlfile = fs.openSync(nodejs_path.join(path, filename), "w");
+                require("mkdirp").sync(path); // make sure the path exists
+                var filepath = nodejs_path.join(path, filename);
+                var xmlfile = fs.openSync(filepath, "w");
                 fs.writeSync(xmlfile, text, 0);
                 fs.closeSync(xmlfile);
                 return;
-            } catch (g) {}
+            }
+            // Attempt writing with each possible environment.
+            // Track errors in case no write succeeds
+            try {
+                phantomWrite(path, filename, text);
+                return;
+            } catch (e) { errors.push('  PhantomJs attempt: ' + e.message); }
+            try {
+                nodeWrite(path, filename, text);
+                return;
+            } catch (f) { errors.push('  NodeJS attempt: ' + f.message); }
+
+            // If made it here, no write succeeded.  Let user know.
+            console.log("Warning: writing junit report failed for '" + path + "', '" +
+                filename + "'. Reasons:\n" +
+                errors.join("\n")
+            );
         };
 
         /******** Helper functions with closure access for simplicity ********/
