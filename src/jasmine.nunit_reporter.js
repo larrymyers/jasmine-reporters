@@ -115,6 +115,7 @@
         },
 
         writeFile: function(text) {
+            var errors = [];
             var path = this.savePath;
             var filename = this.filename;
             function getQualifiedFilename(separator) {
@@ -124,10 +125,9 @@
                 return path + filename;
             }
 
-            // Rhino
-            try {
-                // turn filename into a qualified path
+            function rhinoWrite(path, filename, text) {
                 if (path) {
+                    // turn filename into a qualified path
                     filename = getQualifiedFilename(java.lang.System.getProperty("file.separator"));
                     // create parent dir and ancestors if necessary
                     var file = java.io.File(filename);
@@ -140,24 +140,52 @@
                 var out = new java.io.BufferedWriter(new java.io.FileWriter(filename));
                 out.write(text);
                 out.close();
-                return;
-            } catch (e) {}
-            // PhantomJS, via a method injected by phantomjs-testrunner.js
-            try {
+            }
+
+            function phantomWrite(path, filename, text) {
                 // turn filename into a qualified path
                 filename = getQualifiedFilename(window.fs_path_separator);
+                // write via a method injected by phantomjs-testrunner.js
                 __phantom_writeFile(filename, text);
-                return;
-            } catch (f) {}
-            // Node.js
-            try {
+            }
+
+            function nodeWrite(path, filename, text) {
                 var fs = require("fs");
                 var nodejs_path = require("path");
-                var fd = fs.openSync(nodejs_path.join(path, filename), "w");
+                var filepath = nodejs_path.join(path, filename);
+                var fd = fs.openSync(filepath, "w");
                 fs.writeSync(fd, text, 0);
                 fs.closeSync(fd);
+            }
+
+            // Attempt writing with each possible environment.
+            // Track errors in case no write succeeds
+            try {
+                rhinoWrite(path, filename, text);
                 return;
-            } catch (g) {}
+            } catch (e) {
+                errors.push('  Rhino attempt: ' + e.message);
+            }
+
+            try {
+                phantomWrite(path, filename, text);
+                return;
+            } catch (f) {
+                errors.push('  PhantomJs attempt: ' + f.message);
+            }
+
+            try {
+                nodeWrite(path, filename, text);
+                return;
+            } catch (g) {
+                errors.push('  NodeJS attempt: ' + g.message);
+            }
+
+            // If made it here, no write succeeded.  Let user know.
+            console.log("Warning: writing junit report failed for '" + path + "', '" +
+                filename + "'. Reasons:\n" +
+                errors.join("\n")
+            );
         }
     };
 

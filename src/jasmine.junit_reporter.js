@@ -168,7 +168,7 @@
                 return path + filename;
             }
 
-            function rhinoWrite (path, filename, text) {
+            function rhinoWrite(path, filename, text) {
                 if (path) {
                     // turn filename into a qualified path
                     filename = getQualifiedFilename(java.lang.System.getProperty("file.separator"));
@@ -185,18 +185,17 @@
                 out.close();
             }
 
-            function phantomWrite (path, filename, text) {
+            function phantomWrite(path, filename, text) {
                 // turn filename into a qualified path
                 filename = getQualifiedFilename(window.fs_path_separator);
-
-                // PhantomJS, via a method injected by phantomjs-testrunner.js
+                // write via a method injected by phantomjs-testrunner.js
                 __phantom_writeFile(filename, text);
             }
 
-            function nodeWrite (path, filename, text) {
+            function nodeWrite(path, filename, text) {
                 var fs = require("fs");
                 var nodejs_path = require("path");
-                var filepath = nodejs_path.join(path, filename)
+                var filepath = nodejs_path.join(path, filename);
                 var fd = fs.openSync(filepath, "w");
                 fs.writeSync(fd, text, 0);
                 fs.closeSync(fd);
