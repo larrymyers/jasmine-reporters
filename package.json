@@ -9,7 +9,6 @@
     "type": "git",
     "url": "git://github.com/larrymyers/jasmine-reporters.git"
   },
-  "main": "./src/load_reporters.js",
   "dependencies": {
     "mkdirp": "~0.3.5"
   },
