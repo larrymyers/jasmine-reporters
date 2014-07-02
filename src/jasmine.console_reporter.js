@@ -61,7 +61,9 @@
             if (!this.hasGroupedConsole()) {
                 var resultText = "Failed.";
 
-                if (spec.results().passed()) {
+                if (spec.results().skipped ) {
+                    resultText = 'Skipped.';
+                } else if (spec.results().passed()) {
                     this.passed_specs++;
                     resultText = "Passed.";
                 }
