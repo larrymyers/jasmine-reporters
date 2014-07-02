@@ -1,91 +1,135 @@
-/* globals jasmine, describe, beforeEach, afterEach, it, expect, spyOn */
+/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect, spyOn */
 (function(){
-    var env, suite, subSuite, subSubSuite, siblingSuite, reporter, runner;
-    function fakeSpec(suite, name) {
-        var s = new jasmine.Spec(env, suite, name);
-        suite.add(s);
+    var env, suite, subSuite, subSubSuite, siblingSuite,
+        reporter, writeCalls, suiteId=0, specId=0;
+    function fakeSpec(ste, name) {
+        var s = new jasmine.Spec({
+            env: env,
+            id: specId++,
+            description: name
+        });
+        ste.addChild(s);
         return s;
     }
     function fakeSuite(name, parentSuite) {
-        var s = new jasmine.Suite(env, name, null, parentSuite || null);
+        var s = new jasmine.Suite({
+            env: env,
+            id: suiteId++,
+            description: name,
+            parentSuite: parentSuite || jasmine.createSpy("pretend top suite") // I'm sure there's a good reason Jasmine does this...
+        });
         if (parentSuite) {
-            parentSuite.add(s);
+            parentSuite.addChild(s);
         }
-        runner.add(s);
+        else {
+
+            env._suites = env._suites || [];
+            env._suites.push(s);
+        }
         return s;
     }
 
+    function setupReporterWithOptions(options) {
+        reporter = new jasmineReporters.NUnitXmlReporter(options);
+        reporter.writeFile = jasmine.createSpy();
+    }
+
     // make sure reporter is set before calling this
-    function triggerSuiteEvents(suites) {
-        for (var i=0; i<suites.length; i++) {
-            var s = suites[i];
-            for (var j=0; j<s.specs().length; j++) {
-                reporter.reportSpecStarting(s.specs()[j]);
-                reporter.reportSpecResults(s.specs()[j]);
-            }
-            reporter.reportSuiteResults(s);
+    function triggerRunnerEvents() {
+        reporter.jasmineStarted();
+        for (var i=0; i<env._suites.length; i++) {
+            var s = env._suites[i];
+            triggerSuiteEvents(s);
         }
+        reporter.jasmineDone();
+
+        // pre-parse some data to be used by various specs
+        writeCalls = reporter.writeFile.calls.all();
+        for (i=0; i<writeCalls.length; i++) {
+            writeCalls[i].output = writeCalls[i].args[0];
+            writeCalls[i].xmldoc = xmlDocumentFromString(writeCalls[i].output);
+        }
+    }
+    function triggerSuiteEvents(ste) {
+        reporter.suiteStarted(ste.result);
+        var thing;
+        for (var i=0; i<ste.children.length; i++) {
+            thing = ste.children[i];
+            if (thing instanceof jasmine.Suite) {
+                triggerSuiteEvents(thing);
+            } else {
+                reporter.specStarted(thing.result);
+                reporter.specDone(thing.result);
+            }
+        }
+        reporter.suiteDone(ste.result);
+    }
+
+    function xmlDocumentFromString(str) {
+        return (new DOMParser()).parseFromString(str, "text/xml");
     }
 
     describe("NUnitXmlReporter", function(){
 
         beforeEach(function(){
             env = new jasmine.Env();
-            env.updateInterval = 0;
-            runner = new jasmine.Runner(env);
-
             suite = fakeSuite("ParentSuite");
             subSuite = fakeSuite("SubSuite", suite);
             subSubSuite = fakeSuite("SubSubSuite", subSuite);
             siblingSuite = fakeSuite("SiblingSuite With Invalid Chars & < > \" ' | : \\ /");
             var spec = fakeSpec(suite, "should be a dummy with invalid characters: & < >");
-            var failedSpec = fakeSpec(suite, "should be failed");
-            failedSpec.fail(Error("I failed"));
+            var failedSpec = fakeSpec(subSubSuite, "should be failed");
+            failedSpec.result.status = "failed";
+            failedSpec.result.failedExpectations.push({
+                passed: false,
+                message: "Expected true to be false.",
+                expected: false,
+                actual: true,
+                matcherName: 'toBe',
+                stack: "Stack trace! Stack trackes are cool & can have \"special\" characters <3\n\n Neat: yes."
+            });
             var subSpec = fakeSpec(subSuite, "should be one level down");
             var subSubSpec1 = fakeSpec(subSubSuite, "(1) should be two levels down");
             var subSubSpec2 = fakeSpec(subSubSuite, "(2) should be two levels down");
             var subSubSpec3 = fakeSpec(subSubSuite, "(3) should be two levels down");
             var siblingSpec = fakeSpec(siblingSuite, "should be a sibling of Parent");
-            reporter = new jasmine.NUnitXmlReporter({reportName: "<Bad Character Report>"});
+            setupReporterWithOptions({reportName: "<Bad Character Report>"});
         });
 
         describe("constructor", function(){
+            beforeEach(function() {
+                setupReporterWithOptions();
+            });
             it("should default path to an empty string", function(){
-                reporter = new jasmine.NUnitXmlReporter();
-                expect(reporter.savePath).toBe("");
+                expect(reporter.savePath).toBe('');
             });
             it("should allow a custom path to be provided", function() {
-                reporter = new jasmine.NUnitXmlReporter({savePath:"/tmp"});
-                expect(reporter.savePath).toBe("/tmp");
+                setupReporterWithOptions({savePath:'/tmp'});
+                expect(reporter.savePath).toBe('/tmp');
             });
-            it("should default filename to 'nunit-results.xml'", function(){
-                reporter = new jasmine.NUnitXmlReporter();
-                expect(reporter.filename).toBe("nunit-results.xml");
+            it("should default filename to 'nunitresults.xml'", function(){
+                expect(reporter.filename).toBe("nunitresults.xml");
             });
             it("should allow a custom filename to be provided", function() {
-                reporter = new jasmine.NUnitXmlReporter({filename:"results.xml"});
-                expect(reporter.filename).toBe("results.xml");
+                setupReporterWithOptions({filename:'results.xml'});
+                expect(reporter.filename).toBe('results.xml');
             });
             it("should default reportName to 'Jasmine Results'", function(){
-                reporter = new jasmine.NUnitXmlReporter();
                 expect(reporter.reportName).toBe("Jasmine Results");
             });
             it("should allow a custom reportName to be provided", function() {
-                reporter = new jasmine.NUnitXmlReporter({reportName:"Test Results"});
+                setupReporterWithOptions({reportName:"Test Results"});
                 expect(reporter.reportName).toBe("Test Results");
             });
         });
 
-        describe("reportRunnerResults", function(){
+        describe("generated xml output", function(){
             var output, xmldoc;
 
             beforeEach(function(){
-                spyOn(reporter, "writeFile");
-                reporter.reportRunnerStarting(runner);
-                triggerSuiteEvents([suite, siblingSuite, subSuite, subSubSuite]);
-                reporter.reportRunnerResults(runner);
-                output = reporter.writeFile.mostRecentCall.args[0];
-                xmldoc = (new DOMParser()).parseFromString(output, "text/xml");
+                triggerRunnerEvents();
+                output = writeCalls[0].output;
+                xmldoc = writeCalls[0].xmldoc;
             });
             it("should escape invalid xml chars from report name", function() {
                 expect(output).toContain('name="&amp;lt;Bad Character Report&amp;gt;"');
@@ -104,12 +148,9 @@
                     specs = rootNode.getElementsByTagName("test-case");
                 });
                 it("should report the date / time that the tests were run", function() {
-                    function twoDigits(number) { return number >= 10 ? number : ("0" + number); }
                     var now = new Date();
-                    var date = now.getFullYear() + "-" + twoDigits(now.getMonth()+1) + "-" + twoDigits(now.getDate());
-                    var time = now.getHours() + ":" + twoDigits(now.getMinutes()) + ":" + twoDigits(now.getSeconds());
-                    expect(rootNode.getAttribute("date")).toBe(date);
-                    expect(rootNode.getAttribute("time")).toBe(time); // this could fail extremely rarely
+                    expect(rootNode.getAttribute("date")).toMatch(/\d{4}-\d{2}-\d{2}/);
+                    expect(rootNode.getAttribute("time")).toMatch(/\d{2}:\d{2}:\d{2}/);
                 });
                 it("should report the appropriate number of suites", function() {
                     expect(suites.length).toBe(4);
@@ -139,7 +180,7 @@
                 });
                 describe("passed specs", function() {
                     it("should indicate that the test case was successful", function() {
-                        expect(specs[0].getAttribute("success")).toBe("true");
+                        expect(specs[1].getAttribute("success")).toBe("true");
                     });
                 });
                 describe("failed specs", function() {
@@ -147,14 +188,23 @@
                     beforeEach(function() {
                         failedSpec = rootNode.getElementsByTagName("message")[0].parentNode.parentNode;
                     });
-                    it("should report the number of failed specs on the root node", function() {
-                        expect(rootNode.getAttribute("failures")).toBe("1");
-                    });
                     it("should indicate that the test case was not successful", function() {
                         expect(failedSpec.getAttribute("success")).toBe("false");
                     });
                     it("should include the error for failed specs", function() {
-                        expect(failedSpec.getElementsByTagName("message")[0].textContent).toContain("I failed");
+                        expect(failedSpec.getElementsByTagName("message")[0].textContent).toBe('Expected true to be false.');
+                    });
+                    it("should include the stack trace for failed specs", function() {
+                        expect(failedSpec.getElementsByTagName("stack-trace")[0].textContent).toContain('cool & can have "special" characters <3');
+                    });
+                    it("should report the failure on ancestor suite nodes", function() {
+                        var parentSuite = failedSpec.parentNode.parentNode;
+                        var grandparentSuite = parentSuite.parentNode.parentNode;
+                        expect(parentSuite.getAttribute("success")).toBe("false");
+                        expect(grandparentSuite.getAttribute("success")).toBe("false");
+                    });
+                    it("should report the number of failed specs on the root node", function() {
+                        expect(rootNode.getAttribute("failures")).toBe("1");
                     });
                 });
             });
