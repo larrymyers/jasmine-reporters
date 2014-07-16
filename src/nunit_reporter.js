@@ -191,7 +191,7 @@
             } catch (f) { errors.push('  NodeJS attempt: ' + f.message); }
 
             // If made it here, no write succeeded.  Let user know.
-            console.log("Warning: writing junit report failed for '" + path + "', '" +
+            console.log("Warning: writing nunit report failed for '" + path + "', '" +
                 filename + "'. Reasons:\n" +
                 errors.join("\n")
             );
