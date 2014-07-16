@@ -195,9 +195,9 @@
             return new Array(level).join(indent_string) + string;
         }
         function log(str) {
-            var console = global.console;
-            if (console && console.log) {
-                console.log(str);
+            var con = global.console || console;
+            if (con && con.log) {
+                con.log(str);
             }
         }
         function inColor(string, color) {
