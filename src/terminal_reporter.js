@@ -19,6 +19,13 @@
         }
         return dupe;
     }
+    function log(str) {
+        var con = global.console || console;
+        if (con && con.log) {
+            con.log(str);
+        }
+    }
+
 
     /**
      * Basic reporter that outputs spec results to the terminal.
@@ -185,7 +192,7 @@
             if (self.verbosity > 0) {
                 log(inColor(result_str, result_color));
             }
-            //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+            //log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
@@ -193,12 +200,6 @@
         };
         function indentWithLevel(level, string) {
             return new Array(level).join(indent_string) + string;
-        }
-        function log(str) {
-            var con = global.console || console;
-            if (con && con.log) {
-                con.log(str);
-            }
         }
         function inColor(string, color) {
             var color_attributes = color && color.split("+"),

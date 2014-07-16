@@ -20,6 +20,13 @@
         }
         return dupe;
     }
+    function log(str) {
+        var con = global.console || console;
+        if (con && con.log) {
+            con.log(str);
+        }
+    }
+
 
     /**
      * TAP (http://en.wikipedia.org/wiki/Test_Anything_Protocol) reporter.
@@ -116,11 +123,5 @@
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = endTime;
         };
-        function log(str) {
-            var con = global.console || console;
-            if (con && con.log) {
-                con.log(str);
-            }
-        }
     };
 })(this);

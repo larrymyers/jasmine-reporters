@@ -46,6 +46,12 @@
         }
         return path + filename;
     }
+    function log(str) {
+        var con = global.console || console;
+        if (con && con.log) {
+            con.log(str);
+        }
+    }
 
 
     /**
@@ -150,7 +156,7 @@
         };
         self.jasmineDone = function() {
             self.writeFile(resultsAsXml());
-            //console.log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+            //log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
@@ -191,7 +197,7 @@
             } catch (f) { errors.push('  NodeJS attempt: ' + f.message); }
 
             // If made it here, no write succeeded.  Let user know.
-            console.log("Warning: writing nunit report failed for '" + path + "', '" +
+            log("Warning: writing nunit report failed for '" + path + "', '" +
                 filename + "'. Reasons:\n" +
                 errors.join("\n")
             );

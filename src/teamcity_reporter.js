@@ -31,6 +31,13 @@
             padThree(d.getUTCMilliseconds()) +
             'Z';
     }
+    function log(str) {
+        var con = global.console || console;
+        if (con && con.log) {
+            con.log(str);
+        }
+    }
+
 
     /**
      * Basic reporter that outputs spec results for the TeamCity build system
@@ -123,12 +130,6 @@
         };
     };
 
-    function log(str) {
-        var con = global.console || console;
-        if (con && con.log) {
-            con.log(str);
-        }
-    }
     // shorthand for logging TeamCity messages
     function tclog(message, attrs) {
         var str = "##teamcity[" + message;
