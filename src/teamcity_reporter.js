@@ -28,8 +28,7 @@
             pad(d.getUTCMinutes()) + ':' +
             pad(d.getUTCSeconds()) + '.' +
             // TeamCity wants ss.SSS
-            padThree(d.getUTCMilliseconds()) +
-            'Z';
+            padThree(d.getUTCMilliseconds());
     }
     function log(str) {
         var con = global.console || console;
