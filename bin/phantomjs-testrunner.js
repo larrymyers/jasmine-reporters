@@ -167,12 +167,18 @@ function processPage(status, page, resultsKey) {
                 }
                 // otherwise, scrape the DOM for the HtmlReporter "finished in ..." output
                 var durElem = document.querySelector(".html-reporter .duration");
+                if (!durElem) {
+                    durElem = document.querySelector(".jasmine_html-reporter .duration");
+                }
                 return durElem && durElem.textContent && durElem.textContent.toLowerCase().indexOf("finished in") === 0;
             });
         };
         var getResultsFromHtmlRunner = function() {
             return page.evaluate(function(){
                 var resultElem = document.querySelector(".html-reporter .alert .bar");
+                if (!resultElem) {
+                    resultElem = document.querySelector(".jasmine_html-reporter .alert .bar");
+                }
                 return resultElem && resultElem.textContent &&
                     resultElem.textContent.match(/(\d+) spec.* (\d+) failure.*/) ||
                    ["Unable to determine success or failure."];
