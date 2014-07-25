@@ -99,5 +99,6 @@ And inside your protractor.conf:
         // this until inside the onPrepare function.
         require('jasmine-reporters');
         jasmine.getEnv().addReporter(
-            new jasmine.JUnitXmlReporter('xmloutput', true, true));
+            new jasmine.JUnitXmlReporter('xmloutput', true, true)
+        );
     }
