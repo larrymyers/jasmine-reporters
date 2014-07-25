@@ -90,3 +90,14 @@ If you are trying to use jasmine-reporters with Protractor, keep in mind that Pr
 Jasmine 1.x. As such, you need to use a 1.x version of jasmine-reporters.
 
     npm install jasmine-reporters@~1.0.0
+
+And inside your protractor.conf:
+
+    onPrepare: function() {
+        // The require statement must be down here, since jasmine-reporters@1.0
+        // needs jasmine to be in the global and protractor does not guarantee
+        // this until inside the onPrepare function.
+        require('jasmine-reporters');
+        jasmine.getEnv().addReporter(
+            new jasmine.JUnitXmlReporter('xmloutput', true, true));
+    }
