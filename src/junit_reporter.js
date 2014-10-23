@@ -13,6 +13,7 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function isDisabled(obj) { return obj.status === "disabled"; }
     function pad(n) { return n < 10 ? '0'+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
@@ -118,6 +119,7 @@
             suite._suites = [];
             suite._failures = 0;
             suite._skipped = 0;
+            suite._disabled = 0;
             suite._parent = currentSuite;
             if (!currentSuite) {
                 suites.push(suite);
@@ -136,6 +138,7 @@
             spec = getSpec(spec);
             spec._endTime = new Date();
             if (isSkipped(spec)) { spec._suite._skipped++; }
+            if (isDisabled(spec)) { spec._suite._disabled++; }
             if (isFailed(spec)) { spec._suite._failures++; }
             totalSpecsExecuted++;
         };
@@ -144,7 +147,6 @@
             // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
                 self.suiteStarted(suite);
-                suite._disabled = true;
             }
             suite._endTime = new Date();
             currentSuite = suite._parent;
@@ -158,7 +160,7 @@
             if (output) {
                 wrapOutputAndWriteFile(self.filePrefix, output);
             }
-            //log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+            //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
@@ -260,6 +262,7 @@
             xml += ' errors="0"';
             xml += ' tests="' + suite._specs.length + '"';
             xml += ' skipped="' + suite._skipped + '"';
+            xml += ' disabled="' + suite._disabled + '"';
             // Because of JUnit's flat structure, only include directly failed tests (not failures for nested suites)
             xml += ' failures="' + suite._failures + '"';
             xml += '>';
@@ -276,7 +279,7 @@
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
             xml += '>';
 
-            if (isSkipped(spec)) {
+            if (isSkipped(spec) || isDisabled(spec)) {
                 xml += '<skipped />';
             } else if (isFailed(spec)) {
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {

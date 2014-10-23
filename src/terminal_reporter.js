@@ -11,6 +11,7 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function isDisabled(obj) { return obj.status === "disabled"; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -45,7 +46,8 @@
             "off": 0,
             "bold": 1,
             "red": 31,
-            "green": 32
+            "green": 32,
+            "yellow": 33
         };
 
     exportObject.TerminalReporter = function(options) {
@@ -64,6 +66,7 @@
             currentSuite = null,
             totalSpecsExecuted = 0,
             totalSpecsSkipped = 0,
+            totalSpecsDisabled = 0,
             totalSpecsFailed = 0,
             totalSpecsDefined;
 
@@ -90,6 +93,8 @@
             suite._nestedFailures = 0;
             suite._skipped = 0;
             suite._nestedSkipped = 0;
+            suite._disabled = 0;
+            suite._nestedDisabled = 0;
             suite._depth = currentSuite ? currentSuite._depth+1 : 1;
             suite._parent = currentSuite;
             currentSuite = suite;
@@ -110,6 +115,7 @@
             spec = getSpec(spec);
             var failed = false,
                 skipped = false,
+                disabled = false,
                 color = 'green',
                 resultText = '';
             if (isSkipped(spec)) {
@@ -124,12 +130,18 @@
                 spec._suite._failures++;
                 totalSpecsFailed++;
             }
+            if (isDisabled(spec)) {
+                disabled = true;
+                color = 'yellow';
+                spec._suite._disabled++;
+                totalSpecsDisabled++;
+            }
             totalSpecsExecuted++;
 
             if (self.verbosity === 2) {
-                resultText = failed ? 'F' : skipped ? 'S' : '.';
+                resultText = failed ? 'F' : skipped ? 'S' : disabled ? 'D' : '.';
             } else if (self.verbosity > 2) {
-                resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : 'Passed');
+                resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : disabled ? 'Disabled' : 'Passed');
             }
             log(inColor(resultText, color));
 
@@ -151,12 +163,13 @@
             // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
                 self.suiteStarted(suite);
-                suite._disabled = true;
             }
             if (suite._parent) {
                 suite._parent._specs += suite._specs + suite._nestedSpecs;
                 suite._parent._failures += suite._failures + suite._nestedFailures;
                 suite._parent._skipped += suite._skipped + suite._nestedSkipped;
+                suite._parent._disabled += suite._disabled + suite._nestedDisabled;
+
             }
             currentSuite = suite._parent;
             if (self.verbosity < 3) {
@@ -166,16 +179,17 @@
             var total = suite._specs + suite._nestedSpecs,
                 failed = suite._failures + suite._nestedFailures,
                 skipped = suite._skipped + suite._nestedSkipped,
+                disabled = suite._disabled + suite._nestedDisabled,
                 passed = total - failed - skipped,
                 color = failed ? 'red+bold' : 'green+bold',
-                str = passed + ' of ' + total + ' passed (' + skipped + ' skipped)';
+                str = passed + ' of ' + total + ' passed (' + skipped + ' skipped, ' + disabled + ' disabled)';
             log(indentWithLevel(suite._depth, inColor(str+'.', color)));
         };
         self.jasmineDone = function() {
             var now = new Date(),
                 dur = elapsed(startTime, now),
                 total = totalSpecsDefined || totalSpecsExecuted,
-                disabled = total - totalSpecsExecuted,
+                disabled = total - totalSpecsExecuted + totalSpecsDisabled,
                 skipped = totalSpecsSkipped,
                 spec_str = total + (total === 1 ? " spec, " : " specs, "),
                 fail_str = totalSpecsFailed + (totalSpecsFailed === 1 ? " failure, " : " failures, "),
@@ -192,7 +206,7 @@
             if (self.verbosity > 0) {
                 log(inColor(result_str, result_color));
             }
-            //log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+            //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing

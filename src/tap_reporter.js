@@ -12,6 +12,7 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function isDisabled(obj) { return obj.status === "disabled"; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -45,6 +46,7 @@
             endTime,
             totalSpecsExecuted = 0,
             totalSpecsSkipped = 0,
+            totalSpecsDisabled = 0,
             totalSpecsFailed = 0,
             totalSpecsDefined,
             currentSuite = null;
@@ -94,6 +96,10 @@
                 totalSpecsSkipped++;
                 resultStr += ' # SKIP disabled by xit or similar';
             }
+            if (isDisabled(spec)) {
+                totalSpecsDisabled++;
+                resultStr += ' # SKIP disabled by xit, ?spec=xyz or similar'
+            }
             log(resultStr);
         };
         self.suiteDone = function(suite) {
@@ -103,7 +109,7 @@
             endTime = new Date();
             var dur = elapsed(startTime, endTime),
                 totalSpecs = totalSpecsDefined || totalSpecsExecuted,
-                disabledSpecs = totalSpecs - totalSpecsExecuted;
+                disabledSpecs = totalSpecs - totalSpecsExecuted + totalSpecsDisabled;
 
             if (totalSpecsExecuted === 0) {
                 log('1..0 # All tests disabled');

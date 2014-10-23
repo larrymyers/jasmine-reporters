@@ -12,6 +12,7 @@
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function isDisabled(obj) { return obj.status === "disabled"; }
     function pad(n) { return n < 10 ? '0'+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
@@ -87,6 +88,7 @@
             currentSuite = null,
             totalSpecsExecuted = 0,
             totalSpecsSkipped = 0,
+            totalSpecsDisabled = 0,
             totalSpecsFailed = 0,
             totalSpecsDefined;
 
@@ -113,6 +115,7 @@
             suite._failures = 0;
             suite._nestedFailures = 0;
             suite._skipped = 0;
+            suite._disabled = 0;
             suite._parent = currentSuite;
             if (!currentSuite) {
                 suites.push(suite);
@@ -133,6 +136,10 @@
             if (isSkipped(spec)) {
                 spec._suite._skipped++;
                 totalSpecsSkipped++;
+            }
+            if (isDisabled(spec)) {
+                spec._suite._disabled++;
+                totalSpecsDisabled++;
             }
             if (isFailed(spec)) {
                 spec._suite._failures++;
@@ -156,7 +163,7 @@
         };
         self.jasmineDone = function() {
             self.writeFile(resultsAsXml());
-            //log("Specs skipped but not reported (entire suite skipped)", totalSpecsDefined - totalSpecsExecuted);
+            //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
@@ -207,7 +214,7 @@
         function resultsAsXml() {
             var date = new Date(),
                 totalSpecs = totalSpecsDefined || totalSpecsExecuted,
-                disabledSpecs = totalSpecs - totalSpecsExecuted,
+                disabledSpecs = totalSpecs - totalSpecsExecuted + totalSpecsDisabled,
                 skippedSpecs = totalSpecsSkipped + disabledSpecs;
 
             var xml = '<?xml version="1.0" encoding="utf-8" ?>';
@@ -251,7 +258,7 @@
         indent = indent || '';
         var xml = '\n' + indent + '<test-case';
         xml += ' name="' + escapeInvalidXmlChars(spec.description) + '"';
-        xml += ' executed="' + !isSkipped(spec) + '"';
+        xml += ' executed="' + !(isSkipped(spec) || isDisabled(spec)) + '"';
         xml += ' success="' + !isFailed(spec) + '"';
         xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
         xml += '>';

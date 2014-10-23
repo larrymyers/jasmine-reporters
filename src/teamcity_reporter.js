@@ -10,6 +10,7 @@
 
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
+    function isDisabled(obj) { return obj.status === "disabled"; }
     function pad(n) { return n < 10 ? '0'+n : n; }
     function padThree(n) { return n < 10 ? '00'+n : n < 100 ? '0'+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
@@ -53,6 +54,7 @@
         var currentSuite = null,
             totalSpecsExecuted = 0,
             totalSpecsSkipped = 0,
+            totalSpecsDisabled = 0,
             totalSpecsFailed = 0,
             totalSpecsDefined;
 
@@ -89,7 +91,7 @@
         };
         self.specDone = function(spec) {
             spec = getSpec(spec);
-            if (isSkipped(spec)) {
+            if (isSkipped(spec) || isDisabled(spec)) {
                 tclog("testIgnored", {
                     name: spec.description
                 });
@@ -113,7 +115,6 @@
             // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
                 self.suiteStarted(suite);
-                suite._disabled = true;
             }
             tclog("testSuiteFinished", {
                 name: suite.description
