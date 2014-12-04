@@ -3,11 +3,11 @@
   "name": "jasmine-reporters-browser-logging",
   "description": "Reporters for the Jasmine BDD Framework, with Chrome Browser Logging",
   "version": "1.0.1",
-  "homepage": "https://github.com/DrShavargo/jasmine-reporters",
+  "homepage": "https://github.com/DrShavargo/jasmine-reporters-browser-logging",
   "maintainers": "Georges-Antoine assi <georges.antoine.assi@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/DrShavargo/jasmine-reporters.git"
+    "url": "git://github.com/DrShavargo/jasmine-reporters-browser-logging.git"
   },
   "main": "./src/load_reporters.js",
   "dependencies": {
@@ -17,7 +17,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/DrShavargo/jasmine-reporters/master/LICENSE"
+      "url": "https://github.com/DrShavargo/jasmine-reporters-browser-logging/master/LICENSE"
     }
   ]
 }
