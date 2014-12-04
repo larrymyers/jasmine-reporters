@@ -1,8 +1,8 @@
 {
   "author": "Georges-Antoine Assi",
   "name": "jasmine-reporters-browser-logging",
-  "description": "Reporters for the Jasmine BDD Framework, with Chrome Browser Logging",
-  "version": "1.0.1",
+  "description": "Reporters for Jasmine, with browser console logging",
+  "version": "1.1.0",
   "homepage": "https://github.com/DrShavargo/jasmine-reporters-browser-logging",
   "maintainers": "Georges-Antoine assi <georges.antoine.assi@gmail.com>",
   "repository": {

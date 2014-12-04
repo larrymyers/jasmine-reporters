@@ -8,6 +8,9 @@
         return (endTime - startTime)/1000;
     }
 
+    /**
+     * @return {string}
+     */
     function ISODateString(d) {
         function pad(n) { return n < 10 ? '0'+n : n; }
 
