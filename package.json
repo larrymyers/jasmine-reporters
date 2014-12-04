@@ -1,14 +1,15 @@
 {
-  "author": "Larry Myers",
-  "name": "jasmine-reporters",
-  "description": "Reporters for the Jasmine BDD Framework",
-  "version": "2.0.3",
-  "homepage": "https://github.com/larrymyers/jasmine-reporters",
-  "maintainers": "Ben Loveridge <bloveridge@gmail.com>",
+  "author": "Georges-Antoine Assi",
+  "name": "jasmine-reporters-browser-logging",
+  "description": "Reporters for Jasmine, with browser console logging",
+  "version": "1.1.0",
+  "homepage": "https://github.com/DrShavargo/jasmine-reporters-browser-logging",
+  "maintainers": "Georges-Antoine assi <georges.antoine.assi@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/larrymyers/jasmine-reporters.git"
+    "url": "git://github.com/DrShavargo/jasmine-reporters-browser-logging.git"
   },
+  "main": "./src/load_reporters.js",
   "dependencies": {
     "mkdirp": "~0.3.5"
   },
@@ -16,7 +17,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://raw.github.com/larrymyers/jasmine-reporters/master/LICENSE"
+      "url": "https://github.com/DrShavargo/jasmine-reporters-browser-logging/master/LICENSE"
     }
   ]
 }

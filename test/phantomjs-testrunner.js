@@ -1,11 +1,11 @@
-/* globals jasmineRequire, phantom */
+/* globals jasmine, phantom */
 // Verify arguments
 if (phantom.args.length === 0) {
     console.log("Simple JasmineBDD test runner for phantom.js");
     console.log("Usage: phantomjs-testrunner.js url_to_runner.html");
     console.log("Accepts http:// and file:// urls");
     console.log("");
-    console.log("NOTE: This script depends on jasmine.HtmlReporter being used\non the page, for the DOM elements it creates.\n");
+    console.log("NOTE: This script depends on jasmine.TrivialReporter being used\non the page, for the DOM elements it creates.\n");
     phantom.exit(2);
 }
 else {
@@ -162,26 +162,19 @@ function processPage(status, page, resultsKey) {
         var isFinished = function() {
             return page.evaluate(function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
-                if (window.jasmineReporters && window.jasmineReporters.startTime) {
-                    return !!window.jasmineReporters.endTime;
+                if (jasmine && jasmine.JUnitXmlReporter && jasmine.JUnitXmlReporter.started_at !== null) {
+                    return jasmine.JUnitXmlReporter.finished_at !== null;
                 }
-                // otherwise, scrape the DOM for the HtmlReporter "finished in ..." output
-                var durElem = document.querySelector(".html-reporter .duration");
-                if (!durElem) {
-                    durElem = document.querySelector(".jasmine_html-reporter .duration");
-                }
-                return durElem && durElem.textContent && durElem.textContent.toLowerCase().indexOf("finished in") === 0;
+                // otherwise, see if there is anything in a "finished-at" element
+                return document.getElementsByClassName("finished-at").length &&
+                       document.getElementsByClassName("finished-at")[0].innerHTML.length > 0;
             });
         };
-        var getResultsFromHtmlRunner = function() {
+        var getResults = function() {
             return page.evaluate(function(){
-                var resultElem = document.querySelector(".html-reporter .alert .bar");
-                if (!resultElem) {
-                    resultElem = document.querySelector(".jasmine_html-reporter .alert .bar");
-                }
-                return resultElem && resultElem.textContent &&
-                    resultElem.textContent.match(/(\d+) spec.* (\d+) failure.*/) ||
-                   ["Unable to determine success or failure."];
+                return document.getElementsByClassName("description").length &&
+                       document.getElementsByClassName("description")[0].innerHTML.match(/(\d+) spec.* (\d+) failure.*/) ||
+                       ["Unable to determine success or failure."];
             });
         };
         var timeout = 60000;
@@ -199,7 +192,7 @@ function processPage(status, page, resultsKey) {
                 }
 
                 // print out a success / failure message of the results
-                var results = getResultsFromHtmlRunner();
+                var results = getResults();
                 var failures = Number(results[2]);
                 if (failures > 0) {
                     page.__exit_code = 1;

@@ -1,4 +1,5 @@
+node_modules
 *.pyc
 *.swp
-*.xml
-node_modules/
+.idea
+atlassian-ide-plugin.xml
