@@ -12,11 +12,11 @@
         function pad(n) { return n < 10 ? '0'+n : n; }
 
         return d.getFullYear() + '-' +
-            pad(d.getMonth()+1) + '-' +
-            pad(d.getDate()) + 'T' +
-            pad(d.getHours()) + ':' +
-            pad(d.getMinutes()) + ':' +
-            pad(d.getSeconds());
+          pad(d.getMonth()+1) + '-' +
+          pad(d.getDate()) + 'T' +
+          pad(d.getHours()) + ':' +
+          pad(d.getMinutes()) + ':' +
+          pad(d.getSeconds());
     }
 
     function trim(str) {
@@ -25,10 +25,10 @@
 
     function escapeInvalidXmlChars(str) {
         return str.replace(/</g, "&lt;")
-            .replace(/\>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/\&/g, "&amp;");
+          .replace(/\>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/\'/g, "&apos;")
+          .replace(/\&/g, "&amp;");
     }
 
     /**
@@ -77,9 +77,10 @@
             spec.didFail = !results.passed();
             spec.duration = elapsed(spec.startTime, new Date());
             spec.output = '<testcase classname="' + this.getFullName(spec.suite) +
-                '" name="' + escapeInvalidXmlChars(spec.description) + '" time="' + spec.duration + '">';
+            '" name="' + escapeInvalidXmlChars(spec.description) +
+            '" time="' + spec.duration + '">';
             if(results.skipped) {
-              spec.output = spec.output + "<skipped />";
+                spec.output = spec.output + "<skipped />";
             }
 
             var failure = "";
@@ -98,7 +99,40 @@
             if (failure) {
                 spec.output += failure;
             }
-            spec.output += "</testcase>";
+
+            var logs = browser.driver.manage().logs(),
+              logType = 'browser'; // browser
+            var hasLogs = logs.getAvailableLogTypes();
+            if (hasLogs) {
+                hasLogs.then(function (logTypes) {
+                    if (logTypes.indexOf(logType) > -1) {
+                        var logTypes = browser.driver.manage().logs().get(logType);
+                        if (logTypes) {
+                            logTypes.then(function (logsEntries) {
+                                var len = logsEntries.length,
+                                  msg = " ";
+                                for (var i = 0; i < len; ++i) {
+
+                                    var logEntry = logsEntries[i];
+
+                                    if (logEntry.message.indexOf("{") !== 0) {
+                                        msg += logEntry.message;
+                                    }
+                                }
+                                spec.output += '<log message="' + msg + '"></log>';
+                            }).then(function (result) {
+                                spec.output += "</testcase>";
+                            });
+                        }else{
+                            spec.output += "</testcase>";
+                        }
+                    }else{
+                        spec.output += "</testcase>";
+                    }
+                })
+            }else{
+                spec.output += "</testcase>";
+            }
         },
 
         reportSuiteResults: function(suite) {
@@ -123,10 +157,10 @@
                 specOutput += "\n  " + specs[i].output;
             }
             suite.output = '\n<testsuite name="' + this.getFullName(suite) +
-                '" errors="0" tests="' + specs.length + '" failures="' + failedCount +
-                '" time="' + suite.duration + '" timestamp="' + ISODateString(suite.startTime) + '">';
+            '" errors="0" tests="' + specs.length + '" failures="' + failedCount +
+            '" time="' + suite.duration + '" timestamp="' + ISODateString(suite.startTime) + '">';
             suite.output += specOutput;
-            suite.output += "\n</testsuite>";
+            suite.output += "</testcase>\n</testsuite>";
         },
 
         reportRunnerResults: function(runner) {
@@ -248,8 +282,8 @@
 
             // If made it here, no write succeeded.  Let user know.
             this.log("Warning: writing junit report failed for '" + path + "', '" +
-                     filename + "'. Reasons:\n" +
-                     errors.join("\n"));
+            filename + "'. Reasons:\n" +
+            errors.join("\n"));
         },
 
 
