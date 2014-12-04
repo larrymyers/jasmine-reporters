@@ -266,7 +266,7 @@
             if (suites[i].specs.length > 0) {
                 output += printSpecs(suites[i].specs);
             }
-
+            output += "</test-case>";
             output += "</results>";
             output += "</test-suite>";
         }
@@ -295,7 +295,27 @@
                 output += "</failure>";
             }
 
-            output += "</test-case>";
+            var logs = browser.driver.manage().logs(),
+              logType = 'browser'; // browser
+            logs.getAvailableLogTypes().then(function (logTypes) {
+                if (logTypes.indexOf(logType) > -1) {
+                    browser.driver.manage().logs().get(logType).then(function (logsEntries) {
+                        var len = logsEntries.length,
+                          msg = " ";
+                        for (var i = 0; i < len; ++i) {
+                            var logEntry = logsEntries[i];
+                            if (logEntry.message.indexOf("{") !== 0) {
+                                msg += logEntry.message;
+                            }
+                        }
+                        output += '<log message="' + msg + '"></log>';
+                    }).then(function () {
+                        output += "</testcase>";
+                    });
+                }else{
+                    output += "</testcase>";
+                }
+            })
         }
 
         return output;

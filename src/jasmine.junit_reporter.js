@@ -39,6 +39,9 @@
      * Allows the test results to be used in java based CI
      * systems like CruiseControl and Hudson.
      *
+     * Adapted to support output of browser console to xml format,
+     * which is useful for debugging purposes
+     *
      * @param {string} [savePath] where to save the files
      * @param {boolean} [consolidate] whether to save nested describes within the
      *                  same file as their parent; default: true
@@ -105,37 +108,25 @@
 
             var logs = browser.driver.manage().logs(),
               logType = 'browser'; // browser
-            var hasLogs = logs.getAvailableLogTypes();
-            if (hasLogs) {
-                hasLogs.then(function (logTypes) {
-                    if (logTypes.indexOf(logType) > -1) {
-                        var logTypes = browser.driver.manage().logs().get(logType);
-                        if (logTypes) {
-                            logTypes.then(function (logsEntries) {
-                                var len = logsEntries.length,
-                                  msg = " ";
-                                for (var i = 0; i < len; ++i) {
-
-                                    var logEntry = logsEntries[i];
-
-                                    if (logEntry.message.indexOf("{") !== 0) {
-                                        msg += logEntry.message;
-                                    }
-                                }
-                                spec.output += '<log message="' + msg + '"></log>';
-                            }).then(function (result) {
-                                spec.output += "</testcase>";
-                            });
-                        }else{
-                            spec.output += "</testcase>";
+            logs.getAvailableLogTypes().then(function (logTypes) {
+                if (logTypes.indexOf(logType) > -1) {
+                    browser.driver.manage().logs().get(logType).then(function (logsEntries) {
+                        var len = logsEntries.length,
+                          msg = " ";
+                        for (var i = 0; i < len; ++i) {
+                            var logEntry = logsEntries[i];
+                            if (logEntry.message.indexOf("{") !== 0) {
+                                msg += logEntry.message;
+                            }
                         }
-                    }else{
+                        spec.output += '<log message="' + msg + '"></log>';
+                    }).then(function () {
                         spec.output += "</testcase>";
-                    }
-                })
-            }else{
-                spec.output += "</testcase>";
-            }
+                    });
+                }else{
+                    spec.output += "</testcase>";
+                }
+            })
         },
 
         reportSuiteResults: function(suite) {
