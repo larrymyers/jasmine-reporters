@@ -42,9 +42,9 @@ Most of these reporters also work in node.js by making use of the excellent
 # Protractor
 
 Protractor 1.6.0 or above allows you to use either Jasmine 1 or Jasmine 2.
-If you are using Jasmine 1, make sure you install a 1.x version of jasmine-reporters:
+If you are using Jasmine 1, make sure you install a 1.x-compatible version of jasmine-reporters:
 
-    npm install --save-dev jasmine-reporters@~1.0.0
+    npm install --save-dev jasmine-reporters@^1.0.0
 
 Then set everything up inside your protractor.conf:
 
