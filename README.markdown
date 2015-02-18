@@ -92,9 +92,9 @@ the correct tag / branch / npm version:
 As of Protractor 1.6.0, protractor supports Jasmine 2 by specifying
 `framework: "jasmine2"` in your protractor.conf file.
 
-First, install at least version 2.0.0 of jasmine-reporters:
+First, install a Jasmine 2.x-compatible of jasmine-reporters:
 
-    npm install --save-dev jasmine-reporters@~2.0.0
+    npm install --save-dev jasmine-reporters@^2.0.0
 
 Then set everything up inside your protractor.conf:
 
