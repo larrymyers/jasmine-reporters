@@ -73,8 +73,8 @@ An example for each reporter is available in the `test` directory.
 jasmine-reporters is built for Jasmine 2.x. If you are still using Jasmine 1.x, please use
 the correct tag / branch / npm version:
 
-* bower: `bower install jasmine-reporters#~1.0.0`
-* Node.js: `npm install jasmine-reporters@~1.0.0`
+* bower: `bower install jasmine-reporters#^1.0.0`
+* Node.js: `npm install jasmine-reporters@^1.0.0`
 * git submodule: `git submodule add -b jasmine1.x git@github.com:larrymyers/jasmine-reporters.git jasmine-reporters`
 * or use any of the `1.*` tags
 
