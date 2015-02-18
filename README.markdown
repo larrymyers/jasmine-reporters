@@ -1,3 +1,6 @@
+This branch is for Jasmine 2.x.
+[Switch to the 1.x branch.](https://github.com/larrymyers/jasmine-reporters/tree/jasmine1.x)
+
 # Jasmine Reporters
 
 Jasmine Reporters is a collection of javascript jasmine.Reporter classes that can be used with
@@ -75,7 +78,7 @@ the correct tag / branch / npm version:
 * git submodule: `git submodule add -b jasmine1.x git@github.com:larrymyers/jasmine-reporters.git jasmine-reporters`
 * or use any of the `1.*` tags
 
-## Migrating from Jasmine 1.x
+## Migrating from jasmine-reporters@1.0
 
 * reporters are no longer registered on the global `jasmine` object
     * 1.x: `new jasmine.JUnitXmlReporter( /* ... */ );`
@@ -84,21 +87,23 @@ the correct tag / branch / npm version:
     * 1.x: `new jasmine.JUnitXmlReporter('testresults', true, true, 'junit-', true);`
     * 2.x: `new jasmineReporters.JUnitXmlReporter({savePath:'testresults', filePrefix: 'junit-', consolidateAll:true});`
 
-## Protractor
+# Protractor
 
-If you are trying to use jasmine-reporters with Protractor, keep in mind that Protractor is built around
-Jasmine 1.x. As such, you need to use a 1.x version of jasmine-reporters.
+As of Protractor 1.6.0, protractor supports Jasmine 2 by specifying
+`framework: "jasmine2"` in your protractor.conf file.
 
-    npm install jasmine-reporters@~1.0.0
+First, install at least version 2.0.0 of jasmine-reporters:
 
-And inside your protractor.conf:
+    npm install --save-dev jasmine-reporters@~2.0.0
 
+Then set everything up inside your protractor.conf:
+
+    framework: "jasmine2",
     onPrepare: function() {
-        // The require statement must be down here, since jasmine-reporters@1.0
-        // needs jasmine to be in the global and protractor does not guarantee
-        // this until inside the onPrepare function.
-        require('jasmine-reporters');
-        jasmine.getEnv().addReporter(
-            new jasmine.JUnitXmlReporter('xmloutput', true, true)
-        );
+        var jasmineReporters = require('jasmine-reporters');
+        jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+            consolidateAll: true,
+            filePrefix: 'xmloutput',
+            savePath: 'testresults'
+        }));
     }
