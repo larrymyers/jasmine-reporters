@@ -47,7 +47,10 @@
             "bold": 1,
             "red": 31,
             "green": 32,
-            "yellow": 33
+            "yellow": 33,
+            "blue": 34,
+            "magenta": 35,
+            "cyan": 36
         };
 
     exportObject.TerminalReporter = function(options) {
@@ -59,6 +62,7 @@
         options = options || {};
         self.verbosity = typeof options.verbosity === "number" ? options.verbosity : DEFAULT_VERBOSITY;
         self.color = options.color;
+        self.showStack = options.showStack;
 
         var indent_string = '  ',
             startTime,
@@ -155,6 +159,12 @@
 
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     log(inColor(indentWithLevel(spec._depth, indent_string + spec.failedExpectations[i].message), color));
+                    if (self.showStack){
+                        var stackLines = spec.failedExpectations[i].stack.split('\n');
+                        stackLines.forEach(function(line){
+                            log( inColor( indentWithLevel(spec._depth, indent_string + line), 'magenta' ) );
+                        });
+                    }
                 }
             }
         };
