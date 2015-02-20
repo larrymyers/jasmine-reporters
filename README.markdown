@@ -11,7 +11,7 @@ Included reporters:
 * JUnitXmlReporter - Report test results to a file in JUnit XML Report format.
 * NUnitXmlReporter - Report test results to a file in NUnit XML Report format.
 * TapReporter - Test Anything Protocol, report tests results to console.
-* TeamcityReporter - Basic reporter that outputs spec results to for the Teamcity build system.
+* TeamCityReporter - Basic reporter that outputs spec results to for the Teamcity build system.
 * TerminalReporter - Logs to a terminal (including colors) with variable verbosity.
 
 ### PhantomJS
