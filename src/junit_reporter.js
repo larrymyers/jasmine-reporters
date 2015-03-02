@@ -291,21 +291,26 @@
             var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
             xml += ' name="' + escapeInvalidXmlChars(spec.description) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
-            xml += '>';
 
+            var testCaseBody = '';
             if (isSkipped(spec) || isDisabled(spec)) {
-                xml += '<skipped />';
+                testCaseBody = '<skipped />';
             } else if (isFailed(spec)) {
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     failure = spec.failedExpectations[i];
-                    xml += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
-                    xml += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
-                    xml += '>';
-                    xml += '<![CDATA[' + trim(failure.stack || failure.message) + ']]>';
-                    xml += '\n   </failure>';
+                    testCaseBody += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
+                    testCaseBody += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
+                    testCaseBody += '>';
+                    testCaseBody += '<![CDATA[' + trim(failure.stack || failure.message) + ']]>';
+                    testCaseBody += '\n   </failure>';
                 }
             }
-            xml += '\n  </testcase>';
+
+            if (testCaseBody) {
+                xml += '>' + testCaseBody + '\n  </testcase>';
+            } else {
+                xml += ' />'
+            }
             return xml;
         }
 
