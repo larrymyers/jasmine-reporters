@@ -4,7 +4,7 @@ This branch is for Jasmine 2.x.
 # Jasmine Reporters
 
 Jasmine Reporters is a collection of javascript jasmine.Reporter classes that can be used with
-the [JasmineBDD testing framework](http://pivotal.github.com/jasmine/).
+the [JasmineBDD testing framework](http://jasmine.github.io/).
 
 Included reporters:
 
