@@ -160,10 +160,7 @@
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     log(inColor(indentWithLevel(spec._depth, indent_string + spec.failedExpectations[i].message), color));
                     if (self.showStack){
-                        var stackLines = spec.failedExpectations[i].stack.split('\n');
-                        stackLines.forEach(function(line){
-                            log( inColor( indentWithLevel(spec._depth, indent_string + line), 'magenta' ) );
-                        });
+                        logStackLines(spec._depth, spec.failedExpectations[i].stack.split('\n'));
                     }
                 }
             }
@@ -224,6 +221,11 @@
         };
         function indentWithLevel(level, string) {
             return new Array(level).join(indent_string) + string;
+        }
+        function logStackLines(depth, lines) {
+            lines.forEach(function(line){
+                log(inColor(indentWithLevel(depth, indent_string + line), 'magenta'));
+            });
         }
         function inColor(string, color) {
             var color_attributes = color && color.split("+"),
