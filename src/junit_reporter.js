@@ -79,6 +79,9 @@
      *   xml output file (default: junitresults-)
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
      *     this becomes the actual filename, ie "junitresults.xml"
+     * @param {string} [stylesheetPath] is the string value that specifies a path
+     *   to an XSLT stylesheet to add to the junit XML file so that it can be
+     *   opened directly in a browser. (default: none, no xml-stylesheet tag is added)
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
@@ -91,6 +94,7 @@
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
+        self.stylesheetPath = options.stylesheetPath || '';
 
         var suites = [],
             currentSuite = null,
@@ -311,6 +315,9 @@
 
         // To remove complexity and be more DRY about the silly preamble and <testsuites> element
         var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
+        if (self.stylesheetPath.length > 0) {
+            prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
+        }
         prefix += '\n<testsuites>';
         var suffix = '\n</testsuites>';
         function wrapOutputAndWriteFile(filename, text) {
