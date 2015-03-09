@@ -73,7 +73,13 @@
             totalSpecsSkipped = 0,
             totalSpecsDisabled = 0,
             totalSpecsFailed = 0,
-            totalSpecsDefined;
+            totalSpecsDefined,
+            // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
+            fakeFocusedSuite = {
+                id: 'focused',
+                description: 'focused specs',
+                fullName: 'focused specs'
+            };
 
         var __suites = {}, __specs = {};
         function getSuite(suite) {
@@ -108,6 +114,10 @@
             }
         };
         self.specStarted = function(spec) {
+            if (!currentSuite) {
+                // focused spec (fit) -- suiteStarted was never called
+                self.suiteStarted(fakeFocusedSuite);
+            }
             spec = getSpec(spec);
             spec._suite = currentSuite;
             spec._depth = currentSuite._depth+1;
@@ -168,8 +178,8 @@
         };
         self.suiteDone = function(suite) {
             suite = getSuite(suite);
-            // disabled suite (xdescribe) -- suiteStarted was never called
             if (suite._parent === UNDEFINED) {
+                // disabled suite (xdescribe) -- suiteStarted was never called
                 self.suiteStarted(suite);
             }
             if (suite._parent) {
@@ -194,6 +204,10 @@
             log(indentWithLevel(suite._depth, inColor(str+'.', color)));
         };
         self.jasmineDone = function() {
+            if (currentSuite) {
+                // focused spec (fit) -- suiteDone was never called
+                self.suiteDone(fakeFocusedSuite);
+            }
             var now = new Date(),
                 dur = elapsed(startTime, now),
                 total = totalSpecsDefined || totalSpecsExecuted,
