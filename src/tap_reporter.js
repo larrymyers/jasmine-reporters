@@ -108,7 +108,7 @@
             }
             if (isDisabled(spec)) {
                 totalSpecsDisabled++;
-                resultStr += ' # SKIP disabled by xit, ?spec=xyz or similar'
+                resultStr += ' # SKIP disabled by xit, ?spec=xyz or similar';
             }
             log(resultStr);
         };

@@ -52,10 +52,6 @@
         self.finished = false;
 
         var currentSuite = null,
-            totalSpecsExecuted = 0,
-            totalSpecsSkipped = 0,
-            totalSpecsDisabled = 0,
-            totalSpecsFailed = 0,
             totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {

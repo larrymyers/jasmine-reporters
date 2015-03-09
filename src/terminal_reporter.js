@@ -67,7 +67,6 @@
 
         var indent_string = '  ',
             startTime,
-            suites = [],
             currentSuite = null,
             totalSpecsExecuted = 0,
             totalSpecsSkipped = 0,
@@ -168,7 +167,7 @@
                     log(indentWithLevel(spec._depth, spec.fullName));
                 }
 
-                for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
+                for (var i = 0; i < spec.failedExpectations.length; i++) {
                     log(inColor(indentWithLevel(spec._depth, indent_string + spec.failedExpectations[i].message), color));
                     if (self.showStack){
                         logStackLines(spec._depth, spec.failedExpectations[i].stack.split('\n'));
@@ -245,7 +244,7 @@
         function inColor(string, color) {
             var color_attributes = color && color.split("+"),
                 ansi_string = "",
-                i, attr;
+                i;
 
             if (!self.color || !color_attributes) {
                 return string;

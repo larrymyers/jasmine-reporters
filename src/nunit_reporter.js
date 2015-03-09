@@ -1,4 +1,4 @@
-/* global java, __phantom_writeFile */
+/* global __phantom_writeFile */
 (function(global) {
     var UNDEFINED,
         exportObject;
