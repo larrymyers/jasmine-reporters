@@ -32,11 +32,11 @@
             pad(d.getSeconds());
     }
     function escapeInvalidXmlChars(str) {
-        return str.replace(/</g, "&lt;")
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/\&/g, "&amp;");
+            .replace(/\'/g, "&apos;");
     }
     function getQualifiedFilename(path, filename, separator) {
         if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
