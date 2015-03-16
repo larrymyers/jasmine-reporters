@@ -61,7 +61,7 @@
      *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter(options);
+     * jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter(options));
      *
      * @param {object} [options]
      * @param {string} [savePath] directory to save the files (default: '')
