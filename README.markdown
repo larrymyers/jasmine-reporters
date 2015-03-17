@@ -24,7 +24,7 @@ consider creating a pull request.
 
 The reporters also work in Node.js, and most can be used in combination with
 [jasmine-node](https://github.com/mhevery/jasmine-node). Make sure to use the correct
-combination of jasmine-repoters and jasmine-node, as both projects have different versions
+combination of jasmine-reporters and jasmine-node, as both projects have different versions
 / branches for Jasmine1.x vs Jasmine2.x support.
 
 # Basic Usage
