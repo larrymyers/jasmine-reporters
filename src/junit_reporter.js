@@ -79,6 +79,7 @@
      *   xml output file (default: junitresults-)
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
      *     this becomes the actual filename, ie "junitresults.xml"
+     * @param {string} [package] is the base package for all test suits that are handled by this report {default: ''}
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
