@@ -111,7 +111,7 @@
                 });
             });
 
-            describe("package", function() {
+            describe("package", function () {
                 it("should default output package to be empty", function () {
                     expect(reporter.package).toBe("");
                 });
@@ -121,7 +121,7 @@
                     });
                     expect(reporter.package).toBe("testpackage");
                 });
-                })
+            });
         });
 
         describe("generated xml output", function(){
