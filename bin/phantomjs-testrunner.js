@@ -1,6 +1,15 @@
 /* globals jasmineRequire, phantom */
 // Verify arguments
-if (phantom.args.length === 0) {
+var system = require('system');
+var args;
+
+if(phantom.args) {
+    args = phantom.args;
+} else {
+    args = system.args.slice(1);//use system args for phantom 2.0+
+}
+
+if (args.length === 0) {
     console.log("Simple JasmineBDD test runner for phantom.js");
     console.log("Usage: phantomjs-testrunner.js url_to_runner.html");
     console.log("Accepts http:// and file:// urls");
@@ -9,7 +18,6 @@ if (phantom.args.length === 0) {
     phantom.exit(2);
 }
 else {
-    var args = phantom.args;
     var fs = require("fs"),
         pages = [],
         page, address, resultsKey, i, l;
@@ -68,7 +76,6 @@ function logAndWorkAroundDefaultLineBreaking(msg) {
     var interpretAsWithoutNewline = /(^(\033\[\d+m)*[\.F](\033\[\d+m)*$)|( \.\.\.$)/;
     if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
         try {
-            var system = require('system');
             system.stdout.write(msg);
         } catch (e) {
             var fs = require('fs');
