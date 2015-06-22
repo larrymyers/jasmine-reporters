@@ -116,7 +116,8 @@ per capability.
     onPrepare: function() {
         var jasmineReporters = require('jasmine-reporters');
         
-        browser.getProcessedConfig().then(function (config) {
+        // returning the promise makes protractor wait for the reporter config before executing tests
+        return browser.getProcessedConfig().then(function (config) {
             
             var cap = config.capabilities;
             var browserPlatform = cap.platform || cap.platformName || "ANY_PLATFORM";
