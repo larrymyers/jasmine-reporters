@@ -149,7 +149,7 @@
             spec._endTime = new Date();
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isDisabled(spec)) { spec._suite._disabled++; }
-            if (isFailed(spec)) { spec._suite._failures++; }
+            if (isFailed(spec)) { spec._suite._failures += spec.failedExpectations.length; }
             totalSpecsExecuted++;
         };
         self.suiteDone = function(suite) {
