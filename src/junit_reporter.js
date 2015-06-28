@@ -92,7 +92,7 @@
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
-        self.package = options.package === UNDEFINED ? '' : escapeInvalidXmlChars(options.package);
+        self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
 
         var suites = [],
             currentSuite = null,
@@ -281,7 +281,9 @@
             xml += ' disabled="' + suite._disabled + '"';
             // Because of JUnit's flat structure, only include directly failed tests (not failures for nested suites)
             xml += ' failures="' + suite._failures + '"';
-            xml += ' package="' + self.package + '"';
+            if (self.package) {
+                xml += ' package="' + self.package + '"';
+            }
             xml += '>';
 
             for (var i = 0; i < suite._specs.length; i++) {
