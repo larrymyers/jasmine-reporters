@@ -110,6 +110,23 @@
                     expect(reporter.writeFile).toHaveBeenCalledWith("alt-prefix-ParentSuite.xml", jasmine.any(String));
                 });
             });
+
+            describe("package", function () {
+                it("should default output package to undefined", function () {
+                    expect(reporter.package).toBeUndefined();
+                });
+                it("should not set output package if a non-string is provided", function() {
+                    setupReporterWithOptions({package:true});
+                    expect(reporter.package).toBeUndefined();
+
+                    setupReporterWithOptions({package:['test']});
+                    expect(reporter.package).toBeUndefined();
+                });
+                it("should set output package to the provided string", function () {
+                    setupReporterWithOptions({package:"testPackage"});
+                    expect(reporter.package).toBe("testPackage");
+                });
+            });
         });
 
         describe("generated xml output", function(){
@@ -266,7 +283,29 @@
                 it("should include hostname, simply because the JUnit XSD says it is required", function() {
                     expect(suites[0].getAttribute('hostname')).toBe('localhost');
                 });
+                describe("package", function() {
+                    it("should not include the package attribute if it is not provided", function() {
+                        setupReporterWithOptions({});
+                        triggerRunnerEvents();
+                        suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                        expect(suites[0].getAttribute('package')).toBeNull();
+                    });
+                    it("should include the package attribute if a string is provided", function() {
+                        setupReporterWithOptions({package:"testPackage"});
+                        triggerRunnerEvents();
+                        suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                        expect(suites[0].getAttribute('package')).toBe("testPackage");
+                    });
+                    it("should escape the string provided", function() {
+                        setupReporterWithOptions({package:"testPackage <3"});
+                        triggerRunnerEvents();
+                        suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                        expect(suites[0].getAttribute('package')).toBe("testPackage <3");
+                        expect(writeCalls[0].output).toContain('package="testPackage &lt;3"');
+                    });
+                });
             });
+
             describe("spec result generation", function() {
                 var suites, specs;
                 beforeEach(function() {
