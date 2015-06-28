@@ -37,6 +37,13 @@ global scope (i.e. `window.jasmineReporters`).
         consolidateAll: false
     });
     jasmine.getEnv().addReporter(junitReporter);
+    
+## Options
+
+* `consolidateAll` - boolean. When set to `true` all tests results are saved in one files.
+By default all spec files produce different outputs.
+* `filePrefix` - prefix for names of result files. If `consolidateAll` is set to true allow
+us to choose the output file name.
 
 ### PhantomJS
 
