@@ -340,6 +340,32 @@
                     expect(specs[3].getElementsByTagName('skipped').length).toBe(1);
                 });
             });
+
+            describe("modifySuiteName", function(){
+                var suites, modification = '-modified';
+                beforeEach(function(){
+                    // consolidateAll becomes a noop, we include it specifically to passively test that
+                    setupReporterWithOptions({
+                        consolidateAll:true,
+                        consolidate:true,
+                        modifySuiteName:function(generatedName, suite) {
+                            return generatedName + modification;
+                        }
+                    });
+                    triggerRunnerEvents();
+                    suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                });
+                it("should construct suitenames that contain modification", function() {
+                    suites.forEach(function(suite) {
+                        expect(suite.getAttribute('name')).toContain(modification);
+                    });
+                });
+                it("should construct filenames that contain modification", function() {
+                    expect(writeCalls[0].args[0]).toContain(modification);
+                });
+                itShouldHaveOneTestsuitesElementPerFile();
+                itShouldIncludeXmlPreambleInAllFiles();
+            });
         });
     });
 })();

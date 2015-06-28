@@ -32,11 +32,13 @@ combination of jasmine-reporters and jasmine-node, as both projects have differe
 When used for in-browser tests, the reporters are registered on a `jasmineReporters` object in the
 global scope (i.e. `window.jasmineReporters`).
 
-    var junitReporter = new jasmineReporters.JUnitXmlReporter({
-        savePath: '..',
-        consolidateAll: false
-    });
-    jasmine.getEnv().addReporter(junitReporter);
+```javascript
+var junitReporter = new jasmineReporters.JUnitXmlReporter({
+    savePath: '..',
+    consolidateAll: false
+});
+jasmine.getEnv().addReporter(junitReporter);
+```
 
 ### PhantomJS
 
@@ -50,19 +52,23 @@ method, and also take care to correctly determine when all results have been rep
 
 You can use the included PhantomJS test runner to run any of the included examples.
 
-    bin/phantomjs.runner.sh test/tap_reporter.html
-    bin/phantomjs.runner.sh test/junit_xml_reporter.html
+```bash
+bin/phantomjs.runner.sh test/tap_reporter.html
+bin/phantomjs.runner.sh test/junit_xml_reporter.html
+```
 
 ### NodeJS
 
 In Node.js, jasmine-reporters exports an object with all the reporters which you can use
 however you like.
 
-    var reporters = require('jasmine-reporters');
-    var junitReporter = new reporters.JUnitXmlReporter({
-        savePath: __dirname,
-        consolidateAll: false
-    });
+```javascript
+var reporters = require('jasmine-reporters');
+var junitReporter = new reporters.JUnitXmlReporter({
+    savePath: __dirname,
+    consolidateAll: false
+});
+```
 
 ### More examples
 
@@ -94,16 +100,56 @@ As of Protractor 1.6.0, protractor supports Jasmine 2 by specifying
 
 First, install a Jasmine 2.x-compatible of jasmine-reporters:
 
-    npm install --save-dev jasmine-reporters@^2.0.0
+```bash
+npm install --save-dev jasmine-reporters@^2.0.0
+```
 
 Then set everything up inside your protractor.conf:
 
-    framework: "jasmine2",
-    onPrepare: function() {
-        var jasmineReporters = require('jasmine-reporters');
-        jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+```javascript
+framework: 'jasmine2',
+onPrepare: function() {
+    var jasmineReporters = require('jasmine-reporters');
+    jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
+        consolidateAll: true,
+        savePath: 'testresults',
+        filePrefix: 'xmloutput'
+    }));
+}
+```
+
+### Multi Capabilities
+
+If you run a `multiCapabilities` setup you can reflect this in your test results
+by using the option `modifySuiteName`. This enables you to have distinct suite
+names per capability.
+
+```javascript
+multiCapabilities: [
+    {browserName: 'firefox'},
+    {browserName: 'chrome'}
+],
+framework: 'jasmine2',
+onPrepare: function() {
+    var jasmineReporters = require('jasmine-reporters');
+
+    // returning the promise makes protractor wait for the reporter config before executing tests
+    return browser.getProcessedConfig().then(function(config) {
+        // you could use other properties here if you want, such as platform and version
+        var browserName = config.capabilities.browserName;
+
+        var junitReporter = new jasmineReporters.JUnitXmlReporter({
             consolidateAll: true,
-            filePrefix: 'xmloutput',
-            savePath: 'testresults'
-        }));
-    }
+            savePath: 'testresults',
+            // this will produce distinct xml files for each capability
+            filePrefix: browserName + ‘-xmloutput’,
+            modifySuiteName: function(generatedSuiteName, suite) {
+                // this will produce distinct suite names for each capability,
+                // e.g. ‘firefox.login tests’ and ‘chrome.login tests’
+                return browserName + ‘.’ + generatedSuiteName;
+            }
+        });
+        jasmine.getEnv().addReporter(junitReporter);
+    });
+}
+```
