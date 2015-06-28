@@ -51,6 +51,17 @@
         }
     }
 
+    /**
+     * A delegate for letting the consumer
+     * modify the suite name when it is used inside the junit report and as a file
+     * name. This is useful when running a test suite against multiple capabilities
+     * because the report can have unique names for each combination of suite/spec
+     * and capability/test environment.
+     *
+     * @callback modifySuiteName
+     * @param {string} fullName
+     * @param {object} suite
+     */
 
     /**
      * Generates JUnit XML for the given spec run. There are various options
@@ -80,6 +91,11 @@
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
      *     this becomes the actual filename, ie "junitresults.xml"
      * @param {string} [package] is the base package for all test suits that are handled by this report {default: ''}
+     * @param {modifySuiteName} [modifySuiteName] a delegate for letting the consumer
+     *   modify the suite name when it is used inside the junit report and as a file
+     *   name. This is useful when running a test suite against multiple capabilities
+     *   because the report can have unique names for each combination of suite/spec
+     *   and capability/test environment.
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
@@ -93,6 +109,13 @@
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
         self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
+
+        if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+            throw new Error('option "modifySuiteName" must be a function');
+        }
+
+        var delegates = {};
+        delegates.modifySuiteName = options.modifySuiteName;
 
         var suites = [],
             currentSuite = null,
@@ -266,6 +289,11 @@
                 }
                 return fileName;
             } else {
+
+                if(delegates.modifySuiteName) {
+                    fullName = options.modifySuiteName(fullName, suite);
+                }
+
                 return escapeInvalidXmlChars(fullName);
             }
         }

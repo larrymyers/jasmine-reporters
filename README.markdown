@@ -107,3 +107,34 @@ Then set everything up inside your protractor.conf:
             savePath: 'testresults'
         }));
     }
+    
+If you run a multi-capability setup you can reflect this in your test result
+by using the option `modifySuiteName`. This enables to have distinct results
+per capability.
+
+    framework: "jasmine2",
+    onPrepare: function() {
+        var jasmineReporters = require('jasmine-reporters');
+        
+        // returning the promise makes protractor wait for the reporter config before executing tests
+        return browser.getProcessedConfig().then(function (config) {
+            
+            var cap = config.capabilities;
+            var browserPlatform = cap.platform || cap.platformName || "ANY_PLATFORM";
+            var prePendStr = browserPlatform + '-' + cap.browserName.toUpperCase() + '-';
+            if(cap.version) {
+    
+                prePendStr += 'v' + cap.version + '-';
+            }
+    
+            var junitReporter = new jasmineReporters.JUnitXmlReporter({
+                consolidateAll: false,  // this will produce distinct xml files for each capability
+                savePath: 'e2e-tests-results',
+                filePrefix: prePendStr,
+                modifySuiteName: function (generatedSuiteName, suite) {
+                    return prePendStr + generatedSuiteName;
+                }
+            });
+            jasmine.getEnv().addReporter(junitReporter);
+        });
+    }
