@@ -23,11 +23,11 @@
         return dupe;
     }
     function escapeInvalidXmlChars(str) {
-        return str.replace(/</g, "&lt;")
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/\&/g, "&amp;");
+            .replace(/\'/g, "&apos;");
     }
     function dateString(date) {
         var year = date.getFullYear();
