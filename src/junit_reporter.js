@@ -90,7 +90,8 @@
      *   xml output file (default: junitresults-)
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
      *     this becomes the actual filename, ie "junitresults.xml"
-     * @param {string} [package] is the base package for all test suits that are handled by this report {default: ''}
+     * @param {string} [package] is the base package for all test suits that are
+     *   handled by this report {default: none}
      * @param {modifySuiteName} [modifySuiteName] a delegate for letting the consumer
      *   modify the suite name when it is used inside the junit report and as a file
      *   name. This is useful when running a test suite against multiple capabilities
