@@ -110,6 +110,18 @@
                     expect(reporter.writeFile).toHaveBeenCalledWith("alt-prefix-ParentSuite.xml", jasmine.any(String));
                 });
             });
+
+            describe("package", function () {
+                it("should default output package to be empty", function () {
+                    expect(reporter.package).toBe("");
+                });
+                it("should output package to be the same as the parameter", function () {
+                    setupReporterWithOptions({
+                        package: "testpackage"
+                    });
+                    expect(reporter.package).toBe("testpackage");
+                });
+            });
         });
 
         describe("generated xml output", function(){
@@ -241,7 +253,7 @@
             describe("suite result generation", function() {
                 var suites;
                 beforeEach(function() {
-                    setupReporterWithOptions({consolidateAll:true, consolidate:true});
+                    setupReporterWithOptions({consolidateAll:true, consolidate:true, package:'testpackage'});
                     triggerRunnerEvents();
                     suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
                 });
@@ -265,6 +277,9 @@
                 });
                 it("should include hostname, simply because the JUnit XSD says it is required", function() {
                     expect(suites[0].getAttribute('hostname')).toBe('localhost');
+                });
+                it("should contain package", function () {
+                    expect(suites[0].getAttribute('package')).toBe('testpackage');
                 });
             });
             describe("spec result generation", function() {
