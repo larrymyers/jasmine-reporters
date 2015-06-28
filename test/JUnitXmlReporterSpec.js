@@ -1,4 +1,4 @@
-/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect, spyOn */
+/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect */
 (function(){
     var env, spec, suite,
         reporter, writeCalls, suiteId=0, specId=0;

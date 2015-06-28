@@ -314,7 +314,7 @@
             if (testCaseBody) {
                 xml += '>' + testCaseBody + '\n  </testcase>';
             } else {
-                xml += ' />'
+                xml += ' />';
             }
             return xml;
         }
