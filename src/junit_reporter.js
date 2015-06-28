@@ -92,7 +92,7 @@
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
-        self.package = options.package === UNDEFINED ? '' : options.package;
+        self.package = options.package === UNDEFINED ? '' : escapeInvalidXmlChars(options.package);
 
         var suites = [],
             currentSuite = null,
