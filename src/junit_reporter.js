@@ -294,7 +294,7 @@
 
             var testCaseBody = '';
             if (isSkipped(spec) || isDisabled(spec)) {
-                testCaseBody = '<skipped />';
+                testCaseBody = '\n   <skipped />';
             } else if (isFailed(spec)) {
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     failure = spec.failedExpectations[i];
