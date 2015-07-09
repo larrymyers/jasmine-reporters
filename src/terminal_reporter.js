@@ -22,7 +22,7 @@
     }
     function log(str) {
         var con = global.console || console;
-        if (con && con.log) {
+        if (con && con.log && str && str.length) {
             con.log(str);
         }
     }
