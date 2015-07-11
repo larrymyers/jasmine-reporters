@@ -157,7 +157,9 @@
             } else if (self.verbosity > 2) {
                 resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : disabled ? 'Disabled' : 'Passed');
             }
-            log(inColor(resultText, color));
+            if (resultText) {
+                log(inColor(resultText, color));
+            }
 
             if (failed) {
                 if (self.verbosity === 1) {
