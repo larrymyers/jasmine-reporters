@@ -1,0 +1,32 @@
+{
+  "name": "jasmine-reporters",
+  "version": "2.0.7",
+  "homepage": "https://github.com/larrymyers/jasmine-reporters",
+  "description": "Miscellaneous reporters for Jasmine 2.x.",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "jasmine-reporters",
+    "junitxmlreporter",
+    "jasmine",
+    "reporters",
+    "junit",
+    "nunit",
+    "teamcity",
+    "tap",
+    "xml",
+    "reporter"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jasmine-core": "jasmine#~2.3.4"
+  }
+}

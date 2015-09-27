@@ -51,8 +51,15 @@ you want to use your own PhantomJS runner, you will need to inject a `__phantom_
 method, and also take care to correctly determine when all results have been reported.
 
 You can use the included PhantomJS test runner to run any of the included examples.
+**NOTE:** you will need to install the Jasmine dependency via `bower` if you want to use the
+included PhantomJS runner for any of the included examples--this is where the examples
+look for the Jasmine core library.
 
 ```bash
+# install jasmine via bower
+bower install
+
+# run any of the examples
 bin/phantomjs.runner.sh test/tap_reporter.html
 bin/phantomjs.runner.sh test/junit_xml_reporter.html
 ```
