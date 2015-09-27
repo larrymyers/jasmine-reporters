@@ -234,6 +234,9 @@
             exportObject.endTime = now;
         };
         function indentWithLevel(level, string) {
+            if (!string || !string.length) {
+                return "";
+            }
             return new Array(level).join(indent_string) + string;
         }
         function logStackLines(depth, lines) {
@@ -246,7 +249,9 @@
                 ansi_string = "",
                 i;
 
-            if (!self.color || !color_attributes) {
+            if (!string || !string.length) {
+                return "";
+            } else if (!self.color || !color_attributes) {
                 return string;
             }
 
