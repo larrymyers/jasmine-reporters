@@ -25,7 +25,6 @@ else {
 
     var setupPageFn = function(p, k) {
         return function() {
-            overloadPageEvaluate(p);
             setupWriteFileFunction(p, k, fs.separator);
         };
     };
@@ -108,14 +107,14 @@ function replaceFunctionPlaceholders(fn, replacements) {
 }
 
 /**
- * Replaces the "evaluate" method with one we can easily do substitution with.
+ * Custom "evaluate" method which we can easily do substitution with.
  *
  * @param {phantomjs.WebPage} page The WebPage object to overload
+ * @param {function} fn The function to replace occurrences within.
+ * @param {object} replacements Key => Value object of string replacements.
  */
-function overloadPageEvaluate(page) {
-    page._evaluate = page.evaluate;
-    page.evaluate = function(fn, replacements) { return page._evaluate(replaceFunctionPlaceholders(fn, replacements)); };
-    return page;
+function evaluate(page, fn, replacements) {
+    return page.evaluate(replaceFunctionPlaceholders(fn, replacements));
 }
 
 /** Stubs a fake writeFile function into the test runner.
@@ -126,7 +125,7 @@ function overloadPageEvaluate(page) {
  */
 // TODO: not bothering with error checking for now (closed environment)
 function setupWriteFileFunction(page, key, path_separator) {
-    page.evaluate(function(){
+    evaluate(page, function(){
         window["%resultsObj%"] = {};
         window.fs_path_separator = "%fs_path_separator%";
         window.__phantom_writeFile = function(filename, text) {
@@ -143,7 +142,7 @@ function setupWriteFileFunction(page, key, path_separator) {
  *                     be the same key provided to setupWriteFileFunction.
  */
 function getXmlResults(page, key) {
-    return page.evaluate(function(){
+    return evaluate(page, function(){
         return window["%resultsObj%"] || {};
     }, {resultsObj: key});
 }
@@ -167,7 +166,7 @@ function processPage(status, page, resultsKey) {
     }
     else {
         var isFinished = function() {
-            return page.evaluate(function(){
+            return evaluate(page, function(){
                 // if there's a JUnitXmlReporter, return a boolean indicating if it is finished
                 if (window.jasmineReporters && window.jasmineReporters.startTime) {
                     return !!window.jasmineReporters.endTime;
@@ -181,7 +180,7 @@ function processPage(status, page, resultsKey) {
             });
         };
         var getResultsFromHtmlRunner = function() {
-            return page.evaluate(function(){
+            return evaluate(page, function(){
                 var resultElem = document.querySelector(".html-reporter .alert .bar");
                 if (!resultElem) {
                     resultElem = document.querySelector(".jasmine_html-reporter .alert .bar");
