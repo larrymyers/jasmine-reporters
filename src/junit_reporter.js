@@ -108,7 +108,11 @@
         self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
-        self.filePrefix = options.filePrefix || (self.consolidateAll ? 'junitresults' : 'junitresults-');
+        if (self.consolidateAll) {
+            self.filePrefix = options.filePrefix || 'junitresults';
+        } else {
+            self.filePrefix = typeof options.filePrefix === 'string' ? options.filePrefix : 'junitresults-';
+        }
         self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
 
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
