@@ -121,6 +121,7 @@
 
         var delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
+        delegates.systemOut = options.systemOut;
 
         var suites = [],
             currentSuite = null,
@@ -344,8 +345,12 @@
                 }
             }
 
-            if (testCaseBody) {
-                xml += '>' + testCaseBody + '\n  </testcase>';
+            if (testCaseBody || delegates.systemOut) {
+                xml += '>' + testCaseBody;
+                if (delegates.systemOut) {
+                    xml += '\n   <system-out>' + trim(escapeInvalidXmlChars(delegates.systemOut(spec, getFullyQualifiedSuiteName(spec._suite, true)))) + '</system-out>';
+                }
+                xml += '\n  </testcase>';
             } else {
                 xml += ' />';
             }
