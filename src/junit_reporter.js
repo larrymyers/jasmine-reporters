@@ -332,7 +332,11 @@
 
             var testCaseBody = '';
             if (isSkipped(spec) || isDisabled(spec)) {
-                testCaseBody = '\n   <skipped />';
+                if (spec.pendingReason) {
+                    testCaseBody = '\n   <skipped message="' + trim(escapeInvalidXmlChars(spec.pendingReason)) + '" />';
+                } else {
+                    testCaseBody = '\n   <skipped />';
+                }
             } else if (isFailed(spec)) {
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     failure = spec.failedExpectations[i];
