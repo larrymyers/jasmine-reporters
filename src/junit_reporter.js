@@ -92,11 +92,14 @@
      *     this becomes the actual filename, ie "junitresults.xml"
      * @param {string} [package] is the base package for all test suits that are
      *   handled by this report {default: none}
-     * @param {modifySuiteName} [modifySuiteName] a delegate for letting the consumer
+     * @param {function} [modifySuiteName] a delegate for letting the consumer
      *   modify the suite name when it is used inside the junit report and as a file
      *   name. This is useful when running a test suite against multiple capabilities
      *   because the report can have unique names for each combination of suite/spec
      *   and capability/test environment.
+     * @param {function} [systemOut] a delegate for letting the consumer add content
+     *   to a <system-out> tag as part of each <testcase> spec output. If provided,
+     *   it is invoked with the spec object and the fully qualified suite as filename.
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
@@ -118,9 +121,13 @@
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
         }
+        if(options.systemOut && typeof options.systemOut !== 'function') {
+            throw new Error('option "systemOut" must be a function');
+        }
 
         var delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
+        delegates.systemOut = options.systemOut;
 
         var suites = [],
             currentSuite = null,
@@ -348,8 +355,12 @@
                 }
             }
 
-            if (testCaseBody) {
-                xml += '>' + testCaseBody + '\n  </testcase>';
+            if (testCaseBody || delegates.systemOut) {
+                xml += '>' + testCaseBody;
+                if (delegates.systemOut) {
+                    xml += '\n   <system-out>' + trim(escapeInvalidXmlChars(delegates.systemOut(spec, getFullyQualifiedSuiteName(spec._suite, true)))) + '</system-out>';
+                }
+                xml += '\n  </testcase>';
             } else {
                 xml += ' />';
             }
