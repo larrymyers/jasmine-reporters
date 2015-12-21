@@ -1,6 +1,6 @@
 {
   "name": "jasmine-reporters",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "homepage": "https://github.com/larrymyers/jasmine-reporters",
   "description": "Miscellaneous reporters for Jasmine 2.x.",
   "moduleType": [
