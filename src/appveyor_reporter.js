@@ -8,6 +8,7 @@
         exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
 
+    function elapsed(start, end) { return (end - start); }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
     function isDisabled(obj) { return obj.status === "disabled"; }
@@ -22,8 +23,8 @@
      * 
      * @param {object} [options]
      * @param {number} [options.batchSize] spec batch size to report to AppVeyor (default: 50)
-     * @param {number} [options.verbosity] meaningful values are 0 through 2; anything above
-     *  greater is treated as 2 (default: 0)
+     * @param {number} [options.verbosity] meaningful values are 0 through 2; anything
+     *  greater than 2 is treated as 2 (default: 0)
      * @param {boolean} [options.color] print in color or not (default: true)
      */
     var DEFAULT_BATCHSIZE = 50,
@@ -51,7 +52,25 @@
         
         self.unreportedSpecs = [];
         
+        var __specs = {};
+        
         setApi();
+        
+        // performs a shallow copy of all props of `obj` onto `dupe`
+        function extend(dupe, obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    dupe[prop] = obj[prop];
+                }
+            }
+            return dupe;
+        }
+        
+        // add or get excisting spec from __specs dictionary
+        function getSpec(spec) {
+            __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
+            return __specs[spec.id];
+        }
         
         // set API host information
         function setApi() {
@@ -183,7 +202,8 @@
             var result = {
                 testName: spec.fullName,
                 testFramework: "jasmine2",
-            
+                durationMilliseconds: elapsed(spec.__startTime, spec.__endTime),
+                
                 outcome: getOutcome(spec),
                 ErrorMessage: firstFailedExpectation.message,
                 ErrorStackTrace: firstFailedExpectation.stack
@@ -192,10 +212,17 @@
             return result;
         }
         
+        self.specStarted = function(spec) {
+            spec = getSpec(spec);
+            spec.__startTime = new Date();
+        }
+        
         self.specDone = function(spec) {
+            spec = getSpec(spec);
+            spec.__endTime = new Date();
+            
             var avr = mapSpecToResult(spec);
-                        
-            // push spec to unreportes list
+            
             self.unreportedSpecs.push(avr);
             
             if(self.unreportedSpecs.length > self.batchSize) {

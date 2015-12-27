@@ -39,7 +39,7 @@
      * @param {object} [options]
      * @param {number} [options.verbosity] meaningful values are 0 through 3; anything
      *   greater than 3 is treated as 3 (default: 2)
-     * @param {boolean} [options.color] print in color or not (default: true)
+     * @param {boolean} [options.color] print in color or not (default: false)
      * @param {boolean} [options.showStack] show stack trace for failed specs (default: false)
      */
     var DEFAULT_VERBOSITY = 2,
