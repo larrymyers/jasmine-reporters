@@ -1,6 +1,5 @@
 (function(global) {
-    var UNDEFINED,
-        exportObject;
+    var exportObject;
 
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
@@ -13,6 +12,14 @@
     function isSkipped(obj) { return obj.status === "pending"; }
     function isDisabled(obj) { return obj.status === "disabled"; }
     function isPassed(obj) { return obj.status === "passed"; }
+    function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                dupe[prop] = obj[prop];
+            }
+        }
+        return dupe;
+    }
 
     /**
      * Basic reporter that outputs spec results for the AppVeyor build system
@@ -39,33 +46,21 @@
             "blue": 34,
             "magenta": 35,
             "cyan": 36
-        };;
+        };
 
     exportObject.AppVeyorReporter = function(options) {
         var self = this;
 
         self.options = options || {};
-
         self.batchSize = typeof self.options.batchSize === "number" ? self.options.batchSize : DEFAULT_BATCHSIZE;
         self.verbosity = typeof self.options.verbosity === "number" ? self.options.verbosity : DEFAULT_VERBOSITY;
         self.color = typeof self.options.color === "boolean" ? self.options.color : DEFAULT_COLOR;
 
         self.unreportedSpecs = [];
 
-        var __specs = {};
-
         setApi();
 
-        // performs a shallow copy of all props of `obj` onto `dupe`
-        function extend(dupe, obj) {
-            for (var prop in obj) {
-                if (obj.hasOwnProperty(prop)) {
-                    dupe[prop] = obj[prop];
-                }
-            }
-            return dupe;
-        }
-
+        var __specs = {};
         // add or get excisting spec from __specs dictionary
         function getSpec(spec) {
             __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
@@ -108,7 +103,7 @@
                     con.log(str);
                 }
             }
-        }
+        };
 
         function inColor(string, color) {
             var color_attributes = color && color.split("+"),
@@ -159,7 +154,7 @@
 
                 res.on('end', function() {
                     log.debug(inColor('    RESPONSE END', "yellow"));
-                })
+                });
             });
 
             req.on('error', function(e) {
@@ -181,7 +176,7 @@
             }
 
             if(isDisabled(spec)) {
-                outcome = "Ignored"
+                outcome = "Ignored";
             }
 
             if(isSkipped(spec)) {
@@ -215,7 +210,7 @@
         self.specStarted = function(spec) {
             spec = getSpec(spec);
             spec.__startTime = new Date();
-        }
+        };
 
         self.specDone = function(spec) {
             spec = getSpec(spec);
