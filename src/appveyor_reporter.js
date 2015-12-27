@@ -20,7 +20,7 @@
      * Usage:
      *
      * jasmine.getEnv().addReporter(new jasmineReporters.AppVeyorReporter(options));
-     * 
+     *
      * @param {object} [options]
      * @param {number} [options.batchSize] spec batch size to report to AppVeyor (default: 50)
      * @param {number} [options.verbosity] meaningful values are 0 through 2; anything
@@ -40,22 +40,22 @@
             "magenta": 35,
             "cyan": 36
         };;
-    
+
     exportObject.AppVeyorReporter = function(options) {
         var self = this;
-        
+
         self.options = options || {};
-        
+
         self.batchSize = typeof self.options.batchSize === "number" ? self.options.batchSize : DEFAULT_BATCHSIZE;
         self.verbosity = typeof self.options.verbosity === "number" ? self.options.verbosity : DEFAULT_VERBOSITY;
         self.color = typeof self.options.color === "boolean" ? self.options.color : DEFAULT_COLOR;
-        
+
         self.unreportedSpecs = [];
-        
+
         var __specs = {};
-        
+
         setApi();
-        
+
         // performs a shallow copy of all props of `obj` onto `dupe`
         function extend(dupe, obj) {
             for (var prop in obj) {
@@ -65,31 +65,31 @@
             }
             return dupe;
         }
-        
+
         // add or get excisting spec from __specs dictionary
         function getSpec(spec) {
             __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
             return __specs[spec.id];
         }
-        
+
         // set API host information
         function setApi() {
             self.api = {};
             if(process && process.env && process.env.APPVEYOR_API_URL) {
                 var fullUrl = process.env.APPVEYOR_API_URL;
-                
+
                 var urlParts = fullUrl.split("/")[2].split(":");
                 self.api = {
                     host: urlParts[0],
                     port: urlParts[1],
                     endpoint: "/api/tests/batch"
                 };
-            } 
+            }
             else {
                 throw Error("Not running in AppVeyor environment");
             }
         }
-        
+
         // log object to handle verbosity
         var log = {
             info: function(str) {
@@ -102,14 +102,14 @@
                     log.logOutput(str);
                 }
             },
-            logOutput: function(str) {            
+            logOutput: function(str) {
                 var con = global.console || console;
                 if (con && con.log) {
                     con.log(str);
                 }
             }
         }
-        
+
         function inColor(string, color) {
             var color_attributes = color && color.split("+"),
                 ansi_string = "",
@@ -118,7 +118,7 @@
             if (!string || !string.length) {
                 return "";
             }
-            
+
             if (!self.color || !color_attributes) {
                 return string;
             }
@@ -130,13 +130,13 @@
 
             return ansi_string;
         }
-        
+
         // post batch to AppVeyor API
         function postSpecsToAppVeyor() {
             log.info(inColor("Posting spec batch to AppVeyor API", "magenta"));
-            
+
             var postData = JSON.stringify(self.unreportedSpecs);
-            
+
             var options = {
                 host: self.api.host,
                 path: self.api.endpoint,
@@ -146,55 +146,55 @@
                     "Content-Type": "application/json"
                 }
             };
-            
+
             var http = require("http");
             var req =  http.request(options, function(res) {
                 log.debug(inColor('  STATUS: ' + res.statusCode, "yellow"));
                 log.debug(inColor('  HEADERS: ' + JSON.stringify(res.headers), "yellow"));
                 res.setEncoding('utf8');
-                
+
                 res.on('data', function (chunk) {
                     log.debug(inColor('  BODY: ' + chunk, "yellow"));
                 });
-                
+
                 res.on('end', function() {
                     log.debug(inColor('    RESPONSE END', "yellow"));
                 })
             });
-            
+
             req.on('error', function(e) {
                 log.debug(inColor('API request error: ' + e.message, "red"));
             });
 
             req.write(postData);
             req.end();
-            
+
             self.unreportedSpecs = [];
         }
-        
+
         // detect spec outcome and return AppVeyor literals
         function getOutcome(spec) {
             var outcome = "None";
-            
+
             if(isFailed(spec)) {
                 outcome = "Failed";
             }
-            
+
             if(isDisabled(spec)) {
                 outcome = "Ignored"
             }
-            
+
             if(isSkipped(spec)) {
                 outcome = "Skipped";
             }
-            
+
             if(isPassed(spec)) {
                 outcome = "Passed";
             }
-            
+
             return outcome;
         }
-        
+
         // map jasmine spec to AppVeyor test result
         function mapSpecToResult(spec) {
             var firstFailedExpectation = spec.failedExpectations[0] || {};
@@ -203,38 +203,38 @@
                 testName: spec.fullName,
                 testFramework: "jasmine2",
                 durationMilliseconds: elapsed(spec.__startTime, spec.__endTime),
-                
+
                 outcome: getOutcome(spec),
                 ErrorMessage: firstFailedExpectation.message,
                 ErrorStackTrace: firstFailedExpectation.stack
             };
-            
+
             return result;
         }
-        
+
         self.specStarted = function(spec) {
             spec = getSpec(spec);
             spec.__startTime = new Date();
         }
-        
+
         self.specDone = function(spec) {
             spec = getSpec(spec);
             spec.__endTime = new Date();
-            
+
             var avr = mapSpecToResult(spec);
-            
+
             self.unreportedSpecs.push(avr);
-            
+
             if(self.unreportedSpecs.length > self.batchSize) {
                 postSpecsToAppVeyor();
             }
         };
-        
+
         self.jasmineDone = function() {
             if(self.unreportedSpecs.length > 0) {
                 postSpecsToAppVeyor();
             }
-            
+
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = new Date();
         };
