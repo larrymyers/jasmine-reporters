@@ -161,3 +161,23 @@ onPrepare: function() {
     });
 }
 ```
+
+# TeamCity
+
+To customize the teamcity report:
+
+```javascript
+onPrepare: function() {
+    var jasmineReporters = require('jasmine-reporters');
+
+    // returning the promise makes protractor wait for the reporter config before executing tests
+    return browser.getProcessedConfig().then(function(config) {
+        jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter({
+            id: 'UI tests',
+            description: 'functional tests',
+            fullName: 'App UI tests',
+            prefix: browserName + ':'
+        }));
+    });
+}
+```

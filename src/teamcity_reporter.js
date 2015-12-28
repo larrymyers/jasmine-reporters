@@ -44,20 +44,27 @@
      *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter());
+     * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter(options));
+     *
+     * @param {object} [options]
+     * @param {string} [options.id] id of the suite (default: 'focused')
+     * @param {string} [options.description] description of the suite (default: 'focused specs')
+     * @param {string} [options.fullName] fullName of the suite (default: 'focused specs')
+     * @param {string} [options.prefix] prefix for the suite and scenarios (default: '')
      */
-    exportObject.TeamCityReporter = function() {
+    exportObject.TeamCityReporter = function(options) {
         var self = this;
         self.started = false;
         self.finished = false;
+        self.prefix = options.prefix || '';
 
         var currentSuite = null,
             totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: options.id || 'focused',
+                description: options.description || 'focused specs',
+                fullName: options.fullName || 'focused specs'
             };
 
         var __suites = {}, __specs = {};
@@ -81,7 +88,7 @@
             suite._parent = currentSuite;
             currentSuite = suite;
             tclog("testSuiteStarted", {
-                name: suite.description
+                name: self.prefix + suite.description
             });
         };
         self.specStarted = function(spec) {
@@ -91,7 +98,7 @@
             }
             spec = getSpec(spec);
             tclog("testStarted", {
-                name: spec.description,
+                name: self.prefix + spec.description,,
                 captureStandardOutput: 'true'
             });
         };
@@ -99,7 +106,7 @@
             spec = getSpec(spec);
             if (isSkipped(spec) || isDisabled(spec)) {
                 tclog("testIgnored", {
-                    name: spec.description
+                    name: self.prefix + spec.description,
                 });
             }
             // TeamCity specifies there should only be a single `testFailed`
@@ -107,13 +114,13 @@
             if (isFailed(spec) && spec.failedExpectations.length) {
                 var failure = spec.failedExpectations[0];
                 tclog("testFailed", {
-                    name: spec.description,
+                    name: self.prefix + spec.description,
                     message: failure.message,
                     details: failure.stack
                 });
             }
             tclog("testFinished", {
-                name: spec.description
+                name: self.prefix + spec.description,
             });
         };
         self.suiteDone = function(suite) {
@@ -123,7 +130,7 @@
                 self.suiteStarted(suite);
             }
             tclog("testSuiteFinished", {
-                name: suite.description
+                name: self.prefix + suite.description,
             });
             currentSuite = suite._parent;
         };
@@ -142,7 +149,7 @@
 
     // shorthand for logging TeamCity messages
     function tclog(message, attrs) {
-        var str = "##teamcity[" + message;
+        var str = "##teamcity[" + self.prefix + message;
         if (typeof(attrs) === "object") {
             if (!("timestamp" in attrs)) {
                 attrs.timestamp = new Date();
