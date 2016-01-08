@@ -6,7 +6,8 @@
         var s = new jasmine.Spec({
             env: env,
             id: specId++,
-            description: name
+            description: name,
+            queueableFn : {}
         });
         ste.addChild(s);
         return s;
@@ -35,10 +36,14 @@
     }
 
     // make sure reporter is set before calling this
-    function triggerRunnerEvents() {
+    // use callback to execute code during test execution (e.g. to generate test output)
+    function triggerRunnerEvents(callback) {
         reporter.jasmineStarted();
         for (var i=0; i<env._suites.length; i++) {
             var s = env._suites[i];
+            if(callback && typeof(callback) === 'function') {
+                callback();
+            }
             triggerSuiteEvents(s);
         }
         reporter.jasmineDone();
@@ -365,6 +370,24 @@
                 });
                 itShouldHaveOneTestsuitesElementPerFile();
                 itShouldIncludeXmlPreambleInAllFiles();
+            });
+
+            describe("captures stdout in <xml-output>", function(){
+                var specOutputs;
+                const testOutput = "I'm generating test output.";
+                beforeEach(function(){
+                    setupReporterWithOptions( {consolidateAll:true, consolidate:true, captureStdout: true});
+                    triggerRunnerEvents(function() {
+                        console.log(testOutput);
+                    });
+                    specOutputs = writeCalls[0].xmldoc.getElementsByTagName('system-out');
+                });
+                it("should record stdout", function() {
+                    expect(specOutputs[0].textContent).toContain(testOutput);
+                });
+                it("should discard any stdout for skipped tests", function() {
+                    expect(specOutputs[3].textContent).not.toContain(testOutput);
+                });
             });
         });
     });
