@@ -65,7 +65,7 @@
                             var j = 0;
                             var s;
                             while (s = stack[j++]) {
-                                if (!at_line && ! s.match(/jasmine/gi) ) {
+                                if (! s.match(/jasmine/gi) ) {
                                     var m = s.match(/https?:\/\/[^\/]+\/(.*):([0-9]+):[0-9]+$/);
                                     at_line = ' ( At line ' + m[2] + ' in file ' + m[1] + ' )';
                                 }
@@ -76,7 +76,9 @@
                         }
                         else {
                             errorMessage.push('#  ' + expectationResult.message);
-                            errorMessage.push('#  Stacktrace: ' + expectationResult.trace.stack);
+                            if (expectationResult.trace.stack) {
+                                errorMessage.push('#  Stacktrace: ' + expectationResult.trace.stack);
+                            }
                         }
                     }
                 }
