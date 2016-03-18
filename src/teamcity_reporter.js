@@ -51,11 +51,11 @@
         self.started = false;
         self.finished = false;
 		
-		if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+        if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
         }
 		
-		delegates = {};
+        delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
 
         var currentSuite = null,
@@ -156,9 +156,9 @@
             }
             for (var prop in attrs) {
                 if (attrs.hasOwnProperty(prop)) {
-					if(delegates.modifySuiteName && prop === 'name') {
-						attrs[prop] = delegates.modifySuiteName(attrs[prop]);
-					}
+                    if(delegates.modifySuiteName && prop === 'name') {
+                        attrs[prop] = delegates.modifySuiteName(attrs[prop]);
+                    }
                     str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
                 }
             }
