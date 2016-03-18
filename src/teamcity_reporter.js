@@ -1,6 +1,6 @@
 (function(global) {
     var UNDEFINED,
-        exportObject;
+        exportObject, delegates;
 
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
@@ -46,10 +46,17 @@
      *
      * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter());
      */
-    exportObject.TeamCityReporter = function() {
+    exportObject.TeamCityReporter = function(options) {
         var self = this;
         self.started = false;
         self.finished = false;
+		
+		if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+            throw new Error('option "modifySuiteName" must be a function');
+        }
+		
+		delegates = {};
+        delegates.modifySuiteName = options.modifySuiteName;
 
         var currentSuite = null,
             totalSpecsDefined,
@@ -149,6 +156,9 @@
             }
             for (var prop in attrs) {
                 if (attrs.hasOwnProperty(prop)) {
+					if(delegates.modifySuiteName && prop === 'name') {
+						attrs[prop] = delegates.modifySuiteName(attrs[prop]);
+					}
                     str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
                 }
             }
