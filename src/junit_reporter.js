@@ -303,7 +303,7 @@
             } else {
 
                 if(delegates.modifySuiteName) {
-                    fullName = options.modifySuiteName(fullName, suite);
+                    fullName = delegates.modifySuiteName(fullName, suite);
                 }
 
                 return escapeInvalidXmlChars(fullName);
