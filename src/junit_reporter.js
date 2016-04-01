@@ -287,6 +287,10 @@
                 fullName = suite.fullName;
             }
 
+            if(delegates.modifySuiteName) {
+                fullName = options.modifySuiteName(fullName, suite);
+            }
+
             // Either remove or escape invalid XML characters
             if (isFilename) {
                 var fileName = "",
@@ -301,10 +305,6 @@
                 }
                 return fileName;
             } else {
-
-                if(delegates.modifySuiteName) {
-                    fullName = options.modifySuiteName(fullName, suite);
-                }
 
                 return escapeInvalidXmlChars(fullName);
             }
