@@ -134,7 +134,7 @@
                 resultText = '';
             if (isSkipped(spec)) {
                 skipped = true;
-                color = '';
+                color = 'cyan';
                 spec._suite._skipped++;
                 totalSpecsSkipped++;
             }
@@ -158,6 +158,15 @@
                 resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : disabled ? 'Disabled' : 'Passed');
             }
             log(inColor(resultText, color));
+
+            if (skipped && spec.pendingReason) {
+              if (self.verbosity > 2) {
+                log(indentWithLevel(spec._depth, inColor(spec.pendingReason, color)));
+              }
+              else {
+                log(inColor(spec.pendingReason, color));
+              }
+            }
 
             if (failed) {
                 if (self.verbosity === 1) {
