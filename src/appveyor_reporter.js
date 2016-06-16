@@ -119,9 +119,9 @@
             }
 
             for(i = 0; i < color_attributes.length; i++) {
-                ansi_string += "\033[" + ATTRIBUTES_TO_ANSI[color_attributes[i]] + "m";
+                ansi_string += "\u001b[" + ATTRIBUTES_TO_ANSI[color_attributes[i]] + "m";
             }
-            ansi_string += string + "\033[" + ATTRIBUTES_TO_ANSI["off"] + "m";
+            ansi_string += string + "\u001b[" + ATTRIBUTES_TO_ANSI["off"] + "m";
 
             return ansi_string;
         }

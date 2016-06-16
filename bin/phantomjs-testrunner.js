@@ -72,7 +72,7 @@ else {
  * @param msg
  */
 function logAndWorkAroundDefaultLineBreaking(msg) {
-    var interpretAsWithoutNewline = /(^(\033\[\d+m)*[\.F](\033\[\d+m)*$)|( \.\.\.$)/;
+    var interpretAsWithoutNewline = /(^(\u001b\[\d+m)*[\.F](\u001b\[\d+m)*$)|( \.\.\.$)/;
     if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
         try {
             system.stdout.write(msg);
