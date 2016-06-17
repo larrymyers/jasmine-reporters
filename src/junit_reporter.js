@@ -36,7 +36,8 @@
             .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;");
+            .replace(/\'/g, "&apos;")
+            .replace(/[\x1b]/g, ""); //Remove control character from Jasmine default output
     }
     function getQualifiedFilename(path, filename, separator) {
         if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
@@ -49,6 +50,41 @@
         if (con && con.log) {
             con.log(str);
         }
+    }
+    /** Hooks into either process.stdout (node) or console.log, if that is not
+     *  available (see https://gist.github.com/pguillory/729616).
+     */
+    function hook_stdout(callback) {
+        var old_write;
+        var useProcess;
+        if(typeof(process)!=="undefined") {
+            old_write = process.stdout.write;
+            useProcess = true;
+            process.stdout.write = (function(write) {
+                return function(string, encoding, fd) {
+                    write.apply(process.stdout, arguments);
+                    callback(string, encoding, fd);
+                };
+            })(old_write);
+        }
+        else {
+            old_write = console.log.bind(console);
+            useProcess = false;
+            console.log = (function(write) {
+                return function(string) {
+                    write.apply(string);
+                    callback(string, 'utf8');
+                };
+            })(old_write);
+        }
+        return function() {
+            if(useProcess) {
+                process.stdout.write = old_write;
+            }
+            else {
+                console.log = old_write;
+            }
+        };
     }
 
     /**
@@ -120,6 +156,9 @@
      * @param {function} [systemOut] a delegate for letting the consumer add content
      *   to a <system-out> tag as part of each <testcase> spec output. If provided,
      *   it is invoked with the spec object and the fully qualified suite as filename.
+     * @param {boolean} [captureStdout] enables capturing all output from stdout as spec output in the
+     * xml-output elements of the junit reports {default: false}. If a systemOut delegate is defined and captureStdout
+     * is true, the output of the spec can be accessed via spec._stdout
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
@@ -149,10 +188,20 @@
             throw new Error('option "systemOut" must be a function');
         }
 
+        self.captureStdout = options.captureStdout || false;
+        if(self.captureStdout && !options.systemOut) {
+            options.systemOut = function (spec, specName) { // jshint ignore:line
+                return spec._stdout;
+            };
+        }
+        self.removeStdoutWrapper = undefined;
+
         var delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
         delegates.modifyReportFileName = options.modifyReportFileName;
         delegates.systemOut = options.systemOut;
+
+        self.logEntries = [];
 
         var suites = [],
             currentSuite = null,
@@ -179,6 +228,11 @@
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             exportObject.startTime = new Date();
             self.started = true;
+            if(self.captureStdout) {
+                self.removeStdoutWrapper = hook_stdout(function(string, encoding, fd) { // jshint ignore:line
+                    self.logEntries.push(string);
+                });
+            }
         };
         self.suiteStarted = function(suite) {
             suite = getSuite(suite);
@@ -204,11 +258,13 @@
             spec = getSpec(spec);
             spec._startTime = new Date();
             spec._suite = currentSuite;
+            spec._stdout = "";
             currentSuite._specs.push(spec);
         };
         self.specDone = function(spec) {
             spec = getSpec(spec);
             spec._endTime = new Date();
+            storeOutput(spec);
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isDisabled(spec)) { spec._suite._disabled++; }
             if (isFailed(spec)) { spec._suite._failures += spec.failedExpectations.length; }
@@ -241,6 +297,9 @@
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = new Date();
+            if(self.removeStdoutWrapper) {
+                self.removeStdoutWrapper();
+            }
         };
 
         self.getOrWriteNestedOutput = function(suite) {
@@ -393,6 +452,14 @@
                 xml += ' />';
             }
             return xml;
+        }
+        function storeOutput(spec) {
+            if(self.captureStdout && !isSkipped(spec)) {
+                if(!isSkipped(spec) && !isDisabled(spec)) {
+                    spec._stdout = self.logEntries.join("") + "\n";
+                }
+                self.logEntries.splice(0, self.logEntries.length);
+            }
         }
 
         // To remove complexity and be more DRY about the silly preamble and <testsuites> element
