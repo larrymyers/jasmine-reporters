@@ -47,6 +47,7 @@
      * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter());
      */
     exportObject.TeamCityReporter = function(options) {
+        options = options || {};
         var self = this;
         self.started = false;
         self.finished = false;
