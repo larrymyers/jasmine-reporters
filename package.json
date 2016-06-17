@@ -5,6 +5,9 @@
   "version": "2.1.1",
   "homepage": "https://github.com/larrymyers/jasmine-reporters",
   "maintainers": "Ben Loveridge <bloveridge@gmail.com>",
+  "scripts": {
+    "test": "jasmine"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/larrymyers/jasmine-reporters.git"
