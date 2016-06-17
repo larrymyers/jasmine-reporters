@@ -67,6 +67,7 @@
                             while (s = stack[j++]) {
                                 if (! s.match(/jasmine/gi) ) {
                                     var m = s.match(/https?:\/\/[^\/]+\/(.*):([0-9]+):[0-9]+$/);
+                                    if (!m) { continue; }
                                     at_line = ' ( At line ' + m[2] + ' in file ' + m[1] + ' )';
                                 }
                             }
