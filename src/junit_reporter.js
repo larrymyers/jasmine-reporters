@@ -53,13 +53,25 @@
 
     /**
      * A delegate for letting the consumer
-     * modify the suite name when it is used inside the junit report and as a file
-     * name. This is useful when running a test suite against multiple capabilities
+     * modify the suite name when it is used inside the junit report.
+     * This is useful when running a test suite against multiple capabilities
      * because the report can have unique names for each combination of suite/spec
      * and capability/test environment.
      *
      * @callback modifySuiteName
      * @param {string} fullName
+     * @param {object} suite
+     */
+
+    /**
+     * A delegate for letting the consumer
+     * modify the report filename when it is used inside the junit report.
+     * This is useful when running a test suite against multiple capabilities
+     * because the report can have unique names for each combination of suite/spec
+     * and capability/test environment.
+     *
+     * @callback modifyReportFileName
+     * @param {string} suggestedName
      * @param {object} suite
      */
 
@@ -93,8 +105,13 @@
      * @param {string} [package] is the base package for all test suits that are
      *   handled by this report {default: none}
      * @param {function} [modifySuiteName] a delegate for letting the consumer
-     *   modify the suite name when it is used inside the junit report and as a file
-     *   name. This is useful when running a test suite against multiple capabilities
+     *   modify the suite name when it is used inside the junit report.
+     *   This is useful when running a test suite against multiple capabilities
+     *   because the report can have unique names for each combination of suite/spec
+     *   and capability/test environment.
+     * @param {function} [modifyReportFileName] a delegate for letting the consumer
+     *   modify the report filename.
+     *   This is useful when running a test suite against multiple capabilities
      *   because the report can have unique names for each combination of suite/spec
      *   and capability/test environment.
      * @param {function} [systemOut] a delegate for letting the consumer add content
@@ -121,12 +138,16 @@
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
         }
+        if(options.modifyReportFileName && typeof options.modifyReportFileName !== 'function') {
+            throw new Error('option "modifyReportFileName" must be a function');
+        }
         if(options.systemOut && typeof options.systemOut !== 'function') {
             throw new Error('option "systemOut" must be a function');
         }
 
         var delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
+        delegates.modifyReportFileName = options.modifyReportFileName;
         delegates.systemOut = options.systemOut;
 
         var suites = [],
@@ -298,6 +319,9 @@
                     if (rFileChars.test(chr)) {
                         fileName += chr;
                     }
+                }
+                if(delegates.modifyReportFileName) {
+                    fileName = delegates.modifyReportFileName(fileName, suite);
                 }
                 return fileName;
             } else {
