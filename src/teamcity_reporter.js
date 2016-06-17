@@ -157,7 +157,7 @@
                 }
                 for (var prop in attrs) {
                     if (attrs.hasOwnProperty(prop)) {
-                        if(delegates.modifySuiteName && prop === 'name') {
+                        if(delegates.modifySuiteName && message.indexOf('testSuite') === 0 && prop === 'name') {
                             attrs[prop] = delegates.modifySuiteName(attrs[prop]);
                         }
                         str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
