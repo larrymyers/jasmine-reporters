@@ -39,7 +39,7 @@
 
         reportSpecResults: function(spec) {
             var resultText = "not ok";
-            var errorMessage = '';
+            var errorMessage = [];
 
             var results = spec.results();
             if (results.skipped) {
@@ -56,16 +56,37 @@
             } else {
                 var items = results.getItems();
                 var i = 0;
-                var expectationResult, stackMessage;
+                var expectationResult;
                 while (expectationResult = items[i++]) {
                     if (expectationResult.trace) {
-                        stackMessage = expectationResult.trace.stack? expectationResult.trace.stack : expectationResult.message;
-                        errorMessage += '\n  '+ stackMessage;
+                        var at_line;
+                        if (expectationResult.trace.stack) {
+                            var stack = expectationResult.trace.stack.split('\n');
+                            var j = 0;
+                            var s;
+                            while (s = stack[j++]) {
+                                if (! s.match(/jasmine/gi) ) {
+                                    var m = s.match(/https?:\/\/[^\/]+\/(.*):([0-9]+):[0-9]+$/);
+                                    if (!m) { continue; }
+                                    at_line = ' ( At line ' + m[2] + ' in file ' + m[1] + ' )';
+                                }
+                            }
+                        }
+                        if (at_line) {
+                            errorMessage.push('#  ' + expectationResult.message + at_line);
+                        }
+                        else {
+                            errorMessage.push('#  ' + expectationResult.message);
+                            if (expectationResult.trace.stack) {
+                                errorMessage.push('#  Stacktrace: ' + expectationResult.trace.stack);
+                            }
+                        }
                     }
                 }
             }
 
-            this.log(resultText +" "+ (spec.id + 1) +" - "+ spec.suite.description +" : "+ spec.description + errorMessage);
+            var errorMessageText = errorMessage.length > 0 ? ("\n" + errorMessage.join("\n")) : '';
+            this.log(resultText +" "+ (spec.id + 1) +" - "+ spec.suite.description +" : "+ spec.description + errorMessageText);
         },
 
         reportRunnerResults: function(runner) {
