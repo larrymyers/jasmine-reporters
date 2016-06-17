@@ -1,12 +1,16 @@
-/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect, spyOn */
-(function(){
+/* globals jasmine, describe, beforeEach, it, expect */
+// (function(){
+    var jasmineReporters = require('../index');
+    var DOMParser = require('xmldom').DOMParser;
+
     var env, suite, subSuite, subSubSuite, siblingSuite,
-        reporter, writeCalls, suiteId=0, specId=0;
+        reporter, writeCalls, suiteId=0, specId=0, noop=function(){};
     function fakeSpec(ste, name) {
         var s = new jasmine.Spec({
             env: env,
             id: specId++,
-            description: name
+            description: name,
+            queueableFn: {fn: noop},
         });
         ste.addChild(s);
         return s;
@@ -132,13 +136,13 @@
                 xmldoc = writeCalls[0].xmldoc;
             });
             it("should escape invalid xml chars from report name", function() {
-                expect(output).toContain('name="&amp;lt;Bad Character Report&amp;gt;"');
+                expect(output).toContain('name="&lt;Bad Character Report&gt;"');
             });
             it("should escape invalid xml chars from suite names", function() {
-                expect(output).toContain('name="SiblingSuite With Invalid Chars &amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos; | : \\ /"');
+                expect(output).toContain('name="SiblingSuite With Invalid Chars &amp; &lt; &gt; &quot; &apos; | : \\ /"');
             });
             it("should escape invalid xml chars from spec names", function() {
-                expect(output).toContain('name="should be a dummy with invalid characters: &amp; &amp;lt; &amp;gt;');
+                expect(output).toContain('name="should be a dummy with invalid characters: &amp; &lt; &gt;');
             });
             describe("xml structure", function() {
                 var rootNode, suites, specs;
@@ -210,5 +214,5 @@
             });
         });
     });
-})();
+// })();
 

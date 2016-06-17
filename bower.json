@@ -27,6 +27,6 @@
     "tests"
   ],
   "dependencies": {
-    "jasmine-core": "jasmine#~2.3.4"
+    "jasmine-core": "~2.4.1"
   }
 }

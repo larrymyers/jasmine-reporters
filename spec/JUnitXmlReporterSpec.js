@@ -1,12 +1,16 @@
-/* globals jasmine, jasmineReporters, describe, beforeEach, it, expect */
-(function(){
+/* globals jasmine, describe, beforeEach, it, expect */
+// (function(){
+    var jasmineReporters = require('../index');
+    var DOMParser = require('xmldom').DOMParser;
+
     var env, spec, suite,
-        reporter, writeCalls, suiteId=0, specId=0;
+        reporter, writeCalls, suiteId=0, specId=0, noop=function(){};
     function fakeSpec(ste, name) {
         var s = new jasmine.Spec({
             env: env,
             id: specId++,
-            description: name
+            description: name,
+            queueableFn: {fn: noop},
         });
         ste.addChild(s);
         return s;
@@ -231,7 +235,7 @@
                 it("should remove invalid xml chars from the classname", function() {
                     setupReporterWithOptions({consolidateAll:true, consolidate:true});
                     triggerRunnerEvents();
-                    expect(writeCalls[0].output).toContain("SiblingSuite With Invalid Chars &amp;lt; &amp; &amp;gt; &amp;quot; &amp;apos; | : \\ /");
+                    expect(writeCalls[0].output).toContain("SiblingSuite With Invalid Chars &lt; &amp; &gt; &quot; &apos; | : \\ /");
                 });
                 describe("useDotNotation=true", function() {
                     beforeEach(function() {
@@ -288,7 +292,7 @@
                         setupReporterWithOptions({});
                         triggerRunnerEvents();
                         suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
-                        expect(suites[0].getAttribute('package')).toBeNull();
+                        expect(suites[0].getAttribute('package')).toBe('');
                     });
                     it("should include the package attribute if a string is provided", function() {
                         setupReporterWithOptions({package:"testPackage"});
@@ -319,7 +323,7 @@
                     expect(specs[4].getAttribute('name')).toBe('should be failed two levels down');
                 });
                 it("should escape bad xml characters in spec description", function() {
-                    expect(writeCalls[0].output).toContain("&amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos;");
+                    expect(writeCalls[0].output).toContain("&amp; &lt; &gt; &quot; &apos;");
                 });
                 it("should calculate duration", function() {
                     expect(Number(specs[0].getAttribute('time'))).not.toEqual(NaN);
@@ -348,7 +352,7 @@
                     setupReporterWithOptions({
                         consolidateAll:true,
                         consolidate:true,
-                        modifySuiteName:function(generatedName, suite) {
+                        modifySuiteName:function(generatedName/*, suite*/) {
                             return generatedName + modification;
                         }
                     });
@@ -356,9 +360,26 @@
                     suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
                 });
                 it("should construct suitenames that contain modification", function() {
-                    suites.forEach(function(suite) {
+                    for (var i = 0, suite; i < suites.length; i++) {
+                        suite = suites[i];
                         expect(suite.getAttribute('name')).toContain(modification);
+                    }
+                });
+                itShouldHaveOneTestsuitesElementPerFile();
+                itShouldIncludeXmlPreambleInAllFiles();
+            });
+
+            describe("modifyReportFileName", function(){
+                var modification = '-modified';
+                beforeEach(function(){
+                    // consolidateAll becomes a noop, we include it specifically to passively test that
+                    setupReporterWithOptions({
+                        consolidateAll:false,
+                        modifyReportFileName:function(generatedName/*, suite*/) {
+                            return generatedName + modification;
+                        }
                     });
+                    triggerRunnerEvents();
                 });
                 it("should construct filenames that contain modification", function() {
                     expect(writeCalls[0].args[0]).toContain(modification);
@@ -368,4 +389,4 @@
             });
         });
     });
-})();
+// })();
