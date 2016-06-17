@@ -80,7 +80,7 @@ describe("NUnitXmlReporter", function(){
         subSuite = fakeSuite("SubSuite", suite);
         subSubSuite = fakeSuite("SubSubSuite", subSuite);
         siblingSuite = fakeSuite("SiblingSuite With Invalid Chars & < > \" ' | : \\ /");
-        var spec = fakeSpec(suite, "should be a dummy with invalid characters: & < >");
+        fakeSpec(suite, "should be a dummy with invalid characters: & < >");
         var failedSpec = fakeSpec(subSubSuite, "should be failed");
         failedSpec.result.status = "failed";
         failedSpec.result.failedExpectations.push({
@@ -91,11 +91,11 @@ describe("NUnitXmlReporter", function(){
             matcherName: 'toBe',
             stack: "Stack trace! Stack trackes are cool & can have \"special\" characters <3\n\n Neat: yes."
         });
-        var subSpec = fakeSpec(subSuite, "should be one level down");
-        var subSubSpec1 = fakeSpec(subSubSuite, "(1) should be two levels down");
-        var subSubSpec2 = fakeSpec(subSubSuite, "(2) should be two levels down");
-        var subSubSpec3 = fakeSpec(subSubSuite, "(3) should be two levels down");
-        var siblingSpec = fakeSpec(siblingSuite, "should be a sibling of Parent");
+        fakeSpec(subSuite, "should be one level down");
+        fakeSpec(subSubSuite, "(1) should be two levels down");
+        fakeSpec(subSubSuite, "(2) should be two levels down");
+        fakeSpec(subSubSuite, "(3) should be two levels down");
+        fakeSpec(siblingSuite, "should be a sibling of Parent");
         setupReporterWithOptions({reportName: "<Bad Character Report>"});
     });
 
@@ -151,7 +151,6 @@ describe("NUnitXmlReporter", function(){
                 specs = rootNode.getElementsByTagName("test-case");
             });
             it("should report the date / time that the tests were run", function() {
-                var now = new Date();
                 expect(rootNode.getAttribute("date")).toMatch(/\d{4}-\d{2}-\d{2}/);
                 expect(rootNode.getAttribute("time")).toMatch(/\d{2}:\d{2}:\d{2}/);
             });

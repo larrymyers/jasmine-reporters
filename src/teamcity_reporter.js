@@ -46,10 +46,18 @@
      *
      * jasmine.getEnv().addReporter(new jasmineReporters.TeamCityReporter());
      */
-    exportObject.TeamCityReporter = function() {
+    exportObject.TeamCityReporter = function(options) {
+        options = options || {};
         var self = this;
         self.started = false;
         self.finished = false;
+
+        if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+            throw new Error('option "modifySuiteName" must be a function');
+        }
+
+        var delegates = {};
+        delegates.modifySuiteName = options.modifySuiteName;
 
         var currentSuite = null,
             totalSpecsDefined,
@@ -138,24 +146,29 @@
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = new Date();
         };
-    };
 
-    // shorthand for logging TeamCity messages
-    function tclog(message, attrs) {
-        var str = "##teamcity[" + message;
-        if (typeof(attrs) === "object") {
-            if (!("timestamp" in attrs)) {
-                attrs.timestamp = new Date();
-            }
-            for (var prop in attrs) {
-                if (attrs.hasOwnProperty(prop)) {
-                    str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
+        // shorthand for logging TeamCity messages
+        // defined here because it needs access to the `delegates` closure variable
+        function tclog(message, attrs) {
+            var str = "##teamcity[" + message;
+            if (typeof(attrs) === "object") {
+                if (!("timestamp" in attrs)) {
+                    attrs.timestamp = new Date();
+                }
+                for (var prop in attrs) {
+                    if (attrs.hasOwnProperty(prop)) {
+                        if(delegates.modifySuiteName && message.indexOf('testSuite') === 0 && prop === 'name') {
+                            attrs[prop] = delegates.modifySuiteName(attrs[prop]);
+                        }
+                        str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
+                    }
                 }
             }
+            str += "]";
+            log(str);
         }
-        str += "]";
-        log(str);
-    }
+    };
+
     function escapeTeamCityString(str) {
         if(!str) {
             return "";
