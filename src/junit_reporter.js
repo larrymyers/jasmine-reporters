@@ -137,7 +137,7 @@
             self.filePrefix = typeof options.filePrefix === 'string' ? options.filePrefix : 'junitresults-';
         }
         self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
-        self.stylesheetPath = options.stylesheetPath || '';
+        self.stylesheetPath = typeof(options.stylesheetPath) === 'string' && options.stylesheetPath || UNDEFINED;
 
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
@@ -397,7 +397,7 @@
 
         // To remove complexity and be more DRY about the silly preamble and <testsuites> element
         var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
-        if (self.stylesheetPath.length > 0) {
+        if (self.stylesheetPath) {
             prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
         }
         prefix += '\n<testsuites>';
