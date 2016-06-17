@@ -61,8 +61,8 @@ look for the Jasmine core library.
 bower install
 
 # run any of the examples
-bin/phantomjs.runner.sh test/tap_reporter.html
-bin/phantomjs.runner.sh test/junit_xml_reporter.html
+bin/phantomjs.runner.sh examples/tap_reporter.html
+bin/phantomjs.runner.sh examples/junit_xml_reporter.html
 ```
 
 ### NodeJS
@@ -80,7 +80,7 @@ var junitReporter = new reporters.JUnitXmlReporter({
 
 ### More examples
 
-An example for each reporter is available in the `test` directory.
+An example for each reporter is available in the `examples` directory.
 
 # Changes in jasmine-reporters@2.0
 
@@ -161,3 +161,35 @@ onPrepare: function() {
     });
 }
 ```
+
+You can also use the `modifyReportFileName` option to generate distinct
+filenames when `consolidateAll` is `false`.
+
+```javascript
+multiCapabilities: [
+    {browserName: 'firefox'},
+    {browserName: 'chrome'}
+],
+framework: 'jasmine2',
+onPrepare: function() {
+    var jasmineReporters = require('jasmine-reporters');
+
+    // returning the promise makes protractor wait for the reporter config before executing tests
+    return browser.getProcessedConfig().then(function(config) {
+        // you could use other properties here if you want, such as platform and version
+        var browserName = config.capabilities.browserName;
+
+        var junitReporter = new jasmineReporters.JUnitXmlReporter({
+            consolidateAll: false,
+            savePath: 'testresults',
+            modifyReportFileName: function(generatedFileName, suite) {
+                // this will produce distinct suite names for each capability,
+                // e.g. 'firefox.SuiteName' and 'chrome.SuiteName'
+                return browserName + '.' + generatedFileName;
+            }
+        });
+        jasmine.getEnv().addReporter(junitReporter);
+    });
+}
+```
+
