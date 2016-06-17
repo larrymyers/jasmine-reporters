@@ -183,7 +183,7 @@ onPrepare: function() {
             consolidateAll: false,
             savePath: 'testresults',
             modifyReportFileName: function(generatedFileName, suite) {
-                // this will produce distinct suite names for each capability,
+                // this will produce distinct file names for each capability,
                 // e.g. 'firefox.SuiteName' and 'chrome.SuiteName'
                 return browserName + '.' + generatedFileName;
             }
