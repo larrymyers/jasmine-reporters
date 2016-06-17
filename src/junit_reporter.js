@@ -114,6 +114,9 @@
      *   This is useful when running a test suite against multiple capabilities
      *   because the report can have unique names for each combination of suite/spec
      *   and capability/test environment.
+     * @param {string} [stylesheetPath] is the string value that specifies a path
+     *   to an XSLT stylesheet to add to the junit XML file so that it can be
+     *   opened directly in a browser. (default: none, no xml-stylesheet tag is added)
      * @param {function} [systemOut] a delegate for letting the consumer add content
      *   to a <system-out> tag as part of each <testcase> spec output. If provided,
      *   it is invoked with the spec object and the fully qualified suite as filename.
@@ -134,6 +137,7 @@
             self.filePrefix = typeof options.filePrefix === 'string' ? options.filePrefix : 'junitresults-';
         }
         self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
+        self.stylesheetPath = typeof(options.stylesheetPath) === 'string' && options.stylesheetPath || UNDEFINED;
 
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
@@ -393,6 +397,9 @@
 
         // To remove complexity and be more DRY about the silly preamble and <testsuites> element
         var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
+        if (self.stylesheetPath) {
+            prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
+        }
         prefix += '\n<testsuites>';
         var suffix = '\n</testsuites>';
         function wrapOutputAndWriteFile(filename, text) {

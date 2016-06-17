@@ -130,6 +130,30 @@ describe("JUnitXmlReporter", function(){
                 expect(reporter.package).toBe("testPackage");
             });
         });
+
+        describe("stylesheetPath", function () {
+            it("should default stylesheetPath to undefined", function () {
+                expect(reporter.stylesheetPath).toBeUndefined();
+            });
+            it("should not set stylesheetPath if an empty or non-string is provided", function() {
+                setupReporterWithOptions({stylesheetPath:true});
+                expect(reporter.stylesheetPath).toBeUndefined();
+
+                setupReporterWithOptions({stylesheetPath:''});
+                expect(reporter.stylesheetPath).toBeUndefined();
+            });
+            it("should set output stylesheetPath to the provided string", function () {
+                setupReporterWithOptions({stylesheetPath:"mystyle.xslt"});
+                expect(reporter.stylesheetPath).toBe("mystyle.xslt");
+            });
+            it("should include the stylesheet in all generated output files", function () {
+                setupReporterWithOptions({consolidate: false, stylesheetPath:"mystyle.xslt"});
+                triggerRunnerEvents();
+                writeCalls.forEach(call => {
+                    expect(call.output.indexOf('<?xml-stylesheet type="text/xsl" href="mystyle.xslt"')).toBeGreaterThan(-1);
+                });
+            });
+        });
     });
 
     describe("generated xml output", function(){
