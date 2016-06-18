@@ -134,6 +134,9 @@
      *   NOTE: false also sets consolidateAll to false.
      * @param {boolean} [useDotNotation] whether to separate suite names with
      *   dots instead of spaces, ie "Class.init" not "Class init" (default: true)
+     * @param {boolean} [useFullTestName] whether to use the fully qualified Test
+     *   name for the TestCase name attribute, ie "Suite Name Spec Name" not
+     *   "Spec Name" (default: false)
      * @param {string} [filePrefix] is the string value that is prepended to the
      *   xml output file (default: junitresults-)
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
@@ -170,6 +173,7 @@
         self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
+        self.useFullTestName = options.useFullTestName === UNDEFINED ? false : options.useFullTestName;
         if (self.consolidateAll) {
             self.filePrefix = options.filePrefix || 'junitresults';
         } else {
@@ -359,7 +363,7 @@
         function generateFilename(suite) {
             return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
         }
-
+        
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
             if (self.useDotNotation || isFilename) {
@@ -420,8 +424,10 @@
             return xml;
         }
         function specAsXml(spec) {
+            var testName = self.useFullTestName ? spec.fullName : spec.description;
+            
             var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
-            xml += ' name="' + escapeInvalidXmlChars(spec.description) + '"';
+            xml += ' name="' + escapeInvalidXmlChars(testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
 
             var testCaseBody = '';
