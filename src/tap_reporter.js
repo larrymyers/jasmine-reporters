@@ -94,13 +94,9 @@
                 resultStr = 'not ' + resultStr;
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     failure = spec.failedExpectations[i];
-                    failedStr += '\n  ' + trim(failure.message);
-                    if (failure.stack && failure.stack !== failure.message) {
-                        failedStr += '\n  === STACK TRACE ===';
-                        failedStr += '\n  ' + failure.stack;
-                        failedStr += '\n  === END STACK TRACE ===';
-                    }
+                    failedStr += ' : ' + trim(failure.message).replace(/\n/gm,'');
                 }
+                resultStr += failedStr;
             }
             if (isSkipped(spec)) {
                 totalSpecsSkipped++;
