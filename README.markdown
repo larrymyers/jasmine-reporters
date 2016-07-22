@@ -12,6 +12,7 @@ Included reporters:
 
 * AppVeyor - POSTs results to AppVeyor when running inside an AppVeyor environment.
 * JUnitXmlReporter - Report test results to a file in JUnit XML Report format.
+* SonarXmlReporter - Report test results to a file in Sonar Generic XML Report format.
 * NUnitXmlReporter - Report test results to a file in NUnit XML Report format.
 * TapReporter - Test Anything Protocol, report tests results to console.
 * TeamCityReporter - Basic reporter that outputs spec results to for the Teamcity build system.
