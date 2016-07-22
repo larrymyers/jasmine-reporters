@@ -172,7 +172,7 @@ describe("SonarXmlReporter", function(){
         function itShouldHaveOneTestsuitesElementPerFile() {
             it("should include xml preamble once in all files", function() {
                 for (var i=0; i<writeCalls.length; i++) {
-                    expect(writeCalls[i].xmldoc.getElementsByTagName('files').length).toBe(1);
+                    expect(writeCalls[i].xmldoc.getElementsByTagName('unitTest').length).toBe(1);
                 }
             });
         }
@@ -270,7 +270,7 @@ describe("SonarXmlReporter", function(){
                 });
                 it("should use suite descriptions separated by periods", function() {
                     expect(writeCalls[0].xmldoc.getElementsByTagName('file')[2].getAttribute('path')).toBe('ParentSuite.SubSuite.SubSubSuite');
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testCase')[2].getAttribute('classname')).toBe('ParentSuite.SubSuite.SubSubSuite');
+                    expect(writeCalls[0].xmldoc.getElementsByTagName('testCase')[2].getAttribute('name')).toBe('should be two levels down');
                 });
             });
             describe("useDotNotation=false", function() {
@@ -280,7 +280,7 @@ describe("SonarXmlReporter", function(){
                 });
                 it("should use suite descriptions separated by spaces", function() {
                     expect(writeCalls[0].xmldoc.getElementsByTagName('file')[2].getAttribute('path')).toBe('ParentSuite SubSuite SubSubSuite');
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testCase')[2].getAttribute('classname')).toBe('ParentSuite SubSuite SubSubSuite');
+                    expect(writeCalls[0].xmldoc.getElementsByTagName('testCase')[2].getAttribute('name')).toBe('should be two levels down');
                 });
             });
         });
@@ -293,46 +293,13 @@ describe("SonarXmlReporter", function(){
                 suites = writeCalls[0].xmldoc.getElementsByTagName('file');
             });
             it("should include test suites in order", function() {
-                expect(suites[0].getAttribute('name')).toBe('ParentSuite');
-                expect(suites[1].getAttribute('name')).toContain('SubSuite');
-                expect(suites[2].getAttribute('name')).toContain('SubSubSuite');
-                expect(suites[3].getAttribute('name')).toContain('SiblingSuite');
-            });
-            it("should include total / failed / skipped counts for each suite (ignoring descendent results)", function() {
-                expect(suites[1].getAttribute('tests')).toBe('1');
-                expect(suites[2].getAttribute('tests')).toBe('3');
-                expect(suites[2].getAttribute('skipped')).toBe('1');
-                expect(suites[2].getAttribute('failures')).toBe('1');
+                expect(suites[0].getAttribute('path')).toBe('ParentSuite');
+                expect(suites[1].getAttribute('path')).toContain('SubSuite');
+                expect(suites[2].getAttribute('path')).toContain('SubSubSuite');
+                expect(suites[3].getAttribute('path')).toContain('SiblingSuite');
             });
             it("should calculate duration", function() {
                 expect(Number(suites[0].getAttribute('time'))).not.toEqual(NaN);
-            });
-            it("should include timestamp as an ISO date string without timezone", function() {
-                expect(suites[0].getAttribute('timestamp')).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-            });
-            it("should include hostname, simply because the JUnit XSD says it is required", function() {
-                expect(suites[0].getAttribute('hostname')).toBe('localhost');
-            });
-            describe("package", function() {
-                it("should not include the package attribute if it is not provided", function() {
-                    setupReporterWithOptions({});
-                    triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('file');
-                    expect(suites[0].getAttribute('package')).toBe('');
-                });
-                it("should include the package attribute if a string is provided", function() {
-                    setupReporterWithOptions({package:"testPackage"});
-                    triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('file');
-                    expect(suites[0].getAttribute('package')).toBe("testPackage");
-                });
-                it("should escape the string provided", function() {
-                    setupReporterWithOptions({package:"testPackage <3"});
-                    triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('file');
-                    expect(suites[0].getAttribute('package')).toBe("testPackage <3");
-                    expect(writeCalls[0].output).toContain('package="testPackage &lt;3"');
-                });
             });
         });
 
@@ -353,10 +320,6 @@ describe("SonarXmlReporter", function(){
             });
             it("should calculate duration", function() {
                 expect(Number(specs[0].getAttribute('time'))).not.toEqual(NaN);
-            });
-            it("should include failed matcher name as the failure type", function() {
-                var failure = specs[4].getElementsByTagName('failure')[0];
-                expect(failure.getAttribute('type')).toBe('toBe');
             });
             it("should include failure messages", function() {
                 var failure = specs[4].getElementsByTagName('failure')[0];
@@ -388,7 +351,7 @@ describe("SonarXmlReporter", function(){
             it("should construct suitenames that contain modification", function() {
                 for (var i = 0, suite; i < suites.length; i++) {
                     suite = suites[i];
-                    expect(suite.getAttribute('name')).toContain(modification);
+                    expect(suite.getAttribute('path')).toContain(modification);
                 }
             });
             itShouldHaveOneTestsuitesElementPerFile();
