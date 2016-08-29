@@ -32,11 +32,11 @@
             pad(d.getSeconds());
     }
     function escapeInvalidXmlChars(str) {
-        return str.replace(/\&/g, "&amp;")
+        return str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
-            .replace(/\>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&apos;")
             .replace(/[\x1b]/g, ""); //Remove control character from Jasmine default output
     }
     function getQualifiedFilename(path, filename, separator) {
@@ -51,13 +51,14 @@
             con.log(str);
         }
     }
+
     /** Hooks into either process.stdout (node) or console.log, if that is not
      *  available (see https://gist.github.com/pguillory/729616).
      */
     function hook_stdout(callback) {
         var old_write;
         var useProcess;
-        if(typeof(process)!=="undefined") {
+        if (typeof process !== "undefined") {
             old_write = process.stdout.write;
             useProcess = true;
             process.stdout.write = (function(write) {
@@ -65,7 +66,7 @@
                     write.apply(process.stdout, arguments);
                     callback(string, encoding, fd);
                 };
-            })(old_write);
+            }(old_write));
         }
         else {
             old_write = console.log.bind(console);
@@ -75,7 +76,7 @@
                     write.apply(string);
                     callback(string, 'utf8');
                 };
-            })(old_write);
+            }(old_write));
         }
         return function() {
             if(useProcess) {
@@ -179,8 +180,8 @@
         } else {
             self.filePrefix = typeof options.filePrefix === 'string' ? options.filePrefix : 'junitresults-';
         }
-        self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
-        self.stylesheetPath = typeof(options.stylesheetPath) === 'string' && options.stylesheetPath || UNDEFINED;
+        self.package = typeof options.package === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
+        self.stylesheetPath = typeof options.stylesheetPath === 'string' && options.stylesheetPath || UNDEFINED;
 
         if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
             throw new Error('option "modifySuiteName" must be a function');
@@ -194,7 +195,7 @@
 
         self.captureStdout = options.captureStdout || false;
         if(self.captureStdout && !options.systemOut) {
-            options.systemOut = function (spec, specName) { // jshint ignore:line
+            options.systemOut = function (spec) {
                 return spec._stdout;
             };
         }
@@ -209,8 +210,6 @@
 
         var suites = [],
             currentSuite = null,
-            totalSpecsExecuted = 0,
-            totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
                 id: 'focused',
@@ -228,12 +227,11 @@
             return __specs[spec.id];
         }
 
-        self.jasmineStarted = function(summary) {
-            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+        self.jasmineStarted = function() {
             exportObject.startTime = new Date();
             self.started = true;
             if(self.captureStdout) {
-                self.removeStdoutWrapper = hook_stdout(function(string, encoding, fd) { // jshint ignore:line
+                self.removeStdoutWrapper = hook_stdout(function(string) {
                     self.logEntries.push(string);
                 });
             }
@@ -272,7 +270,6 @@
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isDisabled(spec)) { spec._suite._disabled++; }
             if (isFailed(spec)) { spec._suite._failures += spec.failedExpectations.length; }
-            totalSpecsExecuted++;
         };
         self.suiteDone = function(suite) {
             suite = getSuite(suite);
@@ -296,7 +293,6 @@
             if (output) {
                 wrapOutputAndWriteFile(self.filePrefix, output);
             }
-            //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
@@ -313,11 +309,10 @@
             }
             if (self.consolidateAll || self.consolidate && suite._parent) {
                 return output;
-            } else {
-                // if we aren't supposed to consolidate output, just write it now
-                wrapOutputAndWriteFile(generateFilename(suite), output);
-                return '';
             }
+            // if we aren't supposed to consolidate output, just write it now
+            wrapOutputAndWriteFile(generateFilename(suite), output);
+            return '';
         };
 
         self.writeFile = function(filename, text) {
@@ -363,7 +358,7 @@
         function generateFilename(suite) {
             return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
         }
-        
+
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
             if (self.useDotNotation || isFilename) {
@@ -391,14 +386,13 @@
                     fileName = delegates.modifyReportFileName(fileName, suite);
                 }
                 return fileName;
-            } else {
-
-                if(delegates.modifySuiteName) {
-                    fullName = delegates.modifySuiteName(fullName, suite);
-                }
-
-                return escapeInvalidXmlChars(fullName);
             }
+
+            if(delegates.modifySuiteName) {
+                fullName = delegates.modifySuiteName(fullName, suite);
+            }
+
+            return escapeInvalidXmlChars(fullName);
         }
 
         function suiteAsXml(suite) {
@@ -425,7 +419,7 @@
         }
         function specAsXml(spec) {
             var testName = self.useFullTestName ? spec.fullName : spec.description;
-            
+
             var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
             xml += ' name="' + escapeInvalidXmlChars(testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
@@ -477,7 +471,7 @@
         var suffix = '\n</testsuites>';
         function wrapOutputAndWriteFile(filename, text) {
             if (filename.substr(-4) !== '.xml') { filename += '.xml'; }
-            self.writeFile(filename, (prefix + text + suffix));
+            self.writeFile(filename, prefix + text + suffix);
         }
     };
-})(this);
+}(this));
