@@ -363,7 +363,7 @@
         function generateFilename(suite) {
             return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
         }
-        
+
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
             if (self.useDotNotation || isFilename) {
@@ -425,7 +425,7 @@
         }
         function specAsXml(spec) {
             var testName = self.useFullTestName ? spec.fullName : spec.description;
-            
+
             var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
             xml += ' name="' + escapeInvalidXmlChars(testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
@@ -443,7 +443,7 @@
                     testCaseBody += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
                     testCaseBody += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
                     testCaseBody += '>';
-                    testCaseBody += '<![CDATA[' + trim(failure.stack || failure.message) + ']]>';
+                    testCaseBody += '<![CDATA[' + trim(escapeInvalidXmlChars(failure.stack || failure.message)) + ']]>';
                     testCaseBody += '\n   </failure>';
                 }
             }
