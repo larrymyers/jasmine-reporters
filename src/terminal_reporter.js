@@ -34,7 +34,7 @@
      *
      * Usage:
      *
-     * jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter(options);
+     * jasmine.getEnv().addReporter(new jasmineReporters.TerminalReporter(options));
      *
      * @param {object} [options]
      * @param {number} [options.verbosity] meaningful values are 0 through 3; anything
