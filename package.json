@@ -13,11 +13,12 @@
     "url": "git://github.com/larrymyers/jasmine-reporters.git"
   },
   "dependencies": {
-    "jasmine": "^2.4.1",
     "mkdirp": "^0.5.1",
     "xmldom": "^0.1.22"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  },
   "licenses": [
     {
       "type": "MIT",
