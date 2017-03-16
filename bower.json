@@ -13,6 +13,7 @@
     "reporters",
     "junit",
     "nunit",
+    "sonar",
     "teamcity",
     "tap",
     "xml",
