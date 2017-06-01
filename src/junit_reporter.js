@@ -289,12 +289,18 @@
                 self.suiteDone(fakeFocusedSuite);
             }
             var output = '';
+            var testSuitesResults = { disabled: 0, failures: 0, tests: 0, time: 0 };
             for (var i = 0; i < suites.length; i++) {
                 output += self.getOrWriteNestedOutput(suites[i]);
+                // retrieve nested suite data to include in the testsuites tag
+                var suiteResults = self.getNestedSuiteData(suites[i]);
+                for (var key in suiteResults) {
+                    testSuitesResults[key] += suiteResults[key];
+                };
             }
             // if we have anything to write here, write out the consolidated file
             if (output) {
-                wrapOutputAndWriteFile(self.filePrefix, output);
+                wrapOutputAndWriteFile(self.filePrefix, output, testSuitesResults);
             }
             //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
@@ -306,6 +312,26 @@
             }
         };
 
+        self.formatSuiteData = function(suite) {
+            return {
+                disabled: suite._disabled || 0,
+                failures: suite._failures || 0,
+                tests: suite._specs.length || 0,
+                time: (suite._endTime.getTime() - suite._startTime.getTime()) || 0
+            };
+        };
+
+        self.getNestedSuiteData = function (suite) {
+            var suiteResults = self.formatSuiteData(suite);
+            for (var i = 0; i < suite._suites.length; i++) {
+                var childSuiteResults = self.getNestedSuiteData(suite._suites[i]);
+                for (var key in suiteResults) {
+                    suiteResults[key] += childSuiteResults[key];
+                };
+            }
+            return suiteResults;
+        };
+
         self.getOrWriteNestedOutput = function(suite) {
             var output = suiteAsXml(suite);
             for (var i = 0; i < suite._suites.length; i++) {
@@ -315,7 +341,7 @@
                 return output;
             } else {
                 // if we aren't supposed to consolidate output, just write it now
-                wrapOutputAndWriteFile(generateFilename(suite), output);
+                wrapOutputAndWriteFile(generateFilename(suite), output, self.getNestedSuiteData(suite));
                 return '';
             }
         };
@@ -467,17 +493,21 @@
                 self.logEntries.splice(0, self.logEntries.length);
             }
         }
-
-        // To remove complexity and be more DRY about the silly preamble and <testsuites> element
-        var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
-        if (self.stylesheetPath) {
-            prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
+        function getPrefix(results) {
+            results = results ? results : {};
+            // To remove complexity and be more DRY about the silly preamble and <testsuites> element
+            var prefix = '<?xml version="1.0" encoding="UTF-8" ?>';
+            if (self.stylesheetPath) {
+                prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
+            }
+            prefix += '\n<testsuites disabled="' + results.disabled + '" errors="0" failures="' + results.failures +
+                '" tests="' + results.tests + '" time="' + results.time + '">';
+            return prefix;
         }
-        prefix += '\n<testsuites>';
         var suffix = '\n</testsuites>';
-        function wrapOutputAndWriteFile(filename, text) {
+        function wrapOutputAndWriteFile(filename, text, testSuitesResults) {
             if (filename.substr(-4) !== '.xml') { filename += '.xml'; }
-            self.writeFile(filename, (prefix + text + suffix));
+            self.writeFile(filename, (getPrefix(testSuitesResults) + text + suffix));
         }
     };
 })(this);
