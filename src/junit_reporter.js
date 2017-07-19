@@ -31,13 +31,17 @@
             pad(d.getMinutes()) + ':' +
             pad(d.getSeconds());
     }
+    function escapeControlChars(str) {
+        // Remove control character from Jasmine default output
+        return str.replace(/[\x1b]/g, "");
+    }
     function escapeInvalidXmlChars(str) {
-        return str.replace(/\&/g, "&amp;")
+        const escaped = str.replace(/\&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;")
-            .replace(/[\x1b]/g, ""); //Remove control character from Jasmine default output
+            .replace(/\'/g, "&apos;");
+        return escapeControlChars(escaped);
     }
     function getQualifiedFilename(path, filename, separator) {
         if (path && path.substr(-1) !== separator && filename.substr(0) !== separator) {
@@ -443,7 +447,7 @@
                     testCaseBody += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
                     testCaseBody += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
                     testCaseBody += '>';
-                    testCaseBody += '<![CDATA[' + trim(escapeInvalidXmlChars(failure.stack || failure.message)) + ']]>';
+                    testCaseBody += '<![CDATA[' + trim(escapeControlChars(failure.stack || failure.message)) + ']]>';
                     testCaseBody += '\n   </failure>';
                 }
             }
