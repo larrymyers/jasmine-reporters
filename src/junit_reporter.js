@@ -443,7 +443,7 @@
                     testCaseBody += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
                     testCaseBody += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
                     testCaseBody += '>';
-                    testCaseBody += '<![CDATA[' + trim(failure.stack || failure.message) + ']]>';
+                    testCaseBody += '<![CDATA[' + trim(escapeInvalidXmlChars(failure.stack || failure.message)) + ']]>';
                     testCaseBody += '\n   </failure>';
                 }
             }
