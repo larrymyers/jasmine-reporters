@@ -172,6 +172,9 @@
         self.savePath = options.savePath || '';
         self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
+        self.simpleReport = options.simpleReport === UNDEFINED ? false : options.simpleReport;
+        self.simpleReportPath = self.simpleReport ? options.simpleReportPath : self.savePath;
+        self.simpleReportFilePrefix = options.simpleReportFilePrefix === UNDEFINED ? 'simplereportresults' : options.simpleReportFilePrefix;
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.useFullTestName = options.useFullTestName === UNDEFINED ? false : options.useFullTestName;
         if (self.consolidateAll) {
@@ -288,6 +291,11 @@
                 // focused spec (fit) -- suiteDone was never called
                 self.suiteDone(fakeFocusedSuite);
             }
+            if (self.simpleReport) {
+                var currentSuite = self.getSimpleOutput(suites[0]);
+
+                self.appendObjectToJsonFile(self.simpleReportFilePrefix + '.json', JSON.stringify(currentSuite), self.simpleReportPath);
+            }
             var output = '';
             for (var i = 0; i < suites.length; i++) {
                 output += self.getOrWriteNestedOutput(suites[i]);
@@ -319,6 +327,10 @@
                 return '';
             }
         };
+
+        self.getSimpleOutput = function(suite) {
+            return suiteAsJson(suite);
+        }
 
         self.writeFile = function(filename, text) {
             var errors = [];
@@ -354,6 +366,47 @@
 
             // If made it here, no write succeeded.  Let user know.
             log("Warning: writing junit report failed for '" + path + "', '" +
+                filename + "'. Reasons:\n" +
+                errors.join("\n")
+            );
+        };
+
+        self.appendObjectToJsonFile = function(filename, text, path = false) {
+            var errors = [];
+            path = path || self.savePath;
+            var jsonEntry = JSON.parse(text);
+
+            function nodeAppendObject(path, filename, text) {
+                var fs = require("fs");
+                var nodejs_path = require("path");
+                require("mkdirp").sync(path);
+                var filepath = nodejs_path.join(path, filename);
+                var currentFileData = [];
+                
+                if (fs.existsSync(filepath)) {
+                    var readFile = fs.readFileSync(filepath, 'utf8');
+                    if (readFile.length > 0) {
+                        currentFileData = JSON.parse(readFile);
+
+                        currentFileData.forEach((data, index) => {
+                            if (data.testName == jsonEntry.testName) {
+                                currentFileData.splice(index, 1);
+                            } 
+                        });
+                    }
+                }
+                currentFileData.push(jsonEntry);
+                fs.writeFileSync(filepath, JSON.stringify(currentFileData), 0);
+                return;
+            }
+
+            try {
+                nodeAppendObject(path, filename, text);
+                return;
+            } catch (f) { errors.push('  NodeJS Append attempt: ' + f.message); }
+
+            // If made it here, no write succeeded.  Let user know.
+            log("Warning: appending junit report failed for '" + path + "', '" +
                 filename + "'. Reasons:\n" +
                 errors.join("\n")
             );
@@ -458,6 +511,17 @@
                 xml += ' />';
             }
             return xml;
+        }
+        function suiteAsJson(suite) {
+            var json = {};
+            json.specs = [];
+            json.testName = suite.description;
+
+            for (var i = 0; i < suite._specs.length; i++) {
+                json.specs.push(suite._specs[i].description);
+            }
+
+            return json;
         }
         function storeOutput(spec) {
             if(self.captureStdout && !isSkipped(spec)) {
