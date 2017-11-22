@@ -268,6 +268,7 @@
         self.specDone = function(spec) {
             spec = getSpec(spec);
             spec._endTime = new Date();
+            spec._suite = currentSuite;
             storeOutput(spec);
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isDisabled(spec)) { spec._suite._disabled++; }
