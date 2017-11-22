@@ -40,7 +40,7 @@ function triggerRunnerEvents() {
     var logs = [];
     var _stdoutWrite = process.stdout.write;
     process.stdout.write = function() {
-        logs.push(arguments.length === 1 ? arguments[0] : arguments);
+        logs.push(arguments[0]);
     };
     reporter.jasmineStarted();
     for (var i=0; i<env._suites.length; i++) {
