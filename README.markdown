@@ -78,6 +78,7 @@ var junitReporter = new reporters.JUnitXmlReporter({
     savePath: __dirname,
     consolidateAll: false
 });
+jasmine.getEnv().addReporter(junitReporter)
 ```
 
 ### More examples
