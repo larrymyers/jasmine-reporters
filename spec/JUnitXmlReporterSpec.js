@@ -159,6 +159,34 @@ describe("JUnitXmlReporter", function(){
         });
     });
 
+    function assertTestsuitesTagAttributes(testSuitesTag, {disabled, errors, failures, tests} = {}) {
+        expect(testSuitesTag.getAttribute('disabled')).toBe(disabled);
+        expect(testSuitesTag.getAttribute('errors')).toBe(errors);
+        expect(testSuitesTag.getAttribute('failures')).toBe(failures);
+        expect(testSuitesTag.getAttribute('tests')).toBe(tests);
+    };
+
+
+    it("the testsuites tags should include a time attribute", function() {
+        var testSuitesTags = writeCalls[0].xmldoc.getElementsByTagName('testsuites');
+        expect(testSuitesTags.length).toBe(1);
+        var testSuitesTag =  testSuitesTags[0];
+        expect(testSuitesTag.getAttribute('time')).not.toBe('');
+    });
+
+    describe("no xml output generation", function() {
+        beforeEach(function() {
+            setupReporterWithOptions({consolidateAll:true});
+            triggerRunnerEvents();
+        });
+
+        it("testsuites tags should default disabled, errors, failures to 0 when undefined", function() {
+            assertTestsuitesTagAttributes(
+                writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
+                {disabled: '0', errors: '0', failures: '0', tests: '1'});
+        });
+    });
+
     describe("generated xml output", function(){
         var subSuite, subSubSuite, siblingSuite;
         function itShouldIncludeXmlPreambleInAllFiles() {
@@ -184,9 +212,11 @@ describe("JUnitXmlReporter", function(){
             fakeSpec(subSuite, "should be one level down");
             fakeSpec(subSubSuite, "should be two levels down");
             var skipped = fakeSpec(subSubSuite, "should be skipped two levels down");
+            var disabled = fakeSpec(subSubSuite, "should be disabled two levels down");
             var failed = fakeSpec(subSubSuite, "should be failed two levels down");
             fakeSpec(siblingSuite, "should be a sibling of Parent");
             skipped.result.status = "pending";
+            disabled.result.status = "disabled";
             failed.result.status = "failed";
             failed.result.failedExpectations.push({
                 passed: false,
@@ -212,6 +242,11 @@ describe("JUnitXmlReporter", function(){
             it("should write a single file using filePrefix as the filename", function() {
                 expect(writeCalls[0].args[0]).toBe('results.xml');
             });
+            it("testsuites tags should include disabled, errors, failures, and tests (count) when defined", function() {
+                assertTestsuitesTagAttributes(
+                    writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
+                    {disabled: '1', errors: '0', failures: '1', tests: '7'});
+            });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
         });
@@ -230,6 +265,12 @@ describe("JUnitXmlReporter", function(){
             it("should construct filenames using filePrefix and suite description, removing bad characters", function() {
                 expect(writeCalls[0].args[0]).toBe('results-ParentSuite.xml');
                 expect(writeCalls[1].args[0]).toBe('results-SiblingSuiteWithInvalidChars.xml');
+            });
+            it("testsuites tags should include disabled, errors, failures, and tests (count) when defined", function() {
+                assertTestsuitesTagAttributes(writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
+                    {disabled: '1', errors: '0', failures: '1', tests: '6'});
+                assertTestsuitesTagAttributes(writeCalls[1].xmldoc.getElementsByTagName('testsuites')[0],
+                    {disabled: '0', errors: '0', failures: '0', tests: '1'});
             });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
@@ -300,7 +341,7 @@ describe("JUnitXmlReporter", function(){
             });
             it("should include total / failed / skipped counts for each suite (ignoring descendent results)", function() {
                 expect(suites[1].getAttribute('tests')).toBe('1');
-                expect(suites[2].getAttribute('tests')).toBe('3');
+                expect(suites[2].getAttribute('tests')).toBe('4');
                 expect(suites[2].getAttribute('skipped')).toBe('1');
                 expect(suites[2].getAttribute('failures')).toBe('1');
             });
@@ -346,7 +387,7 @@ describe("JUnitXmlReporter", function(){
             });
             it("should include specs in order", function() {
                 expect(specs[0].getAttribute('name')).toContain('should be a dummy');
-                expect(specs[4].getAttribute('name')).toBe('should be failed two levels down');
+                expect(specs[5].getAttribute('name')).toBe('should be failed two levels down');
             });
             it("should escape bad xml characters in spec description", function() {
                 expect(writeCalls[0].output).toContain("&amp; &lt; &gt; &quot; &apos;");
@@ -355,15 +396,15 @@ describe("JUnitXmlReporter", function(){
                 expect(Number(specs[0].getAttribute('time'))).not.toEqual(NaN);
             });
             it("should include failed matcher name as the failure type", function() {
-                var failure = specs[4].getElementsByTagName('failure')[0];
+                var failure = specs[5].getElementsByTagName('failure')[0];
                 expect(failure.getAttribute('type')).toBe('toBe');
             });
             it("should include failure messages", function() {
-                var failure = specs[4].getElementsByTagName('failure')[0];
+                var failure = specs[5].getElementsByTagName('failure')[0];
                 expect(failure.getAttribute('message')).toBe('Expected true to be false.');
             });
             it("should include stack traces for failed specs (using CDATA to preserve special characters)", function() {
-                var failure = specs[4].getElementsByTagName('failure')[0];
+                var failure = specs[5].getElementsByTagName('failure')[0];
                 expect(failure.textContent).toContain('cool & can have "special" characters <3');
             });
             it("should include <skipped/> for skipped specs", function() {
