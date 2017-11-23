@@ -85,9 +85,15 @@
             __suites[suite.id] = extend(__suites[suite.id] || {}, suite);
             return __suites[suite.id];
         }
-        function getSpec(spec) {
+        function getSpec(spec, suite) {
             __specs[spec.id] = extend(__specs[spec.id] || {}, spec);
-            return __specs[spec.id];
+            var ret = __specs[spec.id];
+            if (suite && !ret._suite) {
+                ret._suite = suite;
+                ret._depth = suite._depth+1;
+                suite._specs++;
+            }
+            return ret;
         }
 
         self.jasmineStarted = function(summary) {
@@ -117,16 +123,13 @@
                 // focused spec (fit) -- suiteStarted was never called
                 self.suiteStarted(fakeFocusedSuite);
             }
-            spec = getSpec(spec);
-            spec._suite = currentSuite;
-            spec._depth = currentSuite._depth+1;
-            currentSuite._specs++;
+            spec = getSpec(spec, currentSuite);
             if (self.verbosity > 2) {
                 log(indentWithLevel(spec._depth, spec.description + ' ...'));
             }
         };
         self.specDone = function(spec) {
-            spec = getSpec(spec);
+            spec = getSpec(spec, currentSuite);
             var failed = false,
                 skipped = false,
                 disabled = false,
