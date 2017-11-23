@@ -36,7 +36,7 @@
         return str.replace(/[\x1b]/g, "");
     }
     function escapeInvalidXmlChars(str) {
-        const escaped = str.replace(/\&/g, "&amp;")
+        var escaped = str.replace(/\&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/\>/g, "&gt;")
             .replace(/\"/g, "&quot;")
