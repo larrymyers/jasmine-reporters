@@ -19,10 +19,5 @@
   "devDependencies": {
     "jasmine": "^2.4.1"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://raw.github.com/larrymyers/jasmine-reporters/master/LICENSE"
-    }
-  ]
+  "license": "MIT"
 }
