@@ -1,7 +1,7 @@
 /* globals jasmine, describe, beforeEach, it, expect */
-var jasmineReporters = require('../index');
+var jasmineReporters = require("../index");
 
-var env, suite, subSuite, subSubSuite, siblingSuite,
+var env, suite, subSuite, subSubSuite,
     reporter, suiteId=0, specId=0, noop=function(){};
 function fakeSpec(ste, name) {
     var s = new jasmine.Spec({
@@ -72,7 +72,7 @@ describe("TeamCityReporter", function(){
         suite = fakeSuite("ParentSuite");
         subSuite = fakeSuite("SubSuite", suite);
         subSubSuite = fakeSuite("SubSubSuite", subSuite);
-        siblingSuite = fakeSuite("SiblingSuite");
+        fakeSuite("SiblingSuite");
         var failedSpec = fakeSpec(subSubSuite, "should be failed");
         failedSpec.result.status = "failed";
         failedSpec.result.failedExpectations.push({
@@ -80,7 +80,7 @@ describe("TeamCityReporter", function(){
             message: "Expected true to be false.",
             expected: false,
             actual: true,
-            matcherName: 'toBe',
+            matcherName: "toBe",
             stack: "Stack trace! Stack traces are cool & can have \"special\" characters <3\n\n Neat: yes."
         });
         fakeSpec(subSuite, "should be one level down");
@@ -92,25 +92,25 @@ describe("TeamCityReporter", function(){
             setupReporterWithOptions();
             this.logs = triggerRunnerEvents();
         });
-        it('should log testSuiteStarted and testSuiteFinished events', function() {
+        it("should log testSuiteStarted and testSuiteFinished events", function() {
             // we have 4 suites
-            var started = this.logs.filter(l=>l.indexOf('testSuiteStarted') > -1);
-            var finished = this.logs.filter(l=>l.indexOf('testSuiteStarted') > -1);
+            var started = this.logs.filter(l=>l.indexOf("testSuiteStarted") > -1);
+            var finished = this.logs.filter(l=>l.indexOf("testSuiteStarted") > -1);
             expect(started.length).toBe(4);
             expect(finished.length).toBe(4);
             expect(started[0].indexOf("name='ParentSuite'")).toBeGreaterThan(-1);
         });
-        it('should log testStarted and testFinished events', function() {
+        it("should log testStarted and testFinished events", function() {
             // we have 3 specs
-            var started = this.logs.filter(l=>l.indexOf('testStarted') > -1);
-            var finished = this.logs.filter(l=>l.indexOf('testStarted') > -1);
+            var started = this.logs.filter(l=>l.indexOf("testStarted") > -1);
+            var finished = this.logs.filter(l=>l.indexOf("testStarted") > -1);
             expect(started.length).toBe(3);
             expect(finished.length).toBe(3);
             expect(started[0].indexOf("name='should be failed'")).toBeGreaterThan(-1);
         });
-        it('should log testFailed event including reason and stack trace', function() {
+        it("should log testFailed event including reason and stack trace", function() {
             // we have 1 failure
-            var failed = this.logs.filter(l=>l.indexOf('testFailed') > -1);
+            var failed = this.logs.filter(l=>l.indexOf("testFailed") > -1);
             expect(failed.length).toBe(1);
             expect(failed[0].indexOf("name='should be failed'")).toBeGreaterThan(-1);
             expect(failed[0].indexOf("message='Expected true to be false.'")).toBeGreaterThan(-1);
@@ -118,21 +118,21 @@ describe("TeamCityReporter", function(){
         });
     });
 
-    describe('modifySuiteName', function() {
-        var modification = '-modified';
+    describe("modifySuiteName", function() {
+        var modification = "-modified";
         beforeEach(function() {
             setupReporterWithOptions({modifySuiteName: function(name) { return name + modification; }});
             this.logs = triggerRunnerEvents();
         });
-        it('should use the modification for suite names', function() {
+        it("should use the modification for suite names", function() {
             // we have 4 suites
-            var started = this.logs.filter(l=>l.indexOf('testSuiteStarted') > -1);
+            var started = this.logs.filter(l=>l.indexOf("testSuiteStarted") > -1);
             started.forEach(e=>expect(e.indexOf(modification)).toBeGreaterThan(-1));
             expect(started[0].indexOf("name='ParentSuite-modified'")).toBeGreaterThan(-1);
         });
-        it('should *not* use the modification for spec names', function() {
+        it("should *not* use the modification for spec names", function() {
             // we have 3 specs
-            var started = this.logs.filter(l=>l.indexOf('testStarted') > -1);
+            var started = this.logs.filter(l=>l.indexOf("testStarted") > -1);
             started.forEach(e=>expect(e.indexOf(modification)).toBe(-1));
         });
     });

@@ -1,6 +1,6 @@
-/* globals jasmineRequire, phantom */
+/* globals phantom */
 // Verify arguments
-var system = require('system');
+var system = require("system");
 var args;
 
 if(phantom.args) {
@@ -72,13 +72,13 @@ else {
  * @param msg
  */
 function logAndWorkAroundDefaultLineBreaking(msg) {
-    var interpretAsWithoutNewline = /(^(\u001b\[\d+m)*[\.F](\u001b\[\d+m)*$)|( \.\.\.$)/;
+    var interpretAsWithoutNewline = /(^(\u001b\[\d+m)*[.F](\u001b\[\d+m)*$)|( \.\.\.$)/;
     if (navigator.userAgent.indexOf("Windows") < 0 && interpretAsWithoutNewline.test(msg)) {
         try {
             system.stdout.write(msg);
         } catch (e) {
-            var fs = require('fs');
-            fs.write('/dev/stdout', msg, 'w');
+            var fs = require("fs");
+            fs.write("/dev/stdout", msg, "w");
         }
     } else {
         console.log(msg);
@@ -219,7 +219,7 @@ function processPage(status, page, resultsKey) {
             else {
                 timeout -= loopInterval;
                 if (timeout <= 0) {
-                    console.log('Page has timed out; aborting.');
+                    console.log("Page has timed out; aborting.");
                     page.__exit_code = 2;
                     clearInterval(ival);
                 }

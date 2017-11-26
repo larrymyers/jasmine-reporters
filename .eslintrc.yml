@@ -1,0 +1,22 @@
+env:
+  browser: true
+  commonjs: true
+  es6: true
+  node: true
+extends: eslint:recommended
+rules:
+  indent:
+    - error
+    - 4
+  linebreak-style:
+    - error
+    - unix
+  no-console: off
+  no-control-regex: off
+  quotes:
+    - error
+    - double
+    - avoidEscape: true
+  semi:
+    - error
+    - always

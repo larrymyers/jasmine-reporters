@@ -11,8 +11,8 @@
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
     function isDisabled(obj) { return obj.status === "disabled"; }
-    function pad(n) { return n < 10 ? '0'+n : n; }
-    function padThree(n) { return n < 10 ? '00'+n : n < 100 ? '0'+n : n; }
+    function pad(n) { return n < 10 ? "0"+n : n; }
+    function padThree(n) { return n < 10 ? "00"+n : n < 100 ? "0"+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -22,12 +22,12 @@
         return dupe;
     }
     function ISODateString(d) {
-        return d.getUTCFullYear() + '-' +
-            pad(d.getUTCMonth()+1) + '-' +
-            pad(d.getUTCDate()) + 'T' +
-            pad(d.getUTCHours()) + ':' +
-            pad(d.getUTCMinutes()) + ':' +
-            pad(d.getUTCSeconds()) + '.' +
+        return d.getUTCFullYear() + "-" +
+            pad(d.getUTCMonth()+1) + "-" +
+            pad(d.getUTCDate()) + "T" +
+            pad(d.getUTCHours()) + ":" +
+            pad(d.getUTCMinutes()) + ":" +
+            pad(d.getUTCSeconds()) + "." +
             // TeamCity wants ss.SSS
             padThree(d.getUTCMilliseconds());
     }
@@ -52,7 +52,7 @@
         self.started = false;
         self.finished = false;
 
-        if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+        if(options.modifySuiteName && typeof options.modifySuiteName !== "function") {
             throw new Error('option "modifySuiteName" must be a function');
         }
 
@@ -60,12 +60,11 @@
         delegates.modifySuiteName = options.modifySuiteName;
 
         var currentSuite = null,
-            totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: "focused",
+                description: "focused specs",
+                fullName: "focused specs"
             };
 
         var __suites = {}, __specs = {};
@@ -78,8 +77,7 @@
             return __specs[spec.id];
         }
 
-        self.jasmineStarted = function(summary) {
-            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+        self.jasmineStarted = function() {
             exportObject.startTime = new Date();
             self.started = true;
             tclog("progressStart 'Running Jasmine Tests'");
@@ -100,7 +98,7 @@
             spec = getSpec(spec);
             tclog("testStarted", {
                 name: spec.description,
-                captureStandardOutput: 'true'
+                captureStandardOutput: "true"
             });
         };
         self.specDone = function(spec) {
@@ -157,7 +155,7 @@
                 }
                 for (var prop in attrs) {
                     if (attrs.hasOwnProperty(prop)) {
-                        if(delegates.modifySuiteName && message.indexOf('testSuite') === 0 && prop === 'name') {
+                        if(delegates.modifySuiteName && message.indexOf("testSuite") === 0 && prop === "name") {
                             attrs[prop] = delegates.modifySuiteName(attrs[prop]);
                         }
                         str += " " + prop + "='" + escapeTeamCityString(attrs[prop]) + "'";
@@ -173,12 +171,12 @@
         if(!str) {
             return "";
         }
-        if (Object.prototype.toString.call(str) === '[object Date]') {
+        if (Object.prototype.toString.call(str) === "[object Date]") {
             return ISODateString(str);
         }
 
         return str.replace(/\|/g, "||")
-            .replace(/\'/g, "|'")
+            .replace(/'/g, "|'")
             .replace(/\n/g, "|n")
             .replace(/\r/g, "|r")
             .replace(/\u0085/g, "|x")
