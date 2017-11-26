@@ -13,7 +13,7 @@
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
     function isDisabled(obj) { return obj.status === "disabled"; }
-    function pad(n) { return n < 10 ? '0'+n : n; }
+    function pad(n) { return n < 10 ? "0"+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -23,11 +23,11 @@
         return dupe;
     }
     function escapeInvalidXmlChars(str) {
-        return str.replace(/\&/g, "&amp;")
+        return str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
-            .replace(/\>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;");
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&apos;");
     }
     function dateString(date) {
         var year = date.getFullYear();
@@ -80,9 +80,9 @@
         self.finished = false;
         // sanitize arguments
         options = options || {};
-        self.savePath = options.savePath || '';
-        self.filename = options.filename || 'nunitresults.xml';
-        self.reportName = options.reportName || 'Jasmine Results';
+        self.savePath = options.savePath || "";
+        self.filename = options.filename || "nunitresults.xml";
+        self.reportName = options.reportName || "Jasmine Results";
 
         var suites = [],
             currentSuite = null,
@@ -93,9 +93,9 @@
             totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: "focused",
+                description: "focused specs",
+                fullName: "focused specs"
             };
 
         var __suites = {}, __specs = {};
@@ -214,11 +214,11 @@
             try {
                 phantomWrite(path, filename, text);
                 return;
-            } catch (e) { errors.push('  PhantomJs attempt: ' + e.message); }
+            } catch (e) { errors.push("  PhantomJs attempt: " + e.message); }
             try {
                 nodeWrite(path, filename, text);
                 return;
-            } catch (f) { errors.push('  NodeJS attempt: ' + f.message); }
+            } catch (f) { errors.push("  NodeJS attempt: " + f.message); }
 
             // If made it here, no write succeeded.  Let user know.
             log("Warning: writing nunit report failed for '" + path + "', '" +
@@ -241,25 +241,25 @@
             xml += ' not-run="' + skippedSpecs + '"';
             xml += ' date="' + dateString(date) + '"';
             xml += ' time="' + timeString(date) + '"';
-            xml += '>';
+            xml += ">";
 
             for (var i=0; i<suites.length; i++) {
-                xml += suiteAsXml(suites[i], ' ');
+                xml += suiteAsXml(suites[i], " ");
             }
-            xml += '\n</test-results>';
+            xml += "\n</test-results>";
             return xml;
         }
     };
 
     function suiteAsXml(suite, indent) {
-        indent = indent || '';
-        var i, xml = '\n' + indent + '<test-suite';
+        indent = indent || "";
+        var i, xml = "\n" + indent + "<test-suite";
         xml += ' name="' + escapeInvalidXmlChars(suite.description) + '"';
         xml += ' executed="' + !suite._disabled + '"';
         xml += ' success="' + !(suite._failures || suite._nestedFailures) + '"';
         xml += ' time="' + elapsed(suite._startTime, suite._endTime) + '"';
-        xml += '>';
-        xml += '\n' + indent + ' <results>';
+        xml += ">";
+        xml += "\n" + indent + " <results>";
 
         for (i=0; i<suite._suites.length; i++) {
             xml += suiteAsXml(suite._suites[i], indent+"  ");
@@ -267,26 +267,26 @@
         for (i=0; i<suite._specs.length; i++) {
             xml += specAsXml(suite._specs[i], indent+"  ");
         }
-        xml += '\n' + indent + ' </results>';
-        xml += '\n' + indent + '</test-suite>';
+        xml += "\n" + indent + " </results>";
+        xml += "\n" + indent + "</test-suite>";
         return xml;
     }
     function specAsXml(spec, indent) {
-        indent = indent || '';
-        var xml = '\n' + indent + '<test-case';
+        indent = indent || "";
+        var xml = "\n" + indent + "<test-case";
         xml += ' name="' + escapeInvalidXmlChars(spec.description) + '"';
         xml += ' executed="' + !(isSkipped(spec) || isDisabled(spec)) + '"';
         xml += ' success="' + !isFailed(spec) + '"';
         xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
-        xml += '>';
+        xml += ">";
         for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
             failure = spec.failedExpectations[i];
-            xml += '\n' + indent + ' <failure>';
-            xml += '\n' + indent + '  <message><![CDATA[' + failure.message + ']]></message>';
-            xml += '\n' + indent + '  <stack-trace><![CDATA[' + failure.stack + ']]></stack-trace>';
-            xml += '\n' + indent + ' </failure>';
+            xml += "\n" + indent + " <failure>";
+            xml += "\n" + indent + "  <message><![CDATA[" + failure.message + "]]></message>";
+            xml += "\n" + indent + "  <stack-trace><![CDATA[" + failure.stack + "]]></stack-trace>";
+            xml += "\n" + indent + " </failure>";
         }
-        xml += '\n' + indent + '</test-case>';
+        xml += "\n" + indent + "</test-case>";
         return xml;
     }
 })(this);
