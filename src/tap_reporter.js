@@ -8,7 +8,6 @@
         exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
 
-    function trim(str) { return str.replace(/^\s+/, "" ).replace(/\s+$/, "" ); }
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
@@ -52,9 +51,9 @@
             totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: "focused",
+                description: "focused specs",
+                fullName: "focused specs"
             };
 
         var __suites = {}, __specs = {};
@@ -80,38 +79,27 @@
             suite = getSuite(suite);
             currentSuite = suite;
         };
-        self.specStarted = function(spec) {
+        self.specStarted = function() {
             if (!currentSuite) {
                 // focused spec (fit) -- suiteStarted was never called
                 self.suiteStarted(fakeFocusedSuite);
             }
-            spec = getSpec(spec, currentSuite);
             totalSpecsExecuted++;
         };
         self.specDone = function(spec) {
             spec = getSpec(spec, currentSuite);
-            var resultStr = 'ok ' + totalSpecsExecuted + ' - ' + spec._suite.description + ' : ' + spec.description;
-            var failedStr = '';
+            var resultStr = "ok " + totalSpecsExecuted + " - " + spec._suite.description + " : " + spec.description;
             if (isFailed(spec)) {
                 totalSpecsFailed++;
-                resultStr = 'not ' + resultStr;
-                for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
-                    failure = spec.failedExpectations[i];
-                    failedStr += '\n  ' + trim(failure.message);
-                    if (failure.stack && failure.stack !== failure.message) {
-                        failedStr += '\n  === STACK TRACE ===';
-                        failedStr += '\n  ' + failure.stack;
-                        failedStr += '\n  === END STACK TRACE ===';
-                    }
-                }
+                resultStr = "not " + resultStr;
             }
             if (isSkipped(spec)) {
                 totalSpecsSkipped++;
-                resultStr += ' # SKIP disabled by xit or similar';
+                resultStr += " # SKIP disabled by xit or similar";
             }
             if (isDisabled(spec)) {
                 totalSpecsDisabled++;
-                resultStr += ' # SKIP disabled by xit, ?spec=xyz or similar';
+                resultStr += " # SKIP disabled by xit, ?spec=xyz or similar";
             }
             log(resultStr);
         };
@@ -134,18 +122,18 @@
                 disabledSpecs = totalSpecs - totalSpecsExecuted + totalSpecsDisabled;
 
             if (totalSpecsExecuted === 0) {
-                log('1..0 # All tests disabled');
+                log("1..0 # All tests disabled");
             } else {
-                log('1..' + totalSpecsExecuted);
+                log("1.." + totalSpecsExecuted);
             }
-            var diagStr = '#';
-            diagStr = '# ' + totalSpecs + ' spec' + (totalSpecs === 1 ? '' : 's');
-            diagStr += ', ' + totalSpecsFailed + ' failure' + (totalSpecsFailed === 1 ? '' : 's');
-            diagStr += ', ' + totalSpecsSkipped + ' skipped';
-            diagStr += ', ' + disabledSpecs + ' disabled';
-            diagStr += ' in ' + dur + 's.';
+            var diagStr = "#";
+            diagStr = "# " + totalSpecs + " spec" + (totalSpecs === 1 ? "" : "s");
+            diagStr += ", " + totalSpecsFailed + " failure" + (totalSpecsFailed === 1 ? "" : "s");
+            diagStr += ", " + totalSpecsSkipped + " skipped";
+            diagStr += ", " + disabledSpecs + " disabled";
+            diagStr += " in " + dur + "s.";
             log(diagStr);
-            log('# NOTE: disabled specs are usually a result of xdescribe.');
+            log("# NOTE: disabled specs are usually a result of xdescribe.");
 
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing

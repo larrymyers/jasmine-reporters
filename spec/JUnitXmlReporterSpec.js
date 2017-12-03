@@ -1,8 +1,8 @@
 /* globals jasmine, describe, afterEach, beforeEach, it, expect */
-var jasmineReporters = require('../index');
-var DOMParser = require('xmldom').DOMParser;
+var jasmineReporters = require("../index");
+var DOMParser = require("xmldom").DOMParser;
 
-var env, spec, suite,
+var env, suite,
     reporter, writeCalls, suiteId=0, specId=0, noop=function(){};
 function fakeSpec(ste, name) {
     var s = new jasmine.Spec({
@@ -42,8 +42,8 @@ function triggerRunnerEvents(callback) {
     reporter.jasmineStarted();
     for (var i=0; i<env._suites.length; i++) {
         var s = env._suites[i];
-        if(callback && typeof(callback) === 'function') {
-           callback();
+        if(callback && typeof(callback) === "function") {
+            callback();
         }
         triggerSuiteEvents(s);
     }
@@ -79,7 +79,7 @@ describe("JUnitXmlReporter", function(){
     beforeEach(function(){
         env = new jasmine.Env();
         suite = fakeSuite("ParentSuite");
-        spec = fakeSpec(suite, "should be a dummy with invalid characters: & < > \" '");
+        fakeSpec(suite, "should be a dummy with invalid characters: & < > \" '");
         setupReporterWithOptions();
     });
 
@@ -98,10 +98,10 @@ describe("JUnitXmlReporter", function(){
         });
 
         describe("file prefix", function(){
-            it("should default output file prefix to \'junitresults\'", function () {
+            it("should default output file prefix to 'junitresults'", function () {
                 expect(reporter.filePrefix).toBe("junitresults");
             });
-            it("should default output file prefix to \'junitresults-\' if consolidateAll is false", function () {
+            it("should default output file prefix to 'junitresults-' if consolidateAll is false", function () {
                 setupReporterWithOptions({
                     consolidateAll: false
                 });
@@ -110,7 +110,7 @@ describe("JUnitXmlReporter", function(){
             it("should prefix suite names if consolidateAll is false", function () {
                 setupReporterWithOptions({
                     consolidateAll: false,
-                    filePrefix: 'alt-prefix-'
+                    filePrefix: "alt-prefix-"
                 });
                 triggerRunnerEvents();
                 expect(reporter.writeFile).toHaveBeenCalledWith("alt-prefix-ParentSuite.xml", jasmine.any(String));
@@ -125,7 +125,7 @@ describe("JUnitXmlReporter", function(){
                 setupReporterWithOptions({package:true});
                 expect(reporter.package).toBeUndefined();
 
-                setupReporterWithOptions({package:['test']});
+                setupReporterWithOptions({package:["test"]});
                 expect(reporter.package).toBeUndefined();
             });
             it("should set output package to the provided string", function () {
@@ -142,7 +142,7 @@ describe("JUnitXmlReporter", function(){
                 setupReporterWithOptions({stylesheetPath:true});
                 expect(reporter.stylesheetPath).toBeUndefined();
 
-                setupReporterWithOptions({stylesheetPath:''});
+                setupReporterWithOptions({stylesheetPath:""});
                 expect(reporter.stylesheetPath).toBeUndefined();
             });
             it("should set output stylesheetPath to the provided string", function () {
@@ -160,18 +160,18 @@ describe("JUnitXmlReporter", function(){
     });
 
     function assertTestsuitesTagAttributes(testSuitesTag, {disabled, errors, failures, tests} = {}) {
-        expect(testSuitesTag.getAttribute('disabled')).toBe(disabled);
-        expect(testSuitesTag.getAttribute('errors')).toBe(errors);
-        expect(testSuitesTag.getAttribute('failures')).toBe(failures);
-        expect(testSuitesTag.getAttribute('tests')).toBe(tests);
-    };
+        expect(testSuitesTag.getAttribute("disabled")).toBe(disabled);
+        expect(testSuitesTag.getAttribute("errors")).toBe(errors);
+        expect(testSuitesTag.getAttribute("failures")).toBe(failures);
+        expect(testSuitesTag.getAttribute("tests")).toBe(tests);
+    }
 
 
     it("the testsuites tags should include a time attribute", function() {
-        var testSuitesTags = writeCalls[0].xmldoc.getElementsByTagName('testsuites');
+        var testSuitesTags = writeCalls[0].xmldoc.getElementsByTagName("testsuites");
         expect(testSuitesTags.length).toBe(1);
         var testSuitesTag =  testSuitesTags[0];
-        expect(testSuitesTag.getAttribute('time')).not.toBe('');
+        expect(testSuitesTag.getAttribute("time")).not.toBe("");
     });
 
     describe("no xml output generation", function() {
@@ -182,8 +182,8 @@ describe("JUnitXmlReporter", function(){
 
         it("testsuites tags should default disabled, errors, failures to 0 when undefined", function() {
             assertTestsuitesTagAttributes(
-                writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
-                {disabled: '0', errors: '0', failures: '0', tests: '1'});
+                writeCalls[0].xmldoc.getElementsByTagName("testsuites")[0],
+                {disabled: "0", errors: "0", failures: "0", tests: "1"});
         });
     });
 
@@ -200,7 +200,7 @@ describe("JUnitXmlReporter", function(){
         function itShouldHaveOneTestsuitesElementPerFile() {
             it("should include xml preamble once in all files", function() {
                 for (var i=0; i<writeCalls.length; i++) {
-                    expect(writeCalls[i].xmldoc.getElementsByTagName('testsuites').length).toBe(1);
+                    expect(writeCalls[i].xmldoc.getElementsByTagName("testsuites").length).toBe(1);
                 }
             });
         }
@@ -223,54 +223,54 @@ describe("JUnitXmlReporter", function(){
                 message: "Expected true to be false.",
                 expected: false,
                 actual: true,
-                matcherName: 'toBe',
+                matcherName: "toBe",
                 stack: "Stack trace! Stack trackes are cool & can have \"special\" characters <3\n\n Neat: yes."
             });
         });
 
         describe("consolidateAll=true", function() {
             beforeEach(function() {
-                setupReporterWithOptions({consolidateAll:true, filePrefix:'results'});
+                setupReporterWithOptions({consolidateAll:true, filePrefix:"results"});
                 triggerRunnerEvents();
             });
             it("should only write a single file", function() {
                 expect(writeCalls.length).toBe(1);
             });
             it("should include results for all test suites", function() {
-                expect(writeCalls[0].xmldoc.getElementsByTagName('testsuite').length).toBe(4);
+                expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite").length).toBe(4);
             });
             it("should write a single file using filePrefix as the filename", function() {
-                expect(writeCalls[0].args[0]).toBe('results.xml');
+                expect(writeCalls[0].args[0]).toBe("results.xml");
             });
             it("testsuites tags should include disabled, errors, failures, and tests (count) when defined", function() {
                 assertTestsuitesTagAttributes(
-                    writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
-                    {disabled: '1', errors: '0', failures: '1', tests: '7'});
+                    writeCalls[0].xmldoc.getElementsByTagName("testsuites")[0],
+                    {disabled: "1", errors: "0", failures: "1", tests: "7"});
             });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
         });
         describe("consolidatedAll=false, consolidate=true", function(){
             beforeEach(function(){
-                setupReporterWithOptions({consolidateAll:false, consolidate:true, filePrefix:'results-'});
+                setupReporterWithOptions({consolidateAll:false, consolidate:true, filePrefix:"results-"});
                 triggerRunnerEvents();
             });
             it("should write one file per parent suite", function(){
                 expect(writeCalls.length).toEqual(2);
             });
             it("should include results for top-level suite and its descendents", function() {
-                expect(writeCalls[0].xmldoc.getElementsByTagName('testsuite').length).toBe(3);
-                expect(writeCalls[1].xmldoc.getElementsByTagName('testsuite').length).toBe(1);
+                expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite").length).toBe(3);
+                expect(writeCalls[1].xmldoc.getElementsByTagName("testsuite").length).toBe(1);
             });
             it("should construct filenames using filePrefix and suite description, removing bad characters", function() {
-                expect(writeCalls[0].args[0]).toBe('results-ParentSuite.xml');
-                expect(writeCalls[1].args[0]).toBe('results-SiblingSuiteWithInvalidChars.xml');
+                expect(writeCalls[0].args[0]).toBe("results-ParentSuite.xml");
+                expect(writeCalls[1].args[0]).toBe("results-SiblingSuiteWithInvalidChars.xml");
             });
             it("testsuites tags should include disabled, errors, failures, and tests (count) when defined", function() {
-                assertTestsuitesTagAttributes(writeCalls[0].xmldoc.getElementsByTagName('testsuites')[0],
-                    {disabled: '1', errors: '0', failures: '1', tests: '6'});
-                assertTestsuitesTagAttributes(writeCalls[1].xmldoc.getElementsByTagName('testsuites')[0],
-                    {disabled: '0', errors: '0', failures: '0', tests: '1'});
+                assertTestsuitesTagAttributes(writeCalls[0].xmldoc.getElementsByTagName("testsuites")[0],
+                    {disabled: "1", errors: "0", failures: "1", tests: "6"});
+                assertTestsuitesTagAttributes(writeCalls[1].xmldoc.getElementsByTagName("testsuites")[0],
+                    {disabled: "0", errors: "0", failures: "0", tests: "1"});
             });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
@@ -278,7 +278,7 @@ describe("JUnitXmlReporter", function(){
         describe("consolidated=false", function(){
             beforeEach(function(){
                 // consolidateAll becomes a noop, we include it specifically to passively test that
-                setupReporterWithOptions({consolidateAll:true, consolidate:false, filePrefix:'results-'});
+                setupReporterWithOptions({consolidateAll:true, consolidate:false, filePrefix:"results-"});
                 triggerRunnerEvents();
             });
             it("should write one file per suite", function(){
@@ -286,13 +286,13 @@ describe("JUnitXmlReporter", function(){
             });
             it("should include results for a single suite", function() {
                 for (var i=0; i<writeCalls.length; i++) {
-                    expect(writeCalls[i].xmldoc.getElementsByTagName('testsuite').length).toBe(1);
+                    expect(writeCalls[i].xmldoc.getElementsByTagName("testsuite").length).toBe(1);
                 }
             });
             it("should construct filenames using filePrefix and suite description, always using dot notation for filenames", function() {
-                expect(writeCalls[0].args[0]).toBe('results-ParentSuite.SubSuite.SubSubSuite.xml');
-                expect(writeCalls[1].args[0]).toBe('results-ParentSuite.SubSuite.xml');
-                expect(writeCalls[2].args[0]).toBe('results-ParentSuite.xml');
+                expect(writeCalls[0].args[0]).toBe("results-ParentSuite.SubSuite.SubSubSuite.xml");
+                expect(writeCalls[1].args[0]).toBe("results-ParentSuite.SubSuite.xml");
+                expect(writeCalls[2].args[0]).toBe("results-ParentSuite.xml");
             });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
@@ -310,8 +310,8 @@ describe("JUnitXmlReporter", function(){
                     triggerRunnerEvents();
                 });
                 it("should use suite descriptions separated by periods", function() {
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testsuite')[2].getAttribute('name')).toBe('ParentSuite.SubSuite.SubSubSuite');
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testcase')[2].getAttribute('classname')).toBe('ParentSuite.SubSuite.SubSubSuite');
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuite.SubSuite.SubSubSuite");
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuite.SubSuite.SubSubSuite");
                 });
             });
             describe("useDotNotation=false", function() {
@@ -320,8 +320,8 @@ describe("JUnitXmlReporter", function(){
                     triggerRunnerEvents();
                 });
                 it("should use suite descriptions separated by spaces", function() {
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testsuite')[2].getAttribute('name')).toBe('ParentSuite SubSuite SubSubSuite');
-                    expect(writeCalls[0].xmldoc.getElementsByTagName('testcase')[2].getAttribute('classname')).toBe('ParentSuite SubSuite SubSubSuite');
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuite SubSuite SubSubSuite");
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuite SubSuite SubSubSuite");
                 });
             });
         });
@@ -331,89 +331,88 @@ describe("JUnitXmlReporter", function(){
             beforeEach(function() {
                 setupReporterWithOptions({consolidateAll:true, consolidate:true});
                 triggerRunnerEvents();
-                suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                suites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
             });
             it("should include test suites in order", function() {
-                expect(suites[0].getAttribute('name')).toBe('ParentSuite');
-                expect(suites[1].getAttribute('name')).toContain('SubSuite');
-                expect(suites[2].getAttribute('name')).toContain('SubSubSuite');
-                expect(suites[3].getAttribute('name')).toContain('SiblingSuite');
+                expect(suites[0].getAttribute("name")).toBe("ParentSuite");
+                expect(suites[1].getAttribute("name")).toContain("SubSuite");
+                expect(suites[2].getAttribute("name")).toContain("SubSubSuite");
+                expect(suites[3].getAttribute("name")).toContain("SiblingSuite");
             });
             it("should include total / failed / skipped counts for each suite (ignoring descendent results)", function() {
-                expect(suites[1].getAttribute('tests')).toBe('1');
-                expect(suites[2].getAttribute('tests')).toBe('4');
-                expect(suites[2].getAttribute('skipped')).toBe('1');
-                expect(suites[2].getAttribute('failures')).toBe('1');
+                expect(suites[1].getAttribute("tests")).toBe("1");
+                expect(suites[2].getAttribute("tests")).toBe("4");
+                expect(suites[2].getAttribute("skipped")).toBe("1");
+                expect(suites[2].getAttribute("failures")).toBe("1");
             });
             it("should calculate duration", function() {
-                expect(Number(suites[0].getAttribute('time'))).not.toEqual(NaN);
+                expect(Number(suites[0].getAttribute("time"))).not.toEqual(NaN);
             });
             it("should include timestamp as an ISO date string without timezone", function() {
-                expect(suites[0].getAttribute('timestamp')).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+                expect(suites[0].getAttribute("timestamp")).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
             });
             it("should include hostname, simply because the JUnit XSD says it is required", function() {
-                expect(suites[0].getAttribute('hostname')).toBe('localhost');
+                expect(suites[0].getAttribute("hostname")).toBe("localhost");
             });
             describe("package", function() {
                 it("should not include the package attribute if it is not provided", function() {
                     setupReporterWithOptions({});
                     triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
-                    expect(suites[0].getAttribute('package')).toBe('');
+                    suites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
+                    expect(suites[0].getAttribute("package")).toBe("");
                 });
                 it("should include the package attribute if a string is provided", function() {
                     setupReporterWithOptions({package:"testPackage"});
                     triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
-                    expect(suites[0].getAttribute('package')).toBe("testPackage");
+                    suites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
+                    expect(suites[0].getAttribute("package")).toBe("testPackage");
                 });
                 it("should escape the string provided", function() {
                     setupReporterWithOptions({package:"testPackage <3"});
                     triggerRunnerEvents();
-                    suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
-                    expect(suites[0].getAttribute('package')).toBe("testPackage <3");
+                    suites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
+                    expect(suites[0].getAttribute("package")).toBe("testPackage <3");
                     expect(writeCalls[0].output).toContain('package="testPackage &lt;3"');
                 });
             });
         });
 
         describe("spec result generation", function() {
-            var suites, specs;
+            var specs;
             beforeEach(function() {
                 setupReporterWithOptions({consolidateAll:true, consolidate:true});
                 triggerRunnerEvents();
-                suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
-                specs = writeCalls[0].xmldoc.getElementsByTagName('testcase');
+                specs = writeCalls[0].xmldoc.getElementsByTagName("testcase");
             });
             it("should include specs in order", function() {
-                expect(specs[0].getAttribute('name')).toContain('should be a dummy');
-                expect(specs[5].getAttribute('name')).toBe('should be failed two levels down');
+                expect(specs[0].getAttribute("name")).toContain("should be a dummy");
+                expect(specs[5].getAttribute("name")).toBe("should be failed two levels down");
             });
             it("should escape bad xml characters in spec description", function() {
                 expect(writeCalls[0].output).toContain("&amp; &lt; &gt; &quot; &apos;");
             });
             it("should calculate duration", function() {
-                expect(Number(specs[0].getAttribute('time'))).not.toEqual(NaN);
+                expect(Number(specs[0].getAttribute("time"))).not.toEqual(NaN);
             });
             it("should include failed matcher name as the failure type", function() {
-                var failure = specs[5].getElementsByTagName('failure')[0];
-                expect(failure.getAttribute('type')).toBe('toBe');
+                var failure = specs[5].getElementsByTagName("failure")[0];
+                expect(failure.getAttribute("type")).toBe("toBe");
             });
             it("should include failure messages", function() {
-                var failure = specs[5].getElementsByTagName('failure')[0];
-                expect(failure.getAttribute('message')).toBe('Expected true to be false.');
+                var failure = specs[5].getElementsByTagName("failure")[0];
+                expect(failure.getAttribute("message")).toBe("Expected true to be false.");
             });
             it("should include stack traces for failed specs (using CDATA to preserve special characters)", function() {
-                var failure = specs[5].getElementsByTagName('failure')[0];
+                var failure = specs[5].getElementsByTagName("failure")[0];
                 expect(failure.textContent).toContain('cool & can have "special" characters <3');
             });
             it("should include <skipped/> for skipped specs", function() {
-                expect(specs[3].getElementsByTagName('skipped').length).toBe(1);
+                expect(specs[3].getElementsByTagName("skipped").length).toBe(1);
             });
         });
 
         describe("modifySuiteName", function(){
-            var suites, modification = '-modified';
+            var suites, modification = "-modified";
             beforeEach(function(){
                 // consolidateAll becomes a noop, we include it specifically to passively test that
                 setupReporterWithOptions({
@@ -424,12 +423,12 @@ describe("JUnitXmlReporter", function(){
                     }
                 });
                 triggerRunnerEvents();
-                suites = writeCalls[0].xmldoc.getElementsByTagName('testsuite');
+                suites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
             });
             it("should construct suitenames that contain modification", function() {
                 for (var i = 0, suite; i < suites.length; i++) {
                     suite = suites[i];
-                    expect(suite.getAttribute('name')).toContain(modification);
+                    expect(suite.getAttribute("name")).toContain(modification);
                 }
             });
             itShouldHaveOneTestsuitesElementPerFile();
@@ -437,7 +436,7 @@ describe("JUnitXmlReporter", function(){
         });
 
         describe("modifyReportFileName", function(){
-            var modification = '-modified';
+            var modification = "-modified";
             beforeEach(function(){
                 // consolidateAll becomes a noop, we include it specifically to passively test that
                 setupReporterWithOptions({
@@ -466,7 +465,7 @@ describe("JUnitXmlReporter", function(){
                 triggerRunnerEvents(function() {
                     console.log(testOutput);
                 });
-                specOutputs = writeCalls[0].xmldoc.getElementsByTagName('system-out');
+                specOutputs = writeCalls[0].xmldoc.getElementsByTagName("system-out");
             });
             afterEach(function() {
                 process.stdout.write = _stdoutWrite;

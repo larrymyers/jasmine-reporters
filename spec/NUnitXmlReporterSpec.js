@@ -1,6 +1,6 @@
 /* globals jasmine, describe, beforeEach, it, expect */
-var jasmineReporters = require('../index');
-var DOMParser = require('xmldom').DOMParser;
+var jasmineReporters = require("../index");
+var DOMParser = require("xmldom").DOMParser;
 
 var env, suite, subSuite, subSubSuite, siblingSuite,
     reporter, writeCalls, suiteId=0, specId=0, noop=function(){};
@@ -88,7 +88,7 @@ describe("NUnitXmlReporter", function(){
             message: "Expected true to be false.",
             expected: false,
             actual: true,
-            matcherName: 'toBe',
+            matcherName: "toBe",
             stack: "Stack trace! Stack trackes are cool & can have \"special\" characters <3\n\n Neat: yes."
         });
         fakeSpec(subSuite, "should be one level down");
@@ -104,18 +104,18 @@ describe("NUnitXmlReporter", function(){
             setupReporterWithOptions();
         });
         it("should default path to an empty string", function(){
-            expect(reporter.savePath).toBe('');
+            expect(reporter.savePath).toBe("");
         });
         it("should allow a custom path to be provided", function() {
-            setupReporterWithOptions({savePath:'/tmp'});
-            expect(reporter.savePath).toBe('/tmp');
+            setupReporterWithOptions({savePath:"/tmp"});
+            expect(reporter.savePath).toBe("/tmp");
         });
         it("should default filename to 'nunitresults.xml'", function(){
             expect(reporter.filename).toBe("nunitresults.xml");
         });
         it("should allow a custom filename to be provided", function() {
-            setupReporterWithOptions({filename:'results.xml'});
-            expect(reporter.filename).toBe('results.xml');
+            setupReporterWithOptions({filename:"results.xml"});
+            expect(reporter.filename).toBe("results.xml");
         });
         it("should default reportName to 'Jasmine Results'", function(){
             expect(reporter.reportName).toBe("Jasmine Results");
@@ -194,7 +194,7 @@ describe("NUnitXmlReporter", function(){
                     expect(failedSpec.getAttribute("success")).toBe("false");
                 });
                 it("should include the error for failed specs", function() {
-                    expect(failedSpec.getElementsByTagName("message")[0].textContent).toBe('Expected true to be false.');
+                    expect(failedSpec.getElementsByTagName("message")[0].textContent).toBe("Expected true to be false.");
                 });
                 it("should include the stack trace for failed specs", function() {
                     expect(failedSpec.getElementsByTagName("stack-trace")[0].textContent).toContain('cool & can have "special" characters <3');
