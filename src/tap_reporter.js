@@ -104,6 +104,7 @@
                         failedStr += '\n  === END STACK TRACE ===';
                     }
                 }
+                resultStr += failedStr;
             }
             if (isSkipped(spec)) {
                 totalSpecsSkipped++;
