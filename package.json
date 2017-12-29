@@ -6,7 +6,9 @@
   "homepage": "https://github.com/larrymyers/jasmine-reporters",
   "maintainers": "Ben Loveridge <bloveridge@gmail.com>",
   "scripts": {
-    "test": "jasmine"
+    "lint": "eslint . --report-unused-disable-directives",
+    "test-only": "jasmine",
+    "test": "npm run test-only && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,7 @@
     "xmldom": "^0.1.22"
   },
   "devDependencies": {
+    "eslint": "^4.11.0",
     "jasmine": "^2.4.1"
   },
   "license": "MIT"

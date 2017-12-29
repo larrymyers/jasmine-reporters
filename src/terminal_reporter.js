@@ -65,7 +65,7 @@
         self.color = options.color;
         self.showStack = options.showStack;
 
-        var indent_string = '  ',
+        var indent_string = "  ",
             startTime,
             currentSuite = null,
             totalSpecsExecuted = 0,
@@ -75,9 +75,9 @@
             totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: "focused",
+                description: "focused specs",
+                fullName: "focused specs"
             };
 
         var __suites = {}, __specs = {};
@@ -125,7 +125,7 @@
             }
             spec = getSpec(spec, currentSuite);
             if (self.verbosity > 2) {
-                log(indentWithLevel(spec._depth, spec.description + ' ...'));
+                log(indentWithLevel(spec._depth, spec.description + " ..."));
             }
         };
         self.specDone = function(spec) {
@@ -133,56 +133,56 @@
             var failed = false,
                 skipped = false,
                 disabled = false,
-                color = 'green',
-                resultText = '';
+                color = "green",
+                resultText = "";
             if (isSkipped(spec)) {
                 skipped = true;
-                color = 'cyan';
+                color = "cyan";
                 spec._suite._skipped++;
                 totalSpecsSkipped++;
             }
             if (isFailed(spec)) {
                 failed = true;
-                color = 'red';
+                color = "red";
                 spec._suite._failures++;
                 totalSpecsFailed++;
             }
             if (isDisabled(spec)) {
                 disabled = true;
-                color = 'yellow';
+                color = "yellow";
                 spec._suite._disabled++;
                 totalSpecsDisabled++;
             }
             totalSpecsExecuted++;
 
             if (self.verbosity === 2) {
-                resultText = failed ? 'F' : skipped ? 'S' : disabled ? 'D' : '.';
+                resultText = failed ? "F" : skipped ? "S" : disabled ? "D" : ".";
             } else if (self.verbosity > 2) {
-                resultText = ' ' + (failed ? 'Failed' : skipped ? 'Skipped' : disabled ? 'Disabled' : 'Passed');
+                resultText = " " + (failed ? "Failed" : skipped ? "Skipped" : disabled ? "Disabled" : "Passed");
             }
             log(inColor(resultText, color));
 
             if (skipped && spec.pendingReason) {
-              if (self.verbosity > 2) {
-                log(indentWithLevel(spec._depth, inColor(spec.pendingReason, color)));
-              }
-              else {
-                log(inColor(spec.pendingReason, color));
-              }
+                if (self.verbosity > 2) {
+                    log(indentWithLevel(spec._depth, inColor(spec.pendingReason, color)));
+                }
+                else {
+                    log(inColor(spec.pendingReason, color));
+                }
             }
 
             if (failed) {
                 if (self.verbosity === 1) {
                     log(spec.fullName);
                 } else if (self.verbosity === 2) {
-                    log(' ');
+                    log(" ");
                     log(indentWithLevel(spec._depth, spec.fullName));
                 }
 
                 for (var i = 0; i < spec.failedExpectations.length; i++) {
                     log(inColor(indentWithLevel(spec._depth, indent_string + spec.failedExpectations[i].message), color));
                     if (self.showStack){
-                        logStackLines(spec._depth, spec.failedExpectations[i].stack.split('\n'));
+                        logStackLines(spec._depth, spec.failedExpectations[i].stack.split("\n"));
                     }
                 }
             }
@@ -210,9 +210,9 @@
                 skipped = suite._skipped + suite._nestedSkipped,
                 disabled = suite._disabled + suite._nestedDisabled,
                 passed = total - failed - skipped,
-                color = failed ? 'red+bold' : 'green+bold',
-                str = passed + ' of ' + total + ' passed (' + skipped + ' skipped, ' + disabled + ' disabled)';
-            log(indentWithLevel(suite._depth, inColor(str+'.', color)));
+                color = failed ? "red+bold" : "green+bold",
+                str = passed + " of " + total + " passed (" + skipped + " skipped, " + disabled + " disabled)";
+            log(indentWithLevel(suite._depth, inColor(str+".", color)));
         };
         self.jasmineDone = function() {
             if (currentSuite) {
@@ -233,7 +233,7 @@
                 result_color = totalSpecsFailed && "red+bold" || "green+bold";
 
             if (self.verbosity === 2) {
-                log('');
+                log("");
             }
 
             if (self.verbosity > 0) {
@@ -253,7 +253,7 @@
         }
         function logStackLines(depth, lines) {
             lines.forEach(function(line){
-                log(inColor(indentWithLevel(depth, indent_string + line), 'magenta'));
+                log(inColor(indentWithLevel(depth, indent_string + line), "magenta"));
             });
         }
         function inColor(string, color) {

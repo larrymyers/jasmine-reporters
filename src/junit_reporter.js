@@ -14,7 +14,7 @@
     function isFailed(obj) { return obj.status === "failed"; }
     function isSkipped(obj) { return obj.status === "pending"; }
     function isDisabled(obj) { return obj.status === "disabled"; }
-    function pad(n) { return n < 10 ? '0'+n : n; }
+    function pad(n) { return n < 10 ? "0"+n : n; }
     function extend(dupe, obj) { // performs a shallow copy of all props of `obj` onto `dupe`
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -24,11 +24,11 @@
         return dupe;
     }
     function ISODateString(d) {
-        return d.getFullYear() + '-' +
-            pad(d.getMonth()+1) + '-' +
-            pad(d.getDate()) + 'T' +
-            pad(d.getHours()) + ':' +
-            pad(d.getMinutes()) + ':' +
+        return d.getFullYear() + "-" +
+            pad(d.getMonth()+1) + "-" +
+            pad(d.getDate()) + "T" +
+            pad(d.getHours()) + ":" +
+            pad(d.getMinutes()) + ":" +
             pad(d.getSeconds());
     }
     function escapeControlChars(str) {
@@ -36,11 +36,11 @@
         return str.replace(/[\x1b]/g, "");
     }
     function escapeInvalidXmlChars(str) {
-        var escaped = str.replace(/\&/g, "&amp;")
+        var escaped = str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
-            .replace(/\>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&apos;");
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&apos;");
         return escapeControlChars(escaped);
     }
     function getQualifiedFilename(path, filename, separator) {
@@ -77,7 +77,7 @@
             console.log = (function(write) {
                 return function(string) {
                     write.apply(string);
-                    callback(string, 'utf8');
+                    callback(string, "utf8");
                 };
             })(old_write);
         }
@@ -173,32 +173,32 @@
         self.finished = false;
         // sanitize arguments
         options = options || {};
-        self.savePath = options.savePath || '';
+        self.savePath = options.savePath || "";
         self.consolidate = options.consolidate === UNDEFINED ? true : options.consolidate;
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.useFullTestName = options.useFullTestName === UNDEFINED ? false : options.useFullTestName;
         if (self.consolidateAll) {
-            self.filePrefix = options.filePrefix || 'junitresults';
+            self.filePrefix = options.filePrefix || "junitresults";
         } else {
-            self.filePrefix = typeof options.filePrefix === 'string' ? options.filePrefix : 'junitresults-';
+            self.filePrefix = typeof options.filePrefix === "string" ? options.filePrefix : "junitresults-";
         }
-        self.package = typeof(options.package) === 'string' ? escapeInvalidXmlChars(options.package) : UNDEFINED;
-        self.stylesheetPath = typeof(options.stylesheetPath) === 'string' && options.stylesheetPath || UNDEFINED;
+        self.package = typeof(options.package) === "string" ? escapeInvalidXmlChars(options.package) : UNDEFINED;
+        self.stylesheetPath = typeof(options.stylesheetPath) === "string" && options.stylesheetPath || UNDEFINED;
 
-        if(options.modifySuiteName && typeof options.modifySuiteName !== 'function') {
+        if(options.modifySuiteName && typeof options.modifySuiteName !== "function") {
             throw new Error('option "modifySuiteName" must be a function');
         }
-        if(options.modifyReportFileName && typeof options.modifyReportFileName !== 'function') {
+        if(options.modifyReportFileName && typeof options.modifyReportFileName !== "function") {
             throw new Error('option "modifyReportFileName" must be a function');
         }
-        if(options.systemOut && typeof options.systemOut !== 'function') {
+        if(options.systemOut && typeof options.systemOut !== "function") {
             throw new Error('option "systemOut" must be a function');
         }
 
         self.captureStdout = options.captureStdout || false;
         if(self.captureStdout && !options.systemOut) {
-            options.systemOut = function (spec, specName) { // jshint ignore:line
+            options.systemOut = function (spec) {
                 return spec._stdout;
             };
         }
@@ -213,13 +213,11 @@
 
         var suites = [],
             currentSuite = null,
-            totalSpecsExecuted = 0,
-            totalSpecsDefined,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
             fakeFocusedSuite = {
-                id: 'focused',
-                description: 'focused specs',
-                fullName: 'focused specs'
+                id: "focused",
+                description: "focused specs",
+                fullName: "focused specs"
             };
 
         var __suites = {}, __specs = {};
@@ -237,12 +235,11 @@
             return ret;
         }
 
-        self.jasmineStarted = function(summary) {
-            totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
+        self.jasmineStarted = function() {
             exportObject.startTime = new Date();
             self.started = true;
             if(self.captureStdout) {
-                self.removeStdoutWrapper = hook_stdout(function(string, encoding, fd) { // jshint ignore:line
+                self.removeStdoutWrapper = hook_stdout(function(string) {
                     self.logEntries.push(string);
                 });
             }
@@ -279,7 +276,6 @@
             if (isSkipped(spec)) { spec._suite._skipped++; }
             if (isDisabled(spec)) { spec._suite._disabled++; }
             if (isFailed(spec)) { spec._suite._failures += spec.failedExpectations.length; }
-            totalSpecsExecuted++;
         };
         self.suiteDone = function(suite) {
             suite = getSuite(suite);
@@ -295,7 +291,7 @@
                 // focused spec (fit) -- suiteDone was never called
                 self.suiteDone(fakeFocusedSuite);
             }
-            var output = '';
+            var output = "";
             var testSuitesResults = { disabled: 0, failures: 0, tests: 0, time: 0 };
             for (var i = 0; i < suites.length; i++) {
                 output += self.getOrWriteNestedOutput(suites[i]);
@@ -303,7 +299,7 @@
                 var suiteResults = self.getNestedSuiteData(suites[i]);
                 for (var key in suiteResults) {
                     testSuitesResults[key] += suiteResults[key];
-                };
+                }
             }
             // if we have anything to write here, write out the consolidated file
             if (output) {
@@ -334,7 +330,7 @@
                 var childSuiteResults = self.getNestedSuiteData(suite._suites[i]);
                 for (var key in suiteResults) {
                     suiteResults[key] += childSuiteResults[key];
-                };
+                }
             }
             return suiteResults;
         };
@@ -349,7 +345,7 @@
             } else {
                 // if we aren't supposed to consolidate output, just write it now
                 wrapOutputAndWriteFile(generateFilename(suite), output, self.getNestedSuiteData(suite));
-                return '';
+                return "";
             }
         };
 
@@ -379,11 +375,11 @@
             try {
                 phantomWrite(path, filename, text);
                 return;
-            } catch (e) { errors.push('  PhantomJs attempt: ' + e.message); }
+            } catch (e) { errors.push("  PhantomJs attempt: " + e.message); }
             try {
                 nodeWrite(path, filename, text);
                 return;
-            } catch (f) { errors.push('  NodeJS attempt: ' + f.message); }
+            } catch (f) { errors.push("  NodeJS attempt: " + f.message); }
 
             // If made it here, no write succeeded.  Let user know.
             log("Warning: writing junit report failed for '" + path + "', '" +
@@ -394,15 +390,15 @@
 
         /******** Helper functions with closure access for simplicity ********/
         function generateFilename(suite) {
-            return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + '.xml';
+            return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + ".xml";
         }
-        
+
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
             if (self.useDotNotation || isFilename) {
                 fullName = suite.description;
                 for (var parent = suite._parent; parent; parent = parent._parent) {
-                    fullName = parent.description + '.' + fullName;
+                    fullName = parent.description + "." + fullName;
                 }
             } else {
                 fullName = suite.fullName;
@@ -411,7 +407,7 @@
             // Either remove or escape invalid XML characters
             if (isFilename) {
                 var fileName = "",
-                    rFileChars = /[\w\.]/,
+                    rFileChars = /[\w.]/,
                     chr;
                 while (fullName.length) {
                     chr = fullName[0];
@@ -448,47 +444,47 @@
             if (self.package) {
                 xml += ' package="' + self.package + '"';
             }
-            xml += '>';
+            xml += ">";
 
             for (var i = 0; i < suite._specs.length; i++) {
                 xml += specAsXml(suite._specs[i]);
             }
-            xml += '\n </testsuite>';
+            xml += "\n </testsuite>";
             return xml;
         }
         function specAsXml(spec) {
             var testName = self.useFullTestName ? spec.fullName : spec.description;
-            
+
             var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
             xml += ' name="' + escapeInvalidXmlChars(testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
 
-            var testCaseBody = '';
+            var testCaseBody = "";
             if (isSkipped(spec) || isDisabled(spec)) {
                 if (spec.pendingReason) {
                     testCaseBody = '\n   <skipped message="' + trim(escapeInvalidXmlChars(spec.pendingReason)) + '" />';
                 } else {
-                    testCaseBody = '\n   <skipped />';
+                    testCaseBody = "\n   <skipped />";
                 }
             } else if (isFailed(spec)) {
                 for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
                     failure = spec.failedExpectations[i];
                     testCaseBody += '\n   <failure type="' + (failure.matcherName || "exception") + '"';
                     testCaseBody += ' message="' + trim(escapeInvalidXmlChars(failure.message))+ '"';
-                    testCaseBody += '>';
-                    testCaseBody += '<![CDATA[' + trim(escapeControlChars(failure.stack || failure.message)) + ']]>';
-                    testCaseBody += '\n   </failure>';
+                    testCaseBody += ">";
+                    testCaseBody += "<![CDATA[" + trim(escapeControlChars(failure.stack || failure.message)) + "]]>";
+                    testCaseBody += "\n   </failure>";
                 }
             }
 
             if (testCaseBody || delegates.systemOut) {
-                xml += '>' + testCaseBody;
+                xml += ">" + testCaseBody;
                 if (delegates.systemOut) {
-                    xml += '\n   <system-out>' + trim(escapeInvalidXmlChars(delegates.systemOut(spec, getFullyQualifiedSuiteName(spec._suite, true)))) + '</system-out>';
+                    xml += "\n   <system-out>" + trim(escapeInvalidXmlChars(delegates.systemOut(spec, getFullyQualifiedSuiteName(spec._suite, true)))) + "</system-out>";
                 }
-                xml += '\n  </testcase>';
+                xml += "\n  </testcase>";
             } else {
-                xml += ' />';
+                xml += " />";
             }
             return xml;
         }
@@ -511,9 +507,9 @@
                 '" tests="' + results.tests + '" time="' + results.time + '">';
             return prefix;
         }
-        var suffix = '\n</testsuites>';
+        var suffix = "\n</testsuites>";
         function wrapOutputAndWriteFile(filename, text, testSuitesResults) {
-            if (filename.substr(-4) !== '.xml') { filename += '.xml'; }
+            if (filename.substr(-4) !== ".xml") { filename += ".xml"; }
             self.writeFile(filename, (getPrefix(testSuitesResults) + text + suffix));
         }
     };

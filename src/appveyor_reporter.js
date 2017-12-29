@@ -144,21 +144,21 @@
 
             var http = require("http");
             var req =  http.request(options, function(res) {
-                log.debug(inColor('  STATUS: ' + res.statusCode, "yellow"));
-                log.debug(inColor('  HEADERS: ' + JSON.stringify(res.headers), "yellow"));
-                res.setEncoding('utf8');
+                log.debug(inColor("  STATUS: " + res.statusCode, "yellow"));
+                log.debug(inColor("  HEADERS: " + JSON.stringify(res.headers), "yellow"));
+                res.setEncoding("utf8");
 
-                res.on('data', function (chunk) {
-                    log.debug(inColor('  BODY: ' + chunk, "yellow"));
+                res.on("data", function (chunk) {
+                    log.debug(inColor("  BODY: " + chunk, "yellow"));
                 });
 
-                res.on('end', function() {
-                    log.debug(inColor('    RESPONSE END', "yellow"));
+                res.on("end", function() {
+                    log.debug(inColor("    RESPONSE END", "yellow"));
                 });
             });
 
-            req.on('error', function(e) {
-                log.debug(inColor('API request error: ' + e.message, "red"));
+            req.on("error", function(e) {
+                log.debug(inColor("API request error: " + e.message, "red"));
             });
 
             req.write(postData);
