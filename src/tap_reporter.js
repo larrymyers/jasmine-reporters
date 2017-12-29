@@ -72,6 +72,7 @@
         }
 
         self.jasmineStarted = function(summary) {
+            log("TAP version 13");
             self.started = true;
             totalSpecsDefined = summary && summary.totalSpecsDefined || NaN;
             startTime = exportObject.startTime = new Date();
@@ -93,6 +94,15 @@
             if (isFailed(spec)) {
                 totalSpecsFailed++;
                 resultStr = "not " + resultStr;
+                for (var i = 0, failure; i < spec.failedExpectations.length; i++) {
+                    failure = spec.failedExpectations[i];
+                    resultStr += "\n  # Failure: " + trim(failure.message);
+                    if (failure.stack && failure.stack !== failure.message) {
+                        resultStr += "\n  # === STACK TRACE ===";
+                        resultStr += "\n  # " + failure.stack.replace(/\n/mg, "\n  # ");
+                        resultStr += "\n  # === END STACK TRACE ===";
+                    }
+                }
             }
             if (isSkipped(spec)) {
                 totalSpecsSkipped++;
