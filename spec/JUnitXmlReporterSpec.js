@@ -309,9 +309,9 @@ describe("JUnitXmlReporter", function(){
                     setupReporterWithOptions({consolidateAll:true, consolidate:true, useDotNotation:true});
                     triggerRunnerEvents();
                 });
-                it("should use suite descriptions separated by periods", function() {
-                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuiteSubSuiteSubSubSuite");
-                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuiteSubSuiteSubSubSuite");
+                it("should use suite descriptions separated by spaces", function() {
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuite SubSuite SubSubSuite");
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuite SubSuite SubSubSuite");
                 });
             });
             describe("useDotNotation=false", function() {
