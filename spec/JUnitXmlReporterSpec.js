@@ -290,8 +290,8 @@ describe("JUnitXmlReporter", function(){
                 }
             });
             it("should construct filenames using filePrefix and suite description, always using dot notation for filenames", function() {
-                expect(writeCalls[0].args[0]).toBe("results-ParentSuite.SubSuite.SubSubSuite.xml");
-                expect(writeCalls[1].args[0]).toBe("results-ParentSuite.SubSuite.xml");
+                expect(writeCalls[0].args[0]).toBe("results-ParentSuiteSubSuiteSubSubSuite.xml");
+                expect(writeCalls[1].args[0]).toBe("results-ParentSuiteSubSuite.xml");
                 expect(writeCalls[2].args[0]).toBe("results-ParentSuite.xml");
             });
             itShouldHaveOneTestsuitesElementPerFile();
@@ -310,8 +310,8 @@ describe("JUnitXmlReporter", function(){
                     triggerRunnerEvents();
                 });
                 it("should use suite descriptions separated by periods", function() {
-                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuite.SubSuite.SubSubSuite");
-                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuite.SubSuite.SubSubSuite");
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testsuite")[2].getAttribute("name")).toBe("ParentSuiteSubSuiteSubSubSuite");
+                    expect(writeCalls[0].xmldoc.getElementsByTagName("testcase")[2].getAttribute("classname")).toBe("ParentSuiteSubSuiteSubSubSuite");
                 });
             });
             describe("useDotNotation=false", function() {
