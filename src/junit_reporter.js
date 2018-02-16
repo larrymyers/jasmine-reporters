@@ -217,6 +217,7 @@
         delegates.modifyReportFileName = options.modifyReportFileName;
         delegates.systemOut = options.systemOut;
         delegates.modifyClassName = options.modifyClassName;
+        delegates.modifySpecName = options.modifySpecName;
 
         self.logEntries = [];
 
@@ -463,8 +464,7 @@
         }
         function specAsXml(spec) {
             var testName = self.useFullTestName ? spec.fullName : spec.description;
-
-            var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(delegates.modifyClassName ? delegates.modifyClassName() : spec._suite) + '"';
+            var xml = '\n  <testcase classname="' + escapeInvalidXmlChars(delegates.modifyClassName ? delegates.modifyClassName() : getFullyQualifiedSuiteName(spec._suite)) + '"';
             xml += ' name="' + escapeInvalidXmlChars(delegates.modifySpecName ? delegates.modifySpecName() : testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
 
