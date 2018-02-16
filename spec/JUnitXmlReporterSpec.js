@@ -454,6 +454,52 @@ describe("JUnitXmlReporter", function(){
             itShouldIncludeXmlPreambleInAllFiles();
         });
 
+        describe('modifyClassName', () => {
+            var suites;
+            var modification = "modified"
+            beforeEach(function () {
+                setupReporterWithOptions({
+                    // consolidateAll: true,
+                    // consolidate: true,
+                    modifyClassName: function (spec) {
+                        return modification;
+                    }
+                });
+                triggerRunnerEvents();
+                suites = writeCalls[0].xmldoc.getElementsByTagName("testcase");
+            });
+            it('should construct classnames that are the provided modification', () => {
+                expect(suites).not.toBeNull();
+                expect(suites.length).toBeGreaterThan(0);
+                for (var i = 0; i < suites.length; i++) {
+                    expect(suites[i].getAttribute("classname")).toBe(modification);
+                };
+            });
+        });
+
+        describe('modifySpecName', () => {
+            var suites;
+            var modification = "modified"
+            beforeEach(function () {
+                setupReporterWithOptions({
+                    // consolidateAll: true,
+                    // consolidate: true,
+                    modifySpecName: function (spec) {
+                        return modification;
+                    }
+                });
+                triggerRunnerEvents();
+                suites = writeCalls[0].xmldoc.getElementsByTagName("testcase");
+            });
+            it('should construct spec names that are the provided modification', () => {
+                expect(suites).not.toBeNull();
+                expect(suites.length).toBeGreaterThan(0);
+                for (var i = 0; i < suites.length; i++) {
+                    expect(suites[i].getAttribute("name")).toBe(modification);
+                };
+            });
+        });
+
         describe("captures stdout in <xml-output>", function(){
             var specOutputs;
             const testOutput = "I'm generating test output.";
