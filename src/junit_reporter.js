@@ -157,6 +157,8 @@
      *   This is useful when running a test suite against multiple capabilities
      *   because the report can have unique names for each combination of suite/spec
      *   and capability/test environment.
+     * @param {function} [modifyClassName] a delegate to modify spec's classname in the xml report.
++    * @param {function} [modifySpecName] a delegate to modify the spec's name in the xml report.
      * @param {string} [stylesheetPath] is the string value that specifies a path
      *   to an XSLT stylesheet to add to the junit XML file so that it can be
      *   opened directly in a browser. (default: none, no xml-stylesheet tag is added)
@@ -195,6 +197,12 @@
         if(options.systemOut && typeof options.systemOut !== "function") {
             throw new Error('option "systemOut" must be a function');
         }
+        if (options.modifyClassName && typeof options.modifyClassName !== "function") {
+            throw new Error('option "modifyClassName" must be a function');
+        }
+        if (options.modifySpecName && typeof options.modifySpecName !== "function") {
+            throw new Error('option "modifySpecName" must be a function');
+        }
 
         self.captureStdout = options.captureStdout || false;
         if(self.captureStdout && !options.systemOut) {
@@ -208,6 +216,8 @@
         delegates.modifySuiteName = options.modifySuiteName;
         delegates.modifyReportFileName = options.modifyReportFileName;
         delegates.systemOut = options.systemOut;
+        delegates.modifyClassName = options.modifyClassName;
+        delegates.modifySpecName = options.modifySpecName;
 
         self.logEntries = [];
 
@@ -454,9 +464,8 @@
         }
         function specAsXml(spec) {
             var testName = self.useFullTestName ? spec.fullName : spec.description;
-
-            var xml = '\n  <testcase classname="' + getFullyQualifiedSuiteName(spec._suite) + '"';
-            xml += ' name="' + escapeInvalidXmlChars(testName) + '"';
+            var xml = '\n  <testcase classname="' + escapeInvalidXmlChars(delegates.modifyClassName ? delegates.modifyClassName(spec) : getFullyQualifiedSuiteName(spec._suite)) + '"';
+            xml += ' name="' + escapeInvalidXmlChars(delegates.modifySpecName ? delegates.modifySpecName(spec) : testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
 
             var testCaseBody = "";
