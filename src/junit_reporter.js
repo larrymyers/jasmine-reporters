@@ -2,13 +2,13 @@
 (function(global) {
     var UNDEFINED,
         exportObject;
-  
+
     if (typeof module !== "undefined" && module.exports) {
         exportObject = exports;
     } else {
         exportObject = global.jasmineReporters = global.jasmineReporters || {};
     }
-  
+
     function trim(str) { return str.replace(/^\s+/, "" ).replace(/\s+$/, "" ); }
     function elapsed(start, end) { return (end - start)/1000; }
     function isFailed(obj) { return obj.status === "failed"; }
@@ -90,7 +90,7 @@
             }
         };
     }
-  
+
     /**
      * A delegate for letting the consumer
      * modify the suite name when it is used inside the junit report.
@@ -102,7 +102,7 @@
      * @param {string} fullName
      * @param {object} suite
      */
-  
+
     /**
      * A delegate for letting the consumer
      * modify the report filename when it is used inside the junit report.
@@ -114,7 +114,7 @@
      * @param {string} suggestedName
      * @param {object} suite
      */
-  
+
     /**
      * Generates JUnit XML for the given spec run. There are various options
      * to control where the results are written, and the default values are
@@ -158,7 +158,7 @@
      *   because the report can have unique names for each combination of suite/spec
      *   and capability/test environment.
      * @param {function} [modifyClassName] a delegate to modify spec's classname in the xml report.
-     * @param {function} [modifySpecName] a delegate to modify the spec's name in the xml report.
++    * @param {function} [modifySpecName] a delegate to modify the spec's name in the xml report.
      * @param {string} [stylesheetPath] is the string value that specifies a path
      *   to an XSLT stylesheet to add to the junit XML file so that it can be
      *   opened directly in a browser. (default: none, no xml-stylesheet tag is added)
@@ -167,7 +167,7 @@
      *   it is invoked with the spec object and the fully qualified suite as filename.
      * @param {boolean} [captureStdout] enables capturing all output from stdout as spec output in the
      * xml-output elements of the junit reports {default: false}. If a systemOut delegate is defined and captureStdout
-     * is true, the output of the spec can be accessed via spec._stdou
+     * is true, the output of the spec can be accessed via spec._stdout
      */
     exportObject.JUnitXmlReporter = function(options) {
         var self = this;
@@ -187,7 +187,7 @@
         }
         self.package = typeof(options.package) === "string" ? escapeInvalidXmlChars(options.package) : UNDEFINED;
         self.stylesheetPath = typeof(options.stylesheetPath) === "string" && options.stylesheetPath || UNDEFINED;
-  
+
         if(options.modifySuiteName && typeof options.modifySuiteName !== "function") {
             throw new Error('option "modifySuiteName" must be a function');
         }
@@ -203,7 +203,7 @@
         if (options.modifySpecName && typeof options.modifySpecName !== "function") {
             throw new Error('option "modifySpecName" must be a function');
         }
-  
+
         self.captureStdout = options.captureStdout || false;
         if(self.captureStdout && !options.systemOut) {
             options.systemOut = function (spec) {
@@ -211,16 +211,16 @@
             };
         }
         self.removeStdoutWrapper = undefined;
-  
+
         var delegates = {};
         delegates.modifySuiteName = options.modifySuiteName;
         delegates.modifyReportFileName = options.modifyReportFileName;
         delegates.systemOut = options.systemOut;
         delegates.modifyClassName = options.modifyClassName;
         delegates.modifySpecName = options.modifySpecName;
-  
+
         self.logEntries = [];
-  
+
         var suites = [],
             currentSuite = null,
             // when use use fit, jasmine never calls suiteStarted / suiteDone, so make a fake one to use
@@ -229,7 +229,7 @@
                 description: "focused specs",
                 fullName: "focused specs"
             };
-  
+
         var __suites = {}, __specs = {};
         function getSuite(suite) {
             __suites[suite.id] = extend(__suites[suite.id] || {}, suite);
@@ -244,7 +244,7 @@
             }
             return ret;
         }
-  
+
         self.jasmineStarted = function() {
             exportObject.startTime = new Date();
             self.started = true;
@@ -316,7 +316,7 @@
                 wrapOutputAndWriteFile(self.filePrefix, output, testSuitesResults);
             }
             //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
-  
+
             self.finished = true;
             // this is so phantomjs-testrunner.js can tell if we're done executing
             exportObject.endTime = new Date();
@@ -324,7 +324,7 @@
                 self.removeStdoutWrapper();
             }
         };
-  
+
         self.formatSuiteData = function(suite) {
             return {
                 disabled: suite._disabled || 0,
@@ -333,7 +333,7 @@
                 time: (suite._endTime.getTime() - suite._startTime.getTime()) || 0
             };
         };
-  
+
         self.getNestedSuiteData = function (suite) {
             var suiteResults = self.formatSuiteData(suite);
             for (var i = 0; i < suite._suites.length; i++) {
@@ -344,7 +344,7 @@
             }
             return suiteResults;
         };
-  
+
         self.getOrWriteNestedOutput = function(suite) {
             var output = suiteAsXml(suite);
             for (var i = 0; i < suite._suites.length; i++) {
@@ -358,18 +358,18 @@
                 return "";
             }
         };
-  
+
         self.writeFile = function(filename, text) {
             var errors = [];
             var path = self.savePath;
-  
+
             function phantomWrite(path, filename, text) {
                 // turn filename into a qualified path
                 filename = getQualifiedFilename(path, filename, window.fs_path_separator);
                 // write via a method injected by phantomjs-testrunner.js
                 __phantom_writeFile(filename, text);
             }
-  
+
             function nodeWrite(path, filename, text) {
                 var fs = require("fs");
                 var nodejs_path = require("path");
@@ -390,19 +390,19 @@
                 nodeWrite(path, filename, text);
                 return;
             } catch (f) { errors.push("  NodeJS attempt: " + f.message); }
-  
+
             // If made it here, no write succeeded.  Let user know.
             log("Warning: writing junit report failed for '" + path + "', '" +
                 filename + "'. Reasons:\n" +
                 errors.join("\n")
             );
         };
-  
+
         /******** Helper functions with closure access for simplicity ********/
         function generateFilename(suite) {
             return self.filePrefix + getFullyQualifiedSuiteName(suite, true) + ".xml";
         }
-  
+
         function getFullyQualifiedSuiteName(suite, isFilename) {
             var fullName;
             if (self.useDotNotation || isFilename) {
@@ -413,7 +413,7 @@
             } else {
                 fullName = suite.fullName;
             }
-  
+
             // Either remove or escape invalid XML characters
             if (isFilename) {
                 var fileName = "",
@@ -431,15 +431,15 @@
                 }
                 return fileName;
             } else {
-  
+
                 if(delegates.modifySuiteName) {
                     fullName = delegates.modifySuiteName(fullName, suite);
                 }
-  
+
                 return escapeInvalidXmlChars(fullName);
             }
         }
-  
+
         function suiteAsXml(suite) {
             var xml = '\n <testsuite name="' + getFullyQualifiedSuiteName(suite) + '"';
             xml += ' timestamp="' + ISODateString(suite._startTime) + '"';
@@ -455,7 +455,7 @@
                 xml += ' package="' + self.package + '"';
             }
             xml += ">";
-  
+
             for (var i = 0; i < suite._specs.length; i++) {
                 xml += specAsXml(suite._specs[i]);
             }
@@ -467,7 +467,7 @@
             var xml = '\n  <testcase classname="' + escapeInvalidXmlChars(delegates.modifyClassName ? delegates.modifyClassName(spec) : getFullyQualifiedSuiteName(spec._suite)) + '"';
             xml += ' name="' + escapeInvalidXmlChars(delegates.modifySpecName ? delegates.modifySpecName(spec) : testName) + '"';
             xml += ' time="' + elapsed(spec._startTime, spec._endTime) + '"';
-  
+
             var testCaseBody = "";
             if (isSkipped(spec) || isDisabled(spec)) {
                 if (spec.pendingReason) {
@@ -485,7 +485,7 @@
                     testCaseBody += "\n   </failure>";
                 }
             }
-  
+
             if (testCaseBody || delegates.systemOut) {
                 xml += ">" + testCaseBody;
                 if (delegates.systemOut) {
@@ -522,5 +522,4 @@
             self.writeFile(filename, (getPrefix(testSuitesResults) + text + suffix));
         }
     };
-  })(this);
-  
+})(this);
