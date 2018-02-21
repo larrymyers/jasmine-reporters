@@ -454,49 +454,49 @@ describe("JUnitXmlReporter", function(){
             itShouldIncludeXmlPreambleInAllFiles();
         });
 
-        describe('modifyClassName', () => {
+        describe("modifyClassName", () => {
             var suites;
-            var modification = "modified"
+            var modification = "modified";
             beforeEach(function () {
                 setupReporterWithOptions({
                     // consolidateAll: true,
                     // consolidate: true,
-                    modifyClassName: function (spec) {
+                    modifyClassName: function () {
                         return modification;
                     }
                 });
                 triggerRunnerEvents();
                 suites = writeCalls[0].xmldoc.getElementsByTagName("testcase");
             });
-            it('should construct classnames that are the provided modification', () => {
+            it("should construct classnames that are the provided modification", () => {
                 expect(suites).not.toBeNull();
                 expect(suites.length).toBeGreaterThan(0);
                 for (var i = 0; i < suites.length; i++) {
                     expect(suites[i].getAttribute("classname")).toBe(modification);
-                };
+                }
             });
         });
 
-        describe('modifySpecName', () => {
+        describe("modifySpecName", () => {
             var suites;
-            var modification = "modified"
+            var modification = "modified";
             beforeEach(function () {
                 setupReporterWithOptions({
                     // consolidateAll: true,
                     // consolidate: true,
-                    modifySpecName: function (spec) {
+                    modifySpecName: function () {
                         return modification;
                     }
                 });
                 triggerRunnerEvents();
                 suites = writeCalls[0].xmldoc.getElementsByTagName("testcase");
             });
-            it('should construct spec names that are the provided modification', () => {
+            it("should construct spec names that are the provided modification", () => {
                 expect(suites).not.toBeNull();
                 expect(suites.length).toBeGreaterThan(0);
                 for (var i = 0; i < suites.length; i++) {
                     expect(suites[i].getAttribute("name")).toBe(modification);
-                };
+                }
             });
         });
 
