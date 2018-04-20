@@ -504,7 +504,7 @@
                 prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
             }
             prefix += '\n<testsuites disabled="' + results.disabled + '" errors="0" failures="' + results.failures +
-                '" tests="' + results.tests + '" time="' + results.time + '">';
+                '" tests="' + results.tests + '" time="' + results.time/1000 + '">';
             return prefix;
         }
         var suffix = "\n</testsuites>";
