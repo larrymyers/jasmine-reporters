@@ -2,7 +2,7 @@
   "author": "Larry Myers",
   "name": "jasmine-reporters",
   "description": "Reporters for the Jasmine BDD Framework",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "homepage": "https://github.com/larrymyers/jasmine-reporters",
   "maintainers": "Ben Loveridge <bloveridge@gmail.com>",
   "scripts": {
