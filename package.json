@@ -2,9 +2,11 @@
   "author": "Larry Myers",
   "name": "jasmine-reporters",
   "description": "Reporters for the Jasmine BDD Framework",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "homepage": "https://github.com/larrymyers/jasmine-reporters",
-  "maintainers": "Ben Loveridge <bloveridge@gmail.com>",
+  "maintainers": [
+    "Ben Loveridge <bloveridge@gmail.com>"
+  ],
   "scripts": {
     "lint": "eslint . --report-unused-disable-directives",
     "test-only": "jasmine",
