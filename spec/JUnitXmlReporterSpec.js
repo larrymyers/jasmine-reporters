@@ -160,7 +160,11 @@ describe("JUnitXmlReporter", function(){
     });
 
     function assertTestsuitesTagAttributes(testSuitesTag, {disabled, errors, failures, tests} = {}) {
-        expect(testSuitesTag.getAttribute("disabled")).toBe(disabled);
+        if (disabled === void 0) {
+            expect(testSuitesTag.hasAttribute("disabled")).toBe(false);
+        } else {
+            expect(testSuitesTag.getAttribute("disabled")).toBe(disabled);
+        }
         expect(testSuitesTag.getAttribute("errors")).toBe(errors);
         expect(testSuitesTag.getAttribute("failures")).toBe(failures);
         expect(testSuitesTag.getAttribute("tests")).toBe(tests);
@@ -452,6 +456,18 @@ describe("JUnitXmlReporter", function(){
             });
             itShouldHaveOneTestsuitesElementPerFile();
             itShouldIncludeXmlPreambleInAllFiles();
+        });
+
+        describe("suppressDisabled=true", function() {
+            beforeEach(function() {
+                setupReporterWithOptions({suppressDisabled: true});
+                triggerRunnerEvents();
+            });
+            it("testsuites tags should include errors, failures, and tests (count) when defined, but not disabled", function() {
+                assertTestsuitesTagAttributes(
+                    writeCalls[0].xmldoc.getElementsByTagName("testsuites")[0],
+                    {disabled: void 0, errors: "0", failures: "1", tests: "7"});
+            });
         });
 
         describe("captures stdout in <xml-output>", function(){

@@ -160,6 +160,7 @@
      * @param {string} [stylesheetPath] is the string value that specifies a path
      *   to an XSLT stylesheet to add to the junit XML file so that it can be
      *   opened directly in a browser. (default: none, no xml-stylesheet tag is added)
+     * @param {function} [suppressDisabled] if true, will not include `disabled=".."` in XML output
      * @param {function} [systemOut] a delegate for letting the consumer add content
      *   to a <system-out> tag as part of each <testcase> spec output. If provided,
      *   it is invoked with the spec object and the fully qualified suite as filename.
@@ -438,7 +439,9 @@
             xml += ' errors="0"';
             xml += ' tests="' + suite._specs.length + '"';
             xml += ' skipped="' + suite._skipped + '"';
-            xml += ' disabled="' + suite._disabled + '"';
+            if (!options.suppressDisabled) {
+                xml += ' disabled="' + suite._disabled + '"';
+            }
             // Because of JUnit's flat structure, only include directly failed tests (not failures for nested suites)
             xml += ' failures="' + suite._failures + '"';
             if (self.package) {
@@ -503,7 +506,7 @@
             if (self.stylesheetPath) {
                 prefix += '\n<?xml-stylesheet type="text/xsl" href="' + self.stylesheetPath + '" ?>';
             }
-            prefix += '\n<testsuites disabled="' + results.disabled + '" errors="0" failures="' + results.failures +
+            prefix += "\n<testsuites " + (options.suppressDisabled ? "" : 'disabled="' + results.disabled + '" ') + 'errors="0" failures="' + results.failures +
                 '" tests="' + results.tests + '" time="' + results.time/1000 + '">';
             return prefix;
         }
