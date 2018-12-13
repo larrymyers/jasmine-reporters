@@ -196,3 +196,31 @@ onPrepare: function() {
 }
 ```
 
+You can also use the `properties` option to add properties on report.
+
+```javascript
+multiCapabilities: [
+    {browserName: 'firefox'},
+    {browserName: 'chrome'}
+],
+framework: 'jasmine2',
+onPrepare: function() {
+    var jasmineReporters = require('jasmine-reporters');
+
+    // returning the promise makes protractor wait for the reporter config before executing tests
+    return browser.getProcessedConfig().then(function(config) {
+        // you could use other properties here if you want, such as platform and version
+        var browserName = config.capabilities.browserName;
+
+        var junitReporter = new jasmineReporters.JUnitXmlReporter({
+            consolidateAll: false,
+            savePath: 'testresults',
+            properties: {
+                capabilities: browserName,
+            }
+        });
+        jasmine.getEnv().addReporter(junitReporter);
+    });
+}
+```
+

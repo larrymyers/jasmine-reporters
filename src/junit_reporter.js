@@ -141,6 +141,8 @@
      * @param {boolean} [useFullTestName] whether to use the fully qualified Test
      *   name for the TestCase name attribute, ie "Suite Name Spec Name" not
      *   "Spec Name" (default: false)
+     * @param {object} [properties] allows you to add custom properties within 
+     *   the report xml (Example: { capabilities: 'chrome', suiteName: 'TestCase' })
      * @param {string} [filePrefix] is the string value that is prepended to the
      *   xml output file (default: junitresults-)
      *   NOTE: if consolidateAll is true, the default is simply "junitresults" and
@@ -179,6 +181,7 @@
         self.consolidateAll = self.consolidate !== false && (options.consolidateAll === UNDEFINED ? true : options.consolidateAll);
         self.useDotNotation = options.useDotNotation === UNDEFINED ? true : options.useDotNotation;
         self.useFullTestName = options.useFullTestName === UNDEFINED ? false : options.useFullTestName;
+        self.properties = options.properties || {};
         if (self.consolidateAll) {
             self.filePrefix = options.filePrefix || "junitresults";
         } else {
@@ -448,7 +451,9 @@
                 xml += ' package="' + self.package + '"';
             }
             xml += ">";
-
+            if (options.properties) {
+                xml += propertiesAsXml(options.properties);
+            }
             for (var i = 0; i < suite._specs.length; i++) {
                 xml += specAsXml(suite._specs[i]);
             }
@@ -514,6 +519,14 @@
         function wrapOutputAndWriteFile(filename, text, testSuitesResults) {
             if (filename.substr(-4) !== ".xml") { filename += ".xml"; }
             self.writeFile(filename, (getPrefix(testSuitesResults) + text + suffix));
+        }
+        function propertiesAsXml (props) {
+            var propertiesBody = "\n  <properties>";
+            for (var prop in props) {
+                propertiesBody += '\n    <property name="' + prop + '" value="' + props[prop] + '"/>';
+            }
+            propertiesBody += "\n  </properties>";
+            return propertiesBody;
         }
     };
 })(this);
