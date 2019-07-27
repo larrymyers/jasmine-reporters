@@ -294,7 +294,16 @@
             }
             var output = "";
             var testSuitesResults = { disabled: 0, failures: 0, tests: 0, time: 0 };
+            suites = suites.sort(function(a,b){
+                return a.description.localeCompare(b.description);
+            });
             for (var i = 0; i < suites.length; i++) {
+                if(!self.consolidateAll && output && suites[i-1].description !== suites[i].description)
+                {
+                    wrapOutputAndWriteFile(generateFilename(suites[i-1]), output, testSuitesResults);
+                    testSuitesResults = { disabled: 0, failures: 0, tests: 0, time: 0 };
+                    output = "";
+                }
                 output += self.getOrWriteNestedOutput(suites[i]);
                 // retrieve nested suite data to include in the testsuites tag
                 var suiteResults = self.getNestedSuiteData(suites[i]);
@@ -304,7 +313,8 @@
             }
             // if we have anything to write here, write out the consolidated file
             if (output) {
-                wrapOutputAndWriteFile(self.filePrefix, output, testSuitesResults);
+                var filename = (self.consolidateAll === true ? self.filePrefix : generateFilename(suites[i-1]));
+                wrapOutputAndWriteFile(filename, output, testSuitesResults);
             }
             //log("Specs skipped but not reported (entire suite skipped or targeted to specific specs)", totalSpecsDefined - totalSpecsExecuted + totalSpecsDisabled);
 
@@ -341,7 +351,7 @@
             for (var i = 0; i < suite._suites.length; i++) {
                 output += self.getOrWriteNestedOutput(suite._suites[i]);
             }
-            if (self.consolidateAll || self.consolidate && suite._parent) {
+            if (self.consolidateAll || self.consolidate) {
                 return output;
             } else {
                 // if we aren't supposed to consolidate output, just write it now
