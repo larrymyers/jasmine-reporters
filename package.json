@@ -17,7 +17,7 @@
     "url": "git://github.com/larrymyers/jasmine-reporters.git"
   },
   "dependencies": {
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.4",
     "@xmldom/xmldom": "^0.7.3"
   },
   "devDependencies": {
