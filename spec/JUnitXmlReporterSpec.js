@@ -1,6 +1,6 @@
 /* globals jasmine, describe, afterEach, beforeEach, it, expect */
 var jasmineReporters = require("../index");
-var DOMParser = require("xmldom").DOMParser;
+var DOMParser = require("@xmldom/xmldom").DOMParser;
 
 var env, suite,
     reporter, writeCalls, suiteId=0, specId=0, noop=function(){};
