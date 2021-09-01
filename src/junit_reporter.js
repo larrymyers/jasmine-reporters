@@ -399,7 +399,7 @@
             if (self.useDotNotation || isFilename) {
                 fullName = suite.description;
                 for (var parent = suite._parent; parent; parent = parent._parent) {
-                    fullName = parent.description + "." + fullName;
+                    fullName = parent.description + " " + fullName;
                 }
             } else {
                 fullName = suite.fullName;
