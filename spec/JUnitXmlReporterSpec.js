@@ -493,5 +493,42 @@ describe("JUnitXmlReporter", function(){
                 expect(specOutputs[3].textContent).not.toContain(testOutput);
             });
         });
+
+        describe("Merge output from suites with the same name", function(){
+            beforeEach(function(){
+                // consolidateAll becomes a noop, we include it specifically to passively test that
+                setupReporterWithOptions({
+                    consolidateAll:false
+                });
+                var suiteSameName = fakeSuite(suite.description);
+                fakeSpec(suiteSameName, "Spec to be merged");
+                var suiteOtherName = fakeSuite(suite.description + "Not");
+                fakeSpec(suiteOtherName, "Spec not to be merged");
+                triggerRunnerEvents();
+            });
+            it("should have three suites and two write calls", function() {
+                expect(env._suites.length).toBe(4);
+                expect(writeCalls.length).toBe(3);
+            });            
+            itShouldHaveOneTestsuitesElementPerFile();
+            itShouldIncludeXmlPreambleInAllFiles();
+            it("should contain two ParentSuite testsuit elements", function() {
+                var testsuites = writeCalls[0].xmldoc.getElementsByTagName("testsuite");
+                var parentSuites = Array.from(testsuites).filter(ts => ts.getAttribute("name") === suite.description);
+                expect(parentSuites.length).toBe(2);
+            }); 
+            it("should contain specs from suites with same name", function() {
+                var testcases = Array.from(writeCalls[0].xmldoc.getElementsByTagName("testcase"));
+                expect(testcases.some(tc => tc.getAttribute("name") === "Spec to be merged")).toBeTruthy();
+                expect(testcases.some(tc => tc.getAttribute("name") === "should be one level down")).toBeTruthy();
+                expect(testcases.some(tc => tc.getAttribute("name") === "should be disabled two levels down")).toBeTruthy();
+            });
+
+            it("should not contain specs from suites with other name", function() {
+                var testcases = Array.from(writeCalls[0].xmldoc.getElementsByTagName("testcase"));
+                expect(testcases.some(tc => tc.getAttribute("name") === "Spec to be merged")).toBeTruthy();
+                expect(testcases.some(tc => tc.getAttribute("name") === "Spec not to be merged")).toBeFalsy();
+            });
+        });
     });
 });
